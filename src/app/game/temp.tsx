@@ -13,11 +13,6 @@ interface Player {
   hasActed: boolean; // New property to track if the player has acted in the current round
 }
 
-interface Pot {
-  amount: number;
-  eligiblePlayers: number[];
-}
-
 type Stage = 'Preflop' | 'Flop' | 'Turn' | 'River';
 type Action = 'Check' | 'Call' | 'Bet' | 'Raise' | 'Fold';
 
@@ -35,7 +30,6 @@ export default function Game() {
   const [showdownMode, setShowdownMode] = useState(false);
   const [reset, setReset] = useState(false);
   const [selectedWinners, setSelectedWinners] = useState<number[]>([]);
-  const [pots, setPots] = useState<Pot[]>([{ amount: 0, eligiblePlayers: [] }]);
 
   const positions = (length: number) => {
     if (length === 2) {
@@ -177,7 +171,6 @@ export default function Game() {
     const player = players[activePlayerIndex];
     let newPlayers = [...players];
     let newCurrentBet = currentBet;
-    let newPots = [...pots];
 
     // Mark the player as having acted
     newPlayers[activePlayerIndex].hasActed = true;
@@ -199,7 +192,7 @@ export default function Game() {
           const callAmount = Math.min(currentBet - player.currentBet, player.chips);
           newPlayers[activePlayerIndex].chips -= callAmount;
           newPlayers[activePlayerIndex].currentBet += callAmount;
-          newPots = updatePots(newPots, newPlayers, activePlayerIndex, callAmount);
+          setPot(pot + callAmount);
         }
         break;
       case 'Bet':
@@ -213,7 +206,7 @@ export default function Game() {
           newPlayers[activePlayerIndex].chips -= betAmount;
           newPlayers[activePlayerIndex].currentBet += betAmount;
           newCurrentBet = newPlayers[activePlayerIndex].currentBet;
-          newPots = updatePots(newPots, newPlayers, activePlayerIndex, betAmount);
+          setPot(pot + betAmount);
           
           // Reset hasActed for all players except the current player and folded players
           newPlayers = newPlayers.map(p => ({
@@ -226,7 +219,6 @@ export default function Game() {
 
     setPlayers(newPlayers);
     setCurrentBet(newCurrentBet);
-    setPots(newPots);
 
     // Check if only one player remains after this action
     checkForLastPlayerStanding(newPlayers);
@@ -276,62 +268,20 @@ export default function Game() {
     );
   };
 
-
-  const updatePots = (currentPots: Pot[], currentPlayers: Player[], playerIndex: number, amount: number): Pot[] => {
-    let remainingAmount = amount;
-    let updatedPots = [...currentPots];
-    const player = currentPlayers[playerIndex];
-
-    // Update existing pots
-    for (let i = 0; i < updatedPots.length; i++) {
-      if (updatedPots[i].eligiblePlayers.includes(player.id)) {
-        const potContribution = Math.min(remainingAmount, updatedPots[i].amount);
-        updatedPots[i].amount += potContribution;
-        remainingAmount -= potContribution;
-
-        if (remainingAmount === 0) break;
-      }
-    }
-
-    // Create new side pot if there's still remaining amount
-    if (remainingAmount > 0) {
-      const eligiblePlayers = currentPlayers
-        .filter(p => p.chips > 0 || p.currentBet >= player.currentBet)
-        .map(p => p.id);
-      updatedPots.push({
-        amount: remainingAmount,
-        eligiblePlayers: eligiblePlayers
-      });
-    }
-
-    return updatedPots;
-  };
-
   const declareWinners = (winnerIds: number[]) => {
     if (winnerIds.length === 0) return;
 
-    const newPlayers = [...players];
-    let remainingPots = [...pots];
+    const winningAmount = Math.floor(pot / winnerIds.length);
+    const remainingChips = pot % winnerIds.length;
 
-    winnerIds.forEach(winnerId => {
-      const winnerIndex = newPlayers.findIndex(p => p.id === winnerId);
-      let winningAmount = 0;
-
-      remainingPots = remainingPots.map(pot => {
-        if (pot.eligiblePlayers.includes(winnerId)) {
-          const potWinners = winnerIds.filter(id => pot.eligiblePlayers.includes(id));
-          const share = Math.floor(pot.amount / potWinners.length);
-          winningAmount += share;
-          return { ...pot, amount: pot.amount % potWinners.length };
-        }
-        return pot;
-      });
-
-      newPlayers[winnerIndex].chips += winningAmount;
+    const newPlayers = players.map(player => {
+      if (winnerIds.includes(player.id)) {
+        return { ...player, chips: player.chips + winningAmount };
+      }
+      return player;
     });
 
-    // Distribute any remaining chips from rounding to the first winner
-    const remainingChips = remainingPots.reduce((sum, pot) => sum + pot.amount, 0);
+    // Distribute any remaining chips to the first winner (in case of uneven division)
     if (remainingChips > 0) {
       const firstWinnerId = winnerIds[0];
       const firstWinnerIndex = newPlayers.findIndex(p => p.id === firstWinnerId);
@@ -339,7 +289,7 @@ export default function Game() {
     }
 
     setPlayers(newPlayers);
-    setPots([{ amount: 0, eligiblePlayers: [] }]);
+    setPot(0);
     setShowdownMode(false);
     setSelectedWinners([]);
     setReset(true);
