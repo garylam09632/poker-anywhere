@@ -2,22 +2,26 @@ import React, { useState } from 'react';
 
 interface Player {
   id: number;
+  name: string; // New field
   chips: number;
   position: string;
   hasFolded: boolean;
   currentBet: number;
+  chipChange: number; // New field
 }
-
-type Action = 'Check' | 'Call' | 'Bet' | 'Raise' | 'Fold';
 
 interface PlayerCardProps {
   player: Player;
   isActive: boolean;
   currentBet: number;
   onAction: (action: Action, amount?: number) => void;
+  onNameChange: (id: number, name: string) => void; // New prop
+  onChipsChange: (id: number, chips: number) => void; // New prop
 }
 
-export default function PlayerCard({ player, isActive, currentBet, onAction }: PlayerCardProps) {
+type Action = 'Check' | 'Call' | 'Bet' | 'Raise' | 'Fold';
+
+export default function PlayerCard({ player, isActive, currentBet, onAction, onNameChange, onChipsChange  }: PlayerCardProps) {
   const [betAmount, setBetAmount] = useState(currentBet * 2);
 
   const getAvailableActions = (): Action[] => {
@@ -42,10 +46,28 @@ export default function PlayerCard({ player, isActive, currentBet, onAction }: P
 
   return (
     <div className={`bg-gray-700 p-4 rounded-lg ${isActive ? 'ring-2 ring-blue-500' : ''}`}>
-      <h3 className="text-xl font-semibold mb-2">Player {player.id}</h3>
+      <input
+        type="text"
+        value={player.name}
+        onChange={(e) => onNameChange(player.id, e.target.value)}
+        className="text-xl font-semibold mb-2 bg-gray-600 text-white rounded px-2 py-1 w-full"
+      />
       <p>Position: {player.position}</p>
-      <p>Chips: ${player.chips}</p>
+      <div className="flex items-center">
+        <p>Chips: $</p>
+        <input
+          type="number"
+          value={player.chips}
+          onChange={(e) => onChipsChange(player.id, Number(e.target.value))}
+          className="bg-gray-600 text-white rounded px-2 py-1 w-24 ml-1"
+        />
+      </div>
       <p>Current Bet: ${player.currentBet}</p>
+      {player.chipChange !== 0 && (
+        <p className={`font-bold ${player.chipChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
+          {player.chipChange > 0 ? '+' : '-'}${Math.abs(player.chipChange)}
+        </p>
+      )}
       {player.hasFolded && <p className="text-red-500">Folded</p>}
       {isActive && (
         <div className="mt-2">
