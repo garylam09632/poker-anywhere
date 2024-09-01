@@ -50,7 +50,7 @@ export default function Home() {
             <StyledInput
               label="Buy-in"
               value={buyIn}
-              onChange={(value) => setBuyIn(Math.max(Number(bigBlind) * 20, Number(value)).toString())}
+              onChange={(value) => setBuyIn(value)}
               type="number"
             />
             <StyledButton

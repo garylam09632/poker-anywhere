@@ -1,37 +1,31 @@
+import { NormalRule, Rule } from '@/type/class/Rules';
+import { Action } from '@/type/General';
+import Player from '@/type/interface/Player';
 import React, { useState } from 'react';
-
-interface Player {
-  id: number;
-  name: string; // New field
-  chips: number;
-  position: string;
-  hasFolded: boolean;
-  currentBet: number;
-  chipChange: number; // New field
-}
 
 interface PlayerCardProps {
   player: Player;
   isActive: boolean;
   currentBet: number;
+  bigBlind: number;
   onAction: (action: Action, amount?: number) => void;
   onNameChange: (id: number, name: string) => void; // New prop
   onChipsChange: (id: number, chips: number) => void; // New prop
 }
 
-type Action = 'Check' | 'Call' | 'Bet' | 'Raise' | 'Fold';
 
-export default function PlayerCard({ player, isActive, currentBet, onAction, onNameChange, onChipsChange  }: PlayerCardProps) {
-  const [betAmount, setBetAmount] = useState(currentBet * 2);
+export default function PlayerCard({ player, isActive, currentBet, bigBlind, onAction, onNameChange, onChipsChange  }: PlayerCardProps) {
+  const [betAmount, setBetAmount] = useState(currentBet);
+  const [rule, setRule] = useState<Rule>(new NormalRule())
 
   const getAvailableActions = (): Action[] => {
     const actions: Action[] = ['Fold'];
     if (currentBet === 0) {
-      actions.push('Check', 'Bet');
+      actions.push('Check', 'Bet', 'ALL IN');
     } else if (player.currentBet < currentBet) {
-      actions.push('Call', 'Raise');
+      actions.push('Call', 'Raise', 'ALL IN');
     } else {
-      actions.push('Check', 'Raise');
+      actions.push('Check', 'Raise', 'ALL IN');
     }
     return actions;
   };
@@ -43,6 +37,13 @@ export default function PlayerCard({ player, isActive, currentBet, onAction, onN
       onAction(action);
     }
   };
+
+  const onBetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let bet = Number(e.target.value);
+    if (rule.canBet(player, bet, currentBet, bigBlind)) {
+      setBetAmount(bet);
+    }
+  }
 
   return (
     <div className={`bg-gray-700 p-4 rounded-lg ${isActive ? 'ring-2 ring-blue-500' : ''}`}>
@@ -77,18 +78,29 @@ export default function PlayerCard({ player, isActive, currentBet, onAction, onN
                 <input
                   type="number"
                   value={betAmount}
-                  onChange={(e) => setBetAmount(Math.max(currentBet * 2, Number(e.target.value)))}
-                  min={currentBet * 2}
+                  onChange={onBetChange}
+                  // min={currentBet * 2}
                   max={player.chips}
                   className="w-20 mr-2 px-2 py-1 bg-gray-600 text-white rounded"
                 />
               )}
-              <button
-                onClick={() => handleAction(action)}
-                className="mr-2 mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-sm"
-              >
-                {action}
-              </button>
+              {
+                action === "ALL IN" ? (
+                  <button
+                    onClick={() => handleAction("ALL IN")}
+                    className="mr-2 mt-2 bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm"
+                  >
+                    {action}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleAction(action)}
+                    className="mr-2 mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-sm"
+                  >
+                    {action}
+                  </button>
+                )
+              }
             </React.Fragment>
           ))}
         </div>
