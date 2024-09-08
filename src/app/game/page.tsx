@@ -12,20 +12,25 @@ const TEST = true;
 
 export default function Game() {
   const searchParams = useSearchParams();
+
+  // Game state
   const [players, setPlayers] = useState<Player[]>([]);
+  const [pots, setPots] = useState<Pot[]>([{ amount: 0, eligiblePlayers: [] }]);
   const [handNumber, setHandNumber] = useState(1);
   const [stage, setStage] = useState<Stage>('Preflop');
-  const [pot, setPot] = useState(0);
   const [currentBet, setCurrentBet] = useState(0);
   const [dealerIndex, setDealerIndex] = useState(0);
   const [activePlayerIndex, setActivePlayerIndex] = useState(0);
-  const [smallBlind, setSmallBlind] = useState(1);
-  const [bigBlind, setBigBlind] = useState(2);
   const [showdownMode, setShowdownMode] = useState(false);
-  const [reset, setReset] = useState(false);
   const [selectedWinners, setSelectedWinners] = useState<number[]>([]);
-  const [pots, setPots] = useState<Pot[]>([{ amount: 0, eligiblePlayers: [] }]);
+  const [bustedPlayers, setBustedPlayers] = useState<Player[]>([]);
+
+  // State for trigger useEffect
+  const [reset, setReset] = useState(false);
   const [initialed, setInitialed] = useState(false);
+
+  let smallBlind = 1;
+  let bigBlind = 2;
 
   const positions = (length: number) => {
     if (length === 2) {
@@ -39,12 +44,7 @@ export default function Game() {
 
   useEffect(() => {
     const playerCount = Number(searchParams.get('players') || 2);
-    const sb = Number(searchParams.get('smallBlind') || 1);
-    const bb = Number(searchParams.get('bigBlind') || 2);
     const buyIn = Number(searchParams.get('buyIn') || 100);
-
-    setSmallBlind(sb);
-    setBigBlind(bb);
 
     if (TEST) {
       const { players, currentBet, pots, stage, dealerIndex, activePlayerIndex, initialed } = case1;
@@ -74,8 +74,7 @@ export default function Game() {
         };
       });
       setPlayers(initialPlayers);
-      setCurrentBet(bb);
-      setPot(sb + bb);
+      setCurrentBet(bigBlind);
       setActivePlayerIndex(playerCount === 2 ? 0 : 3 % playerCount); // Start with the player after BB
       setInitialed(true);
     }
@@ -153,19 +152,67 @@ export default function Game() {
     resetBetsAndUpdateActivePlayer();
   };
 
+  // First case: BTN stays in the players list
+  // UTG, HJ, BTN, SB, BB
+  // UTG, BTN, SB
+  // SB, BB, BTN
+
+  // Second case: BTN is removed from the players list
+  // Finding the new BTN by knowing the next player 
+  // UTG, HJ, BTN, SB, BB
+  // UTG, SB, BB
+  
+  // BB, BTN, SB
+
+  // BB, UTG, HJ, BTN, SB
+  // UTG, HJ, BTN
+  // BTN, SB, BB
+
   const nextHand = () => {
+    let newPlayers: Player[] = [];
+    let tempBustedPlayers: Player[] = [...bustedPlayers];
+    let bustedPlayerMap = new Map<string, Player>();
+    let btnAt = 0;
+    let btnNextLocation: string | null = null;
+    players.forEach((p, i) => {
+      if (p.chips === 0) { 
+        tempBustedPlayers.push({ ...p, originalIndex: i })
+        bustedPlayerMap.set(p.position, p);
+      }
+      else { 
+        newPlayers.push(p)
+        if (p.position === "BTN") btnAt = newPlayers.length - 1
+        if (bustedPlayerMap.has("BTN")) {
+          btnNextLocation = p.position;
+        }
+      }
+    })
+    tempBustedPlayers = tempBustedPlayers.sort((a, b) => (a.originalIndex as number) - (b.originalIndex as number));
+    setBustedPlayers(tempBustedPlayers);
+
+    // // If BTN isn't busted
+    // if (!bustedPlayerMap.has("BTN")) {
+    //   setDealerIndex((btnAt + 1) % newPlayers.length)
+    // }
+    // If BTN is busted
+    if (bustedPlayerMap.has("BTN")) {
+      newPlayers.forEach((p, i) => {
+        if (p.position === btnNextLocation) {
+          btnAt = i;
+        }
+      })
+    }
+
     setHandNumber(handNumber + 1);
     setStage('Preflop');
-    setDealerIndex((dealerIndex + 1) % players.length);
-    setPot(0);
+    // setDealerIndex((dealerIndex + 1) % newPlayers.length);
 
-    const rotatedPositions = rotatePositions(players, dealerIndex + 1);
-    
+    const rotatedPositions = rotatePositions(newPlayers, btnAt + 1);
     // Set initial bets for SB and BB
-    setPlayers(rotatedPositions.map((player: Player, index: number) => {
+    newPlayers = rotatedPositions.map((player: Player, index: number) => {
       let params: Player = {
         ...player,
-        initialChips: player.chips,
+        // initialChips: player.chips,
         hasFolded: false,
         currentBet: 0,
         hasActed: false,
@@ -180,21 +227,29 @@ export default function Game() {
         // params.chipChange -= bigBlind; // Update chipChange for BB
       }
       return params;
-    }));
-
+    })
+    
+    
     setCurrentBet(bigBlind);
-    setPot(smallBlind + bigBlind);
 
     const bbIndex = rotatedPositions.findIndex(p => p.position === 'BB');
     setActivePlayerIndex(bbIndex + 1 === players.length ? 0 : bbIndex + 1);
+    
+    // Set new players to state
+    setPlayers(newPlayers);
   };
 
   const rotatePositions = (currentPlayers: Player[], newDealerIndex: number): Player[] => {
     const newPositions = positions(currentPlayers.length);
+    console.log("newPositions", currentPlayers.map((player, index) => ({
+      ...player,
+      position: newPositions[(index - newDealerIndex + currentPlayers.length) % currentPlayers.length],
+    })))
     return currentPlayers.map((player, index) => ({
       ...player,
       position: newPositions[(index - newDealerIndex + currentPlayers.length) % currentPlayers.length],
     }));
+
   };
 
   const checkForLastPlayerStanding = (currentPlayers: Player[]): boolean => {
@@ -213,7 +268,8 @@ export default function Game() {
     let newPlayers = [...players];
     let newCurrentBet = currentBet;
     let newPots = [...pots];
-
+    console.log("newPlayers", newPlayers)
+    console.log("activePlayerIndex", activePlayerIndex)
     // Mark the player as having acted
     newPlayers[activePlayerIndex].hasActed = true;
 
@@ -274,6 +330,8 @@ export default function Game() {
     let activePlayers = newPlayers.filter(p => !p.hasFolded);
     // If all active players goes all in
     let allPlayerAllIn = activePlayers.every(player => player.chips === 0);
+    console.log("allPlayerAllIn", allPlayerAllIn)
+    console.log("activePlayers", activePlayers)
     {
       if (allPlayerAllIn) {
         let highestBet = -Infinity;
@@ -336,6 +394,8 @@ export default function Game() {
     
     // All players have acted
     const allPlayersActed = activePlayers.every(p => p.hasActed);
+    console.log("allEqualBets", allEqualBets)
+    console.log("allPlayersActed", allPlayersActed)
     return allEqualBets && allPlayersActed;
   };
 
@@ -406,7 +466,6 @@ export default function Game() {
           pot.eligiblePlayers.length === eligiblePlayers.length && 
           pot.eligiblePlayers.every(id => eligiblePlayers.includes(id))
         );
-        console.log(potIndex)
         
         if (potIndex !== -1) {
           newPots[potIndex].amount = potAmount;
@@ -419,7 +478,6 @@ export default function Game() {
     // Create or update main pot with remaining bets
     let mainPotAmount = remainingBets.reduce((sum, bet) => sum + bet, 0);
     if (mainPotAmount > 0) {
-      console.log("NONONONONON")
       let eligiblePlayers = activePlayers.filter(p => p.currentBet > 0).map(p => p.id);
       // console.log("mainPotAmount", mainPotAmount)
       // console.log("eligiblePlayers", eligiblePlayers)
@@ -429,9 +487,11 @@ export default function Game() {
         pot.eligiblePlayers.every(id => eligiblePlayers.includes(id))
       );
       if (stage === "Preflop") mainPotIndex = 0;
-  
+      
       if (mainPotIndex !== -1) {
-        newPots[mainPotIndex].amount = mainPotAmount;
+        console.log("NONONONONON")
+        console.log(mainPotAmount)
+        newPots[mainPotIndex].amount += mainPotAmount;
         newPots[mainPotIndex].eligiblePlayers = eligiblePlayers;
       } else {
         newPots.push({ amount: mainPotAmount, eligiblePlayers });
@@ -504,6 +564,48 @@ export default function Game() {
     });
   };
 
+  const mappingPlayers = (): Player[] => {
+    if (bustedPlayers.length === 0) return players;
+
+    let newPlayers: Player[] = [];
+    let bustedPlayersMap = new Map<number, Player>();
+    bustedPlayers.forEach(p => {
+      // Busted player must have originalIndex
+      if (p.originalIndex !== undefined && p.originalIndex !== null) bustedPlayersMap.set(p.originalIndex, p);
+    })
+
+    // Combine players and busted players
+    let playerIndex = 0;
+    for (let i=0; i<players.length + bustedPlayers.length; i++) {
+      if (bustedPlayersMap.has(i)) {
+        newPlayers.push(bustedPlayersMap.get(i) as Player);
+      } else {
+        newPlayers.push(players[playerIndex]);
+        playerIndex++;
+      }
+    }
+    return newPlayers;
+  }
+
+  const buyIn = (playerId: number, chips: number) => {
+    const player = players.find(p => p.id === playerId);
+    if (player) {
+      player.chips = chips;
+    }
+    setPlayers(players);
+  }
+
+  // ic: 10000
+
+  // currentChip: 8800
+  // change: -1200
+
+  // buy in: 10000
+  // currentChip: 18800
+
+  // 18800 - 10000 
+  // initialChip - (currentChip - buyIn) = hasChangedChip
+  
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <h1 className="text-4xl font-bold mb-8 text-center text-blue-400">Poker Game</h1>
@@ -525,7 +627,7 @@ export default function Game() {
           <p className="text-lg">Current Bet: ${currentBet}</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {players.map((player, index) => (
+          {mappingPlayers().map((player, index) => (
             <PlayerCard
               key={player.id}
               player={player}
@@ -538,12 +640,14 @@ export default function Game() {
             />
           ))}
         </div>
-        <button
-          onClick={extractGameState}
-          className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Extract
-        </button>
+        <div className="flex flex-row gap-4">
+          <button
+            onClick={extractGameState}
+            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Extract
+          </button>
+        </div>
       </div>
 
       {showdownMode && (

@@ -12,7 +12,7 @@ const players: Player[] = [
     currentBet: 0,
     hasActed: false,
     chipChange: 1400,
-    initialChips: 10000
+    initialChips: 10000,
   },
   {
     id: 2,

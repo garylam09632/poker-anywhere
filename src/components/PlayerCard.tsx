@@ -13,10 +13,11 @@ interface PlayerCardProps {
   onChipsChange: (id: number, chips: number) => void; // New prop
 }
 
-
 export default function PlayerCard({ player, isActive, currentBet, bigBlind, onAction, onNameChange, onChipsChange  }: PlayerCardProps) {
   const [betAmount, setBetAmount] = useState(currentBet);
   const [rule, setRule] = useState<Rule>(new NormalRule())
+
+  let isBusted = typeof player.originalIndex === "number" && player.originalIndex >= 0;
 
   const getAvailableActions = (): Action[] => {
     const actions: Action[] = ['Fold'];
@@ -53,7 +54,7 @@ export default function PlayerCard({ player, isActive, currentBet, bigBlind, onA
         onChange={(e) => onNameChange(player.id, e.target.value)}
         className="text-xl font-semibold mb-2 bg-gray-600 text-white rounded px-2 py-1 w-full"
       />
-      <p>Position: {player.position}</p>
+      { isBusted ? <p>Busted</p> : <p>Position: {player.position}</p> }
       <div className="flex items-center">
         <p>Chips: $</p>
         <input
@@ -105,6 +106,12 @@ export default function PlayerCard({ player, isActive, currentBet, bigBlind, onA
           ))}
         </div>
       )}
+      <button
+        onClick={() => {}}
+        className="mr-2 mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-sm"
+      >
+        Buy In
+      </button>
     </div>
   );
 }

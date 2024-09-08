@@ -8,4 +8,5 @@ export default interface Player {
   hasActed: boolean;
   chipChange: number;
   initialChips: number;
+  originalIndex?: number;
 }
