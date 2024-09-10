@@ -8,7 +8,7 @@ import Pot from '@/type/interface/Pot';
 import case1 from '@/case/SidePot1';
 import { Action, Stage } from '@/type/General';
 
-const TEST = true;
+const TEST = false;
 
 export default function Game() {
   const searchParams = useSearchParams();
@@ -16,6 +16,8 @@ export default function Game() {
   // Game state
   const [players, setPlayers] = useState<Player[]>([]);
   const [pots, setPots] = useState<Pot[]>([{ amount: 0, eligiblePlayers: [] }]);
+  const [smallBlind, setSmallBlind] = useState(1);
+  const [bigBlind, setBigBlind] = useState(2);
   const [handNumber, setHandNumber] = useState(1);
   const [stage, setStage] = useState<Stage>('Preflop');
   const [currentBet, setCurrentBet] = useState(0);
@@ -28,9 +30,6 @@ export default function Game() {
   // State for trigger useEffect
   const [reset, setReset] = useState(false);
   const [initialed, setInitialed] = useState(false);
-
-  let smallBlind = 1;
-  let bigBlind = 2;
 
   const positions = (length: number) => {
     if (length === 2) {
@@ -45,6 +44,10 @@ export default function Game() {
   useEffect(() => {
     const playerCount = Number(searchParams.get('players') || 2);
     const buyIn = Number(searchParams.get('buyIn') || 100);
+    let sb = Number(searchParams.get('smallBlind') || 1);
+    let bb = Number(searchParams.get('bigBlind') || 2);
+    setSmallBlind(sb);
+    setBigBlind(bb);
 
     if (TEST) {
       const { players, currentBet, pots, stage, dealerIndex, activePlayerIndex, initialed } = case1;
@@ -74,14 +77,17 @@ export default function Game() {
         };
       });
       setPlayers(initialPlayers);
-      setCurrentBet(bigBlind);
+      setCurrentBet(bb);
       setActivePlayerIndex(playerCount === 2 ? 0 : 3 % playerCount); // Start with the player after BB
       setInitialed(true);
     }
   }, [searchParams]);
 
   useEffect(() => {
+    console.log("initialed", players)
     if (initialed) {
+      console.log("smallBlind", smallBlind)
+      console.log("bigBlind", bigBlind)
       for (let player of players) {
         if (player.position === 'SB') {
           player.currentBet = smallBlind;
@@ -108,6 +114,7 @@ export default function Game() {
   }, [reset]);
 
   const resetBetsAndUpdateActivePlayer = () => {
+    console.log("resetBetsAndUpdateActivePlayer", players) 
     setPlayers(players.map(player => ({ 
       ...player, 
       currentBet: 0, 
@@ -116,7 +123,6 @@ export default function Game() {
     setCurrentBet(0);
     let nextPlayerIndex = players.length === 2 ? players.findIndex(p => p.position === 'BB') : players.findIndex(p => p.position === 'SB');
     while (players[nextPlayerIndex].hasFolded || players[nextPlayerIndex].chips === 0) {
-      console.log("nextPlayerIndex", nextPlayerIndex)
       nextPlayerIndex = nextPlayerIndex + 1 % players.length === players.length ? 0 : nextPlayerIndex + 1;
     }
     setActivePlayerIndex(nextPlayerIndex);
@@ -264,12 +270,11 @@ export default function Game() {
   };
 
   const handleAction = (action: Action, amount?: number) => {
+    console.log("handleAction activePlayerIndex", activePlayerIndex)
     const player = players[activePlayerIndex];
     let newPlayers = [...players];
     let newCurrentBet = currentBet;
     let newPots = [...pots];
-    console.log("newPlayers", newPlayers)
-    console.log("activePlayerIndex", activePlayerIndex)
     // Mark the player as having acted
     newPlayers[activePlayerIndex].hasActed = true;
 
@@ -330,8 +335,6 @@ export default function Game() {
     let activePlayers = newPlayers.filter(p => !p.hasFolded);
     // If all active players goes all in
     let allPlayerAllIn = activePlayers.every(player => player.chips === 0);
-    console.log("allPlayerAllIn", allPlayerAllIn)
-    console.log("activePlayers", activePlayers)
     {
       if (allPlayerAllIn) {
         let highestBet = -Infinity;
@@ -349,9 +352,15 @@ export default function Game() {
             secondHighestBet = player.currentBet;
           }
         }
+        // All all in players have equal bet
+        if (secondHighestBet === -Infinity) {
+          secondHighestBet = highestBet;
+        }
         
         // For all players which their bet are higher than others bet, they get back the remaining chips
         for (let player of newPlayers) {
+          console.log("player", player)
+          console.log("secondHighestBet", secondHighestBet)
           if (player.currentBet > secondHighestBet) {
             player.chips = player.currentBet - secondHighestBet;
             player.currentBet = secondHighestBet;
@@ -360,7 +369,7 @@ export default function Game() {
         }
       }
     }
-    
+    console.log("handleAction", newPlayers)
     setPlayers(newPlayers);
     setCurrentBet(newCurrentBet);
     
@@ -394,8 +403,6 @@ export default function Game() {
     
     // All players have acted
     const allPlayersActed = activePlayers.every(p => p.hasActed);
-    console.log("allEqualBets", allEqualBets)
-    console.log("allPlayersActed", allPlayersActed)
     return allEqualBets && allPlayersActed;
   };
 
@@ -426,7 +433,6 @@ export default function Game() {
     let activePlayers = currentPlayers.filter(p => !p.hasFolded && p.hasActed);
     let allInPlayers = activePlayers.filter(p => p.chips === 0);
     let remainingBets = currentPlayers.map(p => p.currentBet);
-    
     if (allInPlayers.length > 1) {
       // Sort all-in players by their bet amount, lowest to highest
       allInPlayers.sort((a, b) => a.currentBet - b.currentBet);
@@ -435,8 +441,6 @@ export default function Game() {
         let potAmount = 0;
         let eligiblePlayers = activePlayers.filter(p => p.currentBet >= allInPlayer.currentBet).map(p => p.id);
         
-        console.log(allInPlayer)
-        console.log(remainingBets)
         let updatedBetIndex: number[] = [];
         remainingBets = remainingBets.map((bet, index) => {
           console.log(bet, allInPlayer.currentBet)
@@ -458,17 +462,18 @@ export default function Game() {
             }
           })
         })
-        // console.log(remainingBets)
-        // console.log(activePlayers.filter(p => p.currentBet >= allInPlayer.currentBet).map(p => p.name))
-        // console.log(potAmount)
         // Find existing pot or create new one
         let potIndex = newPots.findIndex(pot => 
           pot.eligiblePlayers.length === eligiblePlayers.length && 
           pot.eligiblePlayers.every(id => eligiblePlayers.includes(id))
         );
+        if (stage === "Preflop") potIndex = 0;
         
         if (potIndex !== -1) {
+          console.log("potAmount", potAmount)
+          console.log("eligiblePlayers", eligiblePlayers)
           newPots[potIndex].amount = potAmount;
+          newPots[potIndex].eligiblePlayers = eligiblePlayers;
         } else {
           newPots.push({ amount: potAmount, eligiblePlayers });
         }
@@ -505,6 +510,7 @@ export default function Game() {
 
     const newPlayers = [...players];
     let remainingPots = [...pots];
+    console.log("remainingPots", remainingPots)
   
     const settle = (winners: number[], pot: Pot) => {
       const share = Math.floor(pot.amount / winners.length);
