@@ -19,8 +19,6 @@ const PlayerCard = ({ player, isActive, isSelected, currentBet, bigBlind, onActi
   const [betAmount, setBetAmount] = useState(currentBet);
   const [rule, setRule] = useState<Rule>(new NormalRule())
 
-  let isBusted = typeof player.originalIndex === "number" && player.originalIndex >= 0;
-
   const getAvailableActions = (): Action[] => {
     const actions: Action[] = ['Fold'];
     if (currentBet === 0) {
@@ -66,7 +64,7 @@ const PlayerCard = ({ player, isActive, isSelected, currentBet, bigBlind, onActi
         onChange={(e) => onNameChange(player.id, e.target.value)}
         className="text-xl font-semibold mb-2 bg-gray-600 text-white rounded px-2 py-1 w-full"
       />
-      { isBusted ? <p>Busted</p> : <p>Position: {player.position}</p> }
+      { player.hasBusted ? <p>Busted</p> : <p>Position: {player.position}</p> }
       <div className="flex items-center">
         <p>Chips: $</p>
         <input

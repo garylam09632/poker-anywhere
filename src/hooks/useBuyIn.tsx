@@ -31,40 +31,23 @@ export const useBuyIn = (
       const bustedPlayer = bustedPlayers.find(p => p.id === selectedPlayer.id);
       
       if (bustedPlayer) {
-        console.log("bustedPlayer", bustedPlayer);
         // Handle busted player buy-in
         setBustedPlayers(currentBustedPlayers => 
           currentBustedPlayers.filter(p => p.id !== selectedPlayer.id)
         );
         setPlayers(currentPlayers => {
-          const updatedPlayer = {
+          const newPlayers = [...currentPlayers, {
             ...bustedPlayer,
             chips: amount,
             buyIn: selectedPlayer.buyIn + amount,
             chipChange: amount - (selectedPlayer.buyIn + amount),
             hasFolded: false,
             hasActed: false,
+            hasBusted: false,
             currentBet: 0
-          };
-          
-          if (updatedPlayer.originalIndex !== undefined) {
-            let index = updatedPlayer.originalIndex;
-            delete updatedPlayer.originalIndex;
-            // Insert the player back at their original index
-            console.log("updatedPlayer", updatedPlayer);
-            console.log("index", index);
-            console.log("newPlayers before splice", currentPlayers);
-            const newPlayers = [
-              ...currentPlayers.slice(0, index),
-              updatedPlayer,
-              ...currentPlayers.slice(index)
-            ];
-            console.log("newPlayers after splice", newPlayers);
-            return newPlayers;
-          } else {
-            // If no originalIndex, just add to the end
-            return [...currentPlayers, updatedPlayer];
-          }
+          }];
+          newPlayers.sort((a, b) => (a.id as number) - (b.id as number));
+          return newPlayers;
         });
       } else {
         // Handle active player buy-in

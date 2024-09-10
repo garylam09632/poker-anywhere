@@ -81,11 +81,12 @@ export default function Game() {
           id: i + 1,
           name: `Player ${i + 1}`, // Default name
           chips,
-          buyIn, // Changed from initialChips to buyIn
+          buyIn, 
           position,
           hasFolded: false,
           currentBet,
           hasActed: false,
+          hasBusted: false,
           chipChange: 0,
         };
       });
@@ -194,7 +195,8 @@ export default function Game() {
     players.forEach((p, i) => {
       if (p.chips === 0) { 
         let tempPlayer = resetPlayer(p);
-        tempPlayer.originalIndex = i;
+        // tempPlayer.originalIndex = i;
+        tempPlayer.hasBusted = true;
         tempBustedPlayers.push(tempPlayer);
         bustedPlayerMap.set(p.position, tempPlayer);
       }
@@ -206,7 +208,7 @@ export default function Game() {
         }
       }
     })
-    tempBustedPlayers = tempBustedPlayers.sort((a, b) => (a.originalIndex as number) - (b.originalIndex as number));
+    tempBustedPlayers = tempBustedPlayers.sort((a, b) => (a.id as number) - (b.id as number));
     setBustedPlayers(tempBustedPlayers);
 
     if (bustedPlayerMap.has("BTN")) {
@@ -558,15 +560,14 @@ export default function Game() {
     let newPlayers: Player[] = [];
     let bustedPlayersMap = new Map<number, Player>();
     bustedPlayers.forEach(p => {
-      // Busted player must have originalIndex
-      if (p.originalIndex !== undefined && p.originalIndex !== null) bustedPlayersMap.set(p.originalIndex, p);
+      bustedPlayersMap.set(p.id, p);
     })
 
     // Combine players and busted players
     let playerIndex = 0;
     for (let i=0; i<players.length + bustedPlayers.length; i++) {
-      if (bustedPlayersMap.has(i)) {
-        newPlayers.push(bustedPlayersMap.get(i) as Player);
+      if (bustedPlayersMap.has(i + 1)) {
+        newPlayers.push(bustedPlayersMap.get(i + 1) as Player);
       } else {
         newPlayers.push(players[playerIndex]);
         playerIndex++;

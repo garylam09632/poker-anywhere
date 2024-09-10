@@ -2,11 +2,12 @@ export default interface Player {
   id: number;
   name: string;
   chips: number;
-  buyIn: number; // Renamed from initialChips
+  buyIn: number;
   position: string;
-  hasFolded: boolean;
   currentBet: number;
-  hasActed: boolean;
   chipChange: number;
+  hasFolded: boolean;
+  hasActed: boolean;
+  hasBusted: boolean;
   originalIndex?: number;
 }
