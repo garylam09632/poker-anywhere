@@ -8,12 +8,14 @@ interface PlayerCardProps {
   isActive: boolean;
   currentBet: number;
   bigBlind: number;
+  isSelected: boolean;
+  onSelect: (player: Player) => void;
   onAction: (action: Action, amount?: number) => void;
   onNameChange: (id: number, name: string) => void; // New prop
   onChipsChange: (id: number, chips: number) => void; // New prop
 }
 
-export default function PlayerCard({ player, isActive, currentBet, bigBlind, onAction, onNameChange, onChipsChange  }: PlayerCardProps) {
+const PlayerCard = ({ player, isActive, isSelected, currentBet, bigBlind, onAction, onNameChange, onChipsChange, onSelect  }: PlayerCardProps) => {
   const [betAmount, setBetAmount] = useState(currentBet);
   const [rule, setRule] = useState<Rule>(new NormalRule())
 
@@ -31,6 +33,13 @@ export default function PlayerCard({ player, isActive, currentBet, bigBlind, onA
     return actions;
   };
 
+  const onActionButtonClick = (action: Action) => {
+    return (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      handleAction(action);
+    }
+  }
+
   const handleAction = (action: Action) => {
     if (action === 'Bet' || action === 'Raise') {
       onAction(action, betAmount);
@@ -47,7 +56,10 @@ export default function PlayerCard({ player, isActive, currentBet, bigBlind, onA
   }
 
   return (
-    <div className={`bg-gray-700 p-4 rounded-lg ${isActive ? 'ring-2 ring-blue-500' : ''}`}>
+    <div 
+      className={`bg-gray-700 p-4 rounded-lg ${isActive ? 'ring-2 ring-blue-500' : ''} ${isSelected ? 'ring-2 ring-green-500' : ''} cursor-pointer`}
+      onClick={() => onSelect(player)}
+    >
       <input
         type="text"
         value={player.name}
@@ -88,7 +100,7 @@ export default function PlayerCard({ player, isActive, currentBet, bigBlind, onA
               {
                 action === "ALL IN" ? (
                   <button
-                    onClick={() => handleAction("ALL IN")}
+                    onClick={onActionButtonClick(action)}
                     className="mr-2 mt-2 bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm"
                   >
                     {action}
@@ -106,12 +118,8 @@ export default function PlayerCard({ player, isActive, currentBet, bigBlind, onA
           ))}
         </div>
       )}
-      <button
-        onClick={() => {}}
-        className="mr-2 mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-sm"
-      >
-        Buy In
-      </button>
     </div>
   );
 }
+
+export default PlayerCard;

@@ -7,6 +7,8 @@ import Player from '@/type/interface/Player';
 import Pot from '@/type/interface/Pot';
 import case1 from '@/case/SidePot1';
 import { Action, Stage } from '@/type/General';
+import { useBuyIn } from '@/hooks/useBuyIn';
+import BuyInModal from '@/components/BuyInModal';
 
 const TEST = false;
 
@@ -30,6 +32,16 @@ export default function Game() {
   // State for trigger useEffect
   const [reset, setReset] = useState(false);
   const [initialed, setInitialed] = useState(false);
+
+  // Buy in state
+  const {
+    selectedPlayer,
+    showBuyInModal,
+    handlePlayerSelect,
+    openBuyInModal,
+    closeBuyInModal,
+    handleBuyIn
+  } = useBuyIn(players, bustedPlayers, setPlayers, setBustedPlayers);
 
   const positions = (length: number) => {
     if (length === 2) {
@@ -59,35 +71,34 @@ export default function Game() {
       setActivePlayerIndex(activePlayerIndex)
       setInitialed(initialed)
     } else {
+      let eligiblePlayers: number[] = [];
       const initialPlayers = Array.from({ length: playerCount }, (_, i) => {
         const position = positions(playerCount)[i];
         let currentBet = 0;
         let chips = buyIn;
-    
+        eligiblePlayers.push(i + 1);
         return {
           id: i + 1,
           name: `Player ${i + 1}`, // Default name
           chips,
-          initialChips: chips,
+          buyIn, // Changed from initialChips to buyIn
           position,
           hasFolded: false,
           currentBet,
           hasActed: false,
-          chipChange: 0, // Initialize chipChange
+          chipChange: 0,
         };
       });
       setPlayers(initialPlayers);
       setCurrentBet(bb);
+      setPots([{ amount: 0, eligiblePlayers }]);
       setActivePlayerIndex(playerCount === 2 ? 0 : 3 % playerCount); // Start with the player after BB
       setInitialed(true);
     }
   }, [searchParams]);
 
   useEffect(() => {
-    console.log("initialed", players)
     if (initialed) {
-      console.log("smallBlind", smallBlind)
-      console.log("bigBlind", bigBlind)
       for (let player of players) {
         if (player.position === 'SB') {
           player.currentBet = smallBlind;
@@ -182,8 +193,10 @@ export default function Game() {
     let btnNextLocation: string | null = null;
     players.forEach((p, i) => {
       if (p.chips === 0) { 
-        tempBustedPlayers.push({ ...p, originalIndex: i })
-        bustedPlayerMap.set(p.position, p);
+        let tempPlayer = resetPlayer(p);
+        tempPlayer.originalIndex = i;
+        tempBustedPlayers.push(tempPlayer);
+        bustedPlayerMap.set(p.position, tempPlayer);
       }
       else { 
         newPlayers.push(p)
@@ -196,11 +209,6 @@ export default function Game() {
     tempBustedPlayers = tempBustedPlayers.sort((a, b) => (a.originalIndex as number) - (b.originalIndex as number));
     setBustedPlayers(tempBustedPlayers);
 
-    // // If BTN isn't busted
-    // if (!bustedPlayerMap.has("BTN")) {
-    //   setDealerIndex((btnAt + 1) % newPlayers.length)
-    // }
-    // If BTN is busted
     if (bustedPlayerMap.has("BTN")) {
       newPlayers.forEach((p, i) => {
         if (p.position === btnNextLocation) {
@@ -216,13 +224,7 @@ export default function Game() {
     const rotatedPositions = rotatePositions(newPlayers, btnAt + 1);
     // Set initial bets for SB and BB
     newPlayers = rotatedPositions.map((player: Player, index: number) => {
-      let params: Player = {
-        ...player,
-        // initialChips: player.chips,
-        hasFolded: false,
-        currentBet: 0,
-        hasActed: false,
-      }
+      let params: Player = resetPlayer(player);
       if (player.position === 'SB') {
         params.chips -= smallBlind;
         params.currentBet = smallBlind;
@@ -270,7 +272,6 @@ export default function Game() {
   };
 
   const handleAction = (action: Action, amount?: number) => {
-    console.log("handleAction activePlayerIndex", activePlayerIndex)
     const player = players[activePlayerIndex];
     let newPlayers = [...players];
     let newCurrentBet = currentBet;
@@ -289,14 +290,6 @@ export default function Game() {
       case 'Check':
         // No additional action needed
         break;
-      // case 'Call':
-      //   {
-      //     const callAmount = Math.min(currentBet - player.currentBet, player.chips);
-      //     newPlayers[activePlayerIndex].chips -= callAmount;
-      //     newPlayers[activePlayerIndex].currentBet += callAmount;
-      //     newPots = updatePots(newPots, newPlayers, activePlayerIndex, callAmount);
-      //   }
-      //   break;
       case 'Call':
       case 'Bet':
       case 'Raise':
@@ -359,8 +352,6 @@ export default function Game() {
         
         // For all players which their bet are higher than others bet, they get back the remaining chips
         for (let player of newPlayers) {
-          console.log("player", player)
-          console.log("secondHighestBet", secondHighestBet)
           if (player.currentBet > secondHighestBet) {
             player.chips = player.currentBet - secondHighestBet;
             player.currentBet = secondHighestBet;
@@ -369,7 +360,6 @@ export default function Game() {
         }
       }
     }
-    console.log("handleAction", newPlayers)
     setPlayers(newPlayers);
     setCurrentBet(newCurrentBet);
     
@@ -429,21 +419,23 @@ export default function Game() {
 
   const updatePots = (currentPots: Pot[], currentPlayers: Player[]): Pot[] => {
     // if (currentPlayers[activePlayerIndex].hasFolded) return currentPots;
+    
     let newPots: Pot[] = [...currentPots];
-    let activePlayers = currentPlayers.filter(p => !p.hasFolded && p.hasActed);
+    let newPlayers = currentPlayers.map(p => ({...p}));
+    let activePlayers = newPlayers.filter(p => !p.hasFolded && p.hasActed);
     let allInPlayers = activePlayers.filter(p => p.chips === 0);
-    let remainingBets = currentPlayers.map(p => p.currentBet);
+    let remainingBets = newPlayers.map(p => p.currentBet);
     if (allInPlayers.length > 1) {
       // Sort all-in players by their bet amount, lowest to highest
       allInPlayers.sort((a, b) => a.currentBet - b.currentBet);
       // Create or update pots for each all-in player
-      allInPlayers.forEach((allInPlayer, index) => {
+      allInPlayers.forEach((allInPlayer) => {
+        if (remainingBets.every(bet => bet === 0)) return newPots;
         let potAmount = 0;
-        let eligiblePlayers = activePlayers.filter(p => p.currentBet >= allInPlayer.currentBet).map(p => p.id);
+        let eligiblePlayers = currentPlayers.filter(p => p.currentBet >= allInPlayer.currentBet).map(p => p.id);
         
         let updatedBetIndex: number[] = [];
         remainingBets = remainingBets.map((bet, index) => {
-          console.log(bet, allInPlayer.currentBet)
           if (bet >= allInPlayer.currentBet) {
             potAmount += allInPlayer.currentBet;
             updatedBetIndex.push(index)
@@ -451,7 +443,6 @@ export default function Game() {
           }
           return 0;
         });
-
         updatedBetIndex.forEach(i => {
           const betOwner = currentPlayers[i];
           allInPlayers.forEach((p) => {
@@ -462,16 +453,13 @@ export default function Game() {
             }
           })
         })
+
         // Find existing pot or create new one
         let potIndex = newPots.findIndex(pot => 
           pot.eligiblePlayers.length === eligiblePlayers.length && 
           pot.eligiblePlayers.every(id => eligiblePlayers.includes(id))
         );
-        if (stage === "Preflop") potIndex = 0;
-        
         if (potIndex !== -1) {
-          console.log("potAmount", potAmount)
-          console.log("eligiblePlayers", eligiblePlayers)
           newPots[potIndex].amount = potAmount;
           newPots[potIndex].eligiblePlayers = eligiblePlayers;
         } else {
@@ -479,7 +467,6 @@ export default function Game() {
         }
       });
     }
-
     // Create or update main pot with remaining bets
     let mainPotAmount = remainingBets.reduce((sum, bet) => sum + bet, 0);
     if (mainPotAmount > 0) {
@@ -494,8 +481,6 @@ export default function Game() {
       if (stage === "Preflop") mainPotIndex = 0;
       
       if (mainPotIndex !== -1) {
-        console.log("NONONONONON")
-        console.log(mainPotAmount)
         newPots[mainPotIndex].amount += mainPotAmount;
         newPots[mainPotIndex].eligiblePlayers = eligiblePlayers;
       } else {
@@ -541,11 +526,8 @@ export default function Game() {
 
     // Calculate changes for this hand
     newPlayers.forEach(player => {
-      // console.log(player)
-      // console.log(player.chips)
-      // console.log(player.initialChips)
-      // Calculate the change based on initial chips
-      let handChange = player.chips - player.initialChips;
+      // Calculate the change based on buy-in
+      let handChange = player.chips - player.buyIn; // Changed from initialChips to buyIn
 
       // Update the cumulative chipChange
       player.chipChange = handChange;
@@ -593,6 +575,15 @@ export default function Game() {
     return newPlayers;
   }
 
+  const resetPlayer = (player: Player) => {
+    return {
+      ...player,
+      currentBet: 0,
+      hasActed: false,
+      hasFolded: false,
+    }
+  }
+
   const buyIn = (playerId: number, chips: number) => {
     const player = players.find(p => p.id === playerId);
     if (player) {
@@ -638,11 +629,13 @@ export default function Game() {
               key={player.id}
               player={player}
               isActive={index === activePlayerIndex}
+              isSelected={selectedPlayer?.id === player.id}
               currentBet={currentBet}
               bigBlind={bigBlind}
               onAction={handleAction}
               onNameChange={handleNameChange}
               onChipsChange={handleChipsChange}
+              onSelect={handlePlayerSelect}
             />
           ))}
         </div>
@@ -653,8 +646,27 @@ export default function Game() {
           >
             Extract
           </button>
+          <button
+            onClick={openBuyInModal}
+            className={`mt-4 font-bold py-2 px-4 rounded ${
+              selectedPlayer
+                ? 'bg-green-600 hover:bg-green-700'
+                : 'bg-gray-400 cursor-not-allowed'
+            } text-white`}
+            disabled={!selectedPlayer}
+          >
+            Buy In
+          </button>
         </div>
       </div>
+
+      {showBuyInModal && selectedPlayer && (
+        <BuyInModal
+          player={selectedPlayer}
+          onClose={closeBuyInModal}
+          onBuyIn={handleBuyIn}
+        />
+      )}
 
       {showdownMode && (
         <div className="mt-6">

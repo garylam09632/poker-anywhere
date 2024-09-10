@@ -12,7 +12,7 @@ const players: Player[] = [
     currentBet: 0,
     hasActed: false,
     chipChange: 1400,
-    initialChips: 10000,
+    buyIn: 10000,
   },
   {
     id: 2,
@@ -23,7 +23,7 @@ const players: Player[] = [
     currentBet: 0,
     hasActed: false,
     chipChange: -600,
-    initialChips: 10000
+    buyIn: 10000
   },
   {
     id: 3,
@@ -34,7 +34,7 @@ const players: Player[] = [
     currentBet: 0,
     hasActed: false,
     chipChange: -5200,
-    initialChips: 10000
+    buyIn: 10000
   },
   {
     id: 4,
@@ -45,7 +45,7 @@ const players: Player[] = [
     currentBet: 0,
     hasActed: false,
     chipChange: 10200,
-    initialChips: 10000
+    buyIn: 10000
   },
   {
     id: 5,
@@ -56,7 +56,7 @@ const players: Player[] = [
     currentBet: 0,
     hasActed: false,
     chipChange: -5200,
-    initialChips: 10000
+    buyIn: 10000
   },
 ]
 
