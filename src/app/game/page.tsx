@@ -77,18 +77,18 @@ export default function Game() {
         let currentBet = 0;
         let chips = buyIn;
         eligiblePlayers.push(i + 1);
-        return {
-          id: i + 1,
-          name: `Player ${i + 1}`, // Default name
+        return new Player(
+          i + 1,
+          `Player ${i + 1}`,
           chips,
-          buyIn, 
+          buyIn,
           position,
-          hasFolded: false,
           currentBet,
-          hasActed: false,
-          hasBusted: false,
-          chipChange: 0,
-        };
+          0,
+          false,
+          false,
+          false
+        )
       });
       setPlayers(initialPlayers);
       setCurrentBet(bb);
@@ -191,7 +191,9 @@ export default function Game() {
     let tempBustedPlayers: Player[] = [...bustedPlayers];
     let bustedPlayerMap = new Map<string, Player>();
     let btnAt = 0;
-    let btnNextLocation: string | null = null;
+    let btnNextPosition: string | null = null;
+
+    // Busted player handling:
     players.forEach((p, i) => {
       if (p.chips === 0) { 
         let tempPlayer = resetPlayer(p);
@@ -202,9 +204,14 @@ export default function Game() {
       }
       else { 
         newPlayers.push(p)
+
+        // As the player is newly added, set the btnAt to the new player
         if (p.position === "BTN") btnAt = newPlayers.length - 1
+        
+        // btnNextPosition for recording the position of the next BTN
+        // If the BTN is busted, set the btnNextPosition to the position of the next player
         if (bustedPlayerMap.has("BTN")) {
-          btnNextLocation = p.position;
+          btnNextPosition = p.position;
         }
       }
     })
@@ -213,12 +220,18 @@ export default function Game() {
 
     if (bustedPlayerMap.has("BTN")) {
       newPlayers.forEach((p, i) => {
-        if (p.position === btnNextLocation) {
+        // If position is the same as btnNextPosition, set btnAt to the index
+        if (p.position === btnNextPosition) {
           btnAt = i;
         }
       })
     }
+    // End of busted player handling
 
+    // Busted player return to table handling (if any)
+
+
+    // Rotate positions
     setHandNumber(handNumber + 1);
     setStage('Preflop');
     // setDealerIndex((dealerIndex + 1) % newPlayers.length);
