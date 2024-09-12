@@ -603,7 +603,6 @@ export default function Game() {
         playerIndex++;
       }
     }
-    console.log("newPlayers", newPlayers)
     return newPlayers;
   }
 
