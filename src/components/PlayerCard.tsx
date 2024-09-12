@@ -105,7 +105,7 @@ const PlayerCard = ({ player, isActive, isSelected, currentBet, bigBlind, onActi
                   </button>
                 ) : (
                   <button
-                    onClick={() => handleAction(action)}
+                    onClick={onActionButtonClick(action)}
                     className="mr-2 mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-sm"
                   >
                     {action}

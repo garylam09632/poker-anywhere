@@ -29,40 +29,23 @@ export const useBuyIn = (
   const handleBuyIn = (amount: number) => {
     if (selectedPlayer) {
       const bustedPlayer = bustedPlayers.find(p => p.id === selectedPlayer.id);
+
+      let playerList: Player[];
+      let setFunction: React.Dispatch<React.SetStateAction<Player[]>>;
       
       if (bustedPlayer) {
         // Handle busted player buy-in
-        setBustedPlayers(currentBustedPlayers => 
-          currentBustedPlayers.filter(p => p.id !== selectedPlayer.id)
-        );
-        setPlayers(currentPlayers => {
-          const newPlayers = [...currentPlayers, {
-            ...bustedPlayer,
-            chips: amount,
-            buyIn: selectedPlayer.buyIn + amount,
-            chipChange: amount - (selectedPlayer.buyIn + amount),
-            hasFolded: false,
-            hasActed: false,
-            hasBusted: false,
-            currentBet: 0
-          }];
-          newPlayers.sort((a, b) => (a.id as number) - (b.id as number));
-          return newPlayers;
-        });
+        playerList = [...bustedPlayers];
+        setFunction = setBustedPlayers;
       } else {
         // Handle active player buy-in
-        setPlayers(currentPlayers => 
-          currentPlayers.map(player => {
-            if (player.id === selectedPlayer.id) {
-              const newChips = player.chips + amount;
-              const newBuyIn = player.buyIn + amount;
-              const chipChange = newChips - newBuyIn;
-              return { ...player, chips: newChips, buyIn: newBuyIn, chipChange };
-            }
-            return player;
-          })
-        );
+        playerList = [...players];
+        setFunction = setPlayers;
       }
+      setFunction(playerList.map(p => {
+        if (p.id === selectedPlayer.id) p.tempBuyIn = amount;
+        return p;
+      }))
       closeBuyInModal();
     }
   };

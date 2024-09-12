@@ -10,7 +10,7 @@ import { Action, Stage } from '@/type/General';
 import { useBuyIn } from '@/hooks/useBuyIn';
 import BuyInModal from '@/components/BuyInModal';
 
-const TEST = false;
+const TEST = true;
 
 export default function Game() {
   const searchParams = useSearchParams();
@@ -126,7 +126,6 @@ export default function Game() {
   }, [reset]);
 
   const resetBetsAndUpdateActivePlayer = () => {
-    console.log("resetBetsAndUpdateActivePlayer", players) 
     setPlayers(players.map(player => ({ 
       ...player, 
       currentBet: 0, 
@@ -187,19 +186,45 @@ export default function Game() {
   // BTN, SB, BB
 
   const nextHand = () => {
+    let tempPlayers: Player[] = players.map(p => ({...p}));
+    let tempBustedPlayers: Player[] = bustedPlayers.map(p => ({...p}));
     let newPlayers: Player[] = [];
-    let tempBustedPlayers: Player[] = [...bustedPlayers];
+    let newBustedPlayers: Player[] = [];
     let bustedPlayerMap = new Map<string, Player>();
     let btnAt = 0;
     let btnNextPosition: string | null = null;
 
+    // Busted player return to table handling (if any)
+    tempPlayers.forEach((p) => {
+      if (p.tempBuyIn && p.tempBuyIn > 0) { 
+        p.buyIn += p.tempBuyIn; // 100000 + tempBuyIn
+        p.chips += p.tempBuyIn; // currentChips + tempBuyIn
+        p.tempBuyIn = 0;
+      }
+    })
+    tempBustedPlayers.forEach((p) => {
+      if (p.tempBuyIn && p.tempBuyIn > 0) {
+        p.buyIn += p.tempBuyIn;
+        p.chips += p.tempBuyIn;
+        p.tempBuyIn = 0;
+        // Only place to set the status false to true
+        p.hasBusted = false;
+        tempPlayers.push(p);
+      } else {
+        // Still busted
+        newBustedPlayers.push(p);
+      }
+    })
+    // Sort the players by id
+    tempPlayers = tempPlayers.sort((a, b) => (a.id as number) - (b.id as number));
+
     // Busted player handling:
-    players.forEach((p, i) => {
+    tempPlayers.forEach((p, i) => {
       if (p.chips === 0) { 
         let tempPlayer = resetPlayer(p);
         // tempPlayer.originalIndex = i;
         tempPlayer.hasBusted = true;
-        tempBustedPlayers.push(tempPlayer);
+        newBustedPlayers.push(tempPlayer);
         bustedPlayerMap.set(p.position, tempPlayer);
       }
       else { 
@@ -215,8 +240,8 @@ export default function Game() {
         }
       }
     })
-    tempBustedPlayers = tempBustedPlayers.sort((a, b) => (a.id as number) - (b.id as number));
-    setBustedPlayers(tempBustedPlayers);
+    newBustedPlayers = newBustedPlayers.sort((a, b) => (a.id as number) - (b.id as number));
+    setBustedPlayers(newBustedPlayers);
 
     if (bustedPlayerMap.has("BTN")) {
       newPlayers.forEach((p, i) => {
@@ -227,9 +252,6 @@ export default function Game() {
       })
     }
     // End of busted player handling
-
-    // Busted player return to table handling (if any)
-
 
     // Rotate positions
     setHandNumber(handNumber + 1);
@@ -254,20 +276,15 @@ export default function Game() {
     
     
     setCurrentBet(bigBlind);
-
-    const bbIndex = rotatedPositions.findIndex(p => p.position === 'BB');
-    setActivePlayerIndex(bbIndex + 1 === players.length ? 0 : bbIndex + 1);
-    
+    const bbIndex = newPlayers.findIndex(p => p.position === 'BB');
+    setActivePlayerIndex(bbIndex + 1 === newPlayers.length ? 0 : bbIndex + 1);
+    console.log("newActivePlayerIndex", bbIndex + 1 === newPlayers.length ? 0 : bbIndex + 1)
     // Set new players to state
     setPlayers(newPlayers);
   };
 
   const rotatePositions = (currentPlayers: Player[], newDealerIndex: number): Player[] => {
     const newPositions = positions(currentPlayers.length);
-    console.log("newPositions", currentPlayers.map((player, index) => ({
-      ...player,
-      position: newPositions[(index - newDealerIndex + currentPlayers.length) % currentPlayers.length],
-    })))
     return currentPlayers.map((player, index) => ({
       ...player,
       position: newPositions[(index - newDealerIndex + currentPlayers.length) % currentPlayers.length],
@@ -568,7 +585,7 @@ export default function Game() {
   };
 
   const mappingPlayers = (): Player[] => {
-    if (bustedPlayers.length === 0) return players;
+    // if (bustedPlayers.length === 0) return players;
 
     let newPlayers: Player[] = [];
     let bustedPlayersMap = new Map<number, Player>();
@@ -582,10 +599,11 @@ export default function Game() {
       if (bustedPlayersMap.has(i + 1)) {
         newPlayers.push(bustedPlayersMap.get(i + 1) as Player);
       } else {
-        newPlayers.push(players[playerIndex]);
+        newPlayers.push({ ...players[playerIndex], originalIndex: playerIndex });
         playerIndex++;
       }
     }
+    console.log("newPlayers", newPlayers)
     return newPlayers;
   }
 
@@ -638,20 +656,24 @@ export default function Game() {
           <p className="text-lg">Current Bet: ${currentBet}</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {mappingPlayers().map((player, index) => (
-            <PlayerCard
-              key={player.id}
-              player={player}
-              isActive={index === activePlayerIndex}
-              isSelected={selectedPlayer?.id === player.id}
-              currentBet={currentBet}
-              bigBlind={bigBlind}
-              onAction={handleAction}
-              onNameChange={handleNameChange}
-              onChipsChange={handleChipsChange}
-              onSelect={handlePlayerSelect}
-            />
-          ))}
+          {mappingPlayers().map((player, index) => {
+            let isActive = player.originalIndex === activePlayerIndex;
+            player.originalIndex = undefined;
+            return (
+              <PlayerCard
+                key={player.id}
+                player={player}
+                isActive={isActive}
+                isSelected={selectedPlayer?.id === player.id}
+                currentBet={currentBet}
+                bigBlind={bigBlind}
+                onAction={handleAction}
+                onNameChange={handleNameChange}
+                onChipsChange={handleChipsChange}
+                onSelect={handlePlayerSelect}
+              />
+            )
+          })}
         </div>
         <div className="flex flex-row gap-4">
           <button
