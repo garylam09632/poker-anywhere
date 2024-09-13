@@ -32,6 +32,7 @@ export default function Game() {
   // State for trigger useEffect
   const [reset, setReset] = useState(false);
   const [initialed, setInitialed] = useState(false);
+  const [isFinale, setIsFinale] = useState(false);
 
   // Buy in state
   const {
@@ -117,6 +118,24 @@ export default function Game() {
       setInitialed(false);
     } 
   }, [initialed, players]);
+
+  useEffect(() => {
+    if (isFinale) {
+      // If stage is river, or all players are all in
+      if (stage === 'River' || players.every(player => player.chips === 0)) {
+        // Showdown
+        endHand();
+      }
+      // If there is only one player left, declare the winner
+      else if (checkForLastPlayerStanding(players)) {
+        // Logic executed in the function
+      } 
+      else {
+        nextStage();
+      }
+      setIsFinale(false);
+    }
+  }, [isFinale])
 
   useEffect(() => {
     if (reset) {
@@ -278,7 +297,6 @@ export default function Game() {
     setCurrentBet(bigBlind);
     const bbIndex = newPlayers.findIndex(p => p.position === 'BB');
     setActivePlayerIndex(bbIndex + 1 === newPlayers.length ? 0 : bbIndex + 1);
-    console.log("newActivePlayerIndex", bbIndex + 1 === newPlayers.length ? 0 : bbIndex + 1)
     // Set new players to state
     setPlayers(newPlayers);
   };
@@ -295,9 +313,18 @@ export default function Game() {
   const checkForLastPlayerStanding = (currentPlayers: Player[]): boolean => {
     const activePlayers = currentPlayers.filter(p => !p.hasFolded);
     if (activePlayers.length === 1) {
+      console.log("last player standing")
+      console.log("activePlayers", activePlayers)
       const winner = activePlayers[0];
       declareWinners([winner.id]);
-      nextHand();
+      return true;
+    }
+    return false;
+  };
+
+  const isLastPlayerStanding = (currentPlayers: Player[]): boolean => {
+    const activePlayers = currentPlayers.filter(p => !p.hasFolded);
+    if (activePlayers.length === 1) {
       return true;
     }
     return false;
@@ -314,10 +341,10 @@ export default function Game() {
     switch (action) {
       case 'Fold':
         newPlayers[activePlayerIndex].hasFolded = true;
-        // Immediately check if only one player remains
-        if (checkForLastPlayerStanding(newPlayers)) {
-          return; // Exit the function if the hand is over
-        }
+        // // Immediately check if only one player remains
+        // if (checkForLastPlayerStanding(newPlayers)) {
+        //   return; // Exit the function if the hand is over
+        // }
         break;
       case 'Check':
         // No additional action needed
@@ -395,22 +422,12 @@ export default function Game() {
     setPlayers(newPlayers);
     setCurrentBet(newCurrentBet);
     
-    // Check if only one player remains after this action
-    if (checkForLastPlayerStanding(newPlayers)) {
-      return;
-    }
-    
     // Check if the round is complete
     if (isRoundComplete(newPlayers, newCurrentBet)) {
       // Update pots after each action
       newPots = updatePots(newPots, newPlayers);
       setPots(newPots);
-
-      if (stage === 'River' || allPlayerAllIn) {
-        endHand();
-      } else {
-        nextStage();
-      }
+      setIsFinale(true);
     } else {
       moveToNextPlayer(newPlayers);
     }
@@ -527,7 +544,7 @@ export default function Game() {
 
     const newPlayers = [...players];
     let remainingPots = [...pots];
-    console.log("remainingPots", remainingPots)
+    console.log("remainingPots", remainingPots[0])
   
     const settle = (winners: number[], pot: Pot) => {
       const share = Math.floor(pot.amount / winners.length);
