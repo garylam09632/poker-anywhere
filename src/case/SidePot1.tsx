@@ -20,7 +20,7 @@ const players: Player[] = [
     name: "Makiyo",
     chips: 9200,
     position: "Player 4",
-    hasFolded: true,
+    hasFolded: false,
     currentBet: 0,
     hasActed: false,
     chipChange: -600,
@@ -67,8 +67,8 @@ const players: Player[] = [
 
 const pots: Pot[] = [
   {
-    amount: 4000,
-    eligiblePlayers: [1, 4, 5]
+    amount: 3,
+    eligiblePlayers: [1, 2, 4, 5]
   }
 ];
 

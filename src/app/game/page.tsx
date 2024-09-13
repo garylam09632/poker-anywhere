@@ -10,7 +10,7 @@ import { Action, Stage } from '@/type/General';
 import { useBuyIn } from '@/hooks/useBuyIn';
 import BuyInModal from '@/components/BuyInModal';
 
-const TEST = true;
+const TEST = false;
 
 export default function Game() {
   const searchParams = useSearchParams();
@@ -32,7 +32,7 @@ export default function Game() {
   // State for trigger useEffect
   const [reset, setReset] = useState(false);
   const [initialed, setInitialed] = useState(false);
-  const [isFinale, setIsFinale] = useState(false);
+  const [isEndRound, setIsEndRound] = useState(false);
 
   // Buy in state
   const {
@@ -120,9 +120,15 @@ export default function Game() {
   }, [initialed, players]);
 
   useEffect(() => {
-    if (isFinale) {
-      // If stage is river, or all players are all in
-      if (stage === 'River' || players.every(player => player.chips === 0)) {
+    if (isEndRound) {
+      // If stage is river
+      // If all players are all in
+      // If there is only one player hasn't fold and all in, all other players are folded or all in
+      if (
+        stage === 'River' || 
+        players.every(player => player.chips === 0) ||
+        players.length - 1 === (players.filter(p => p.chips === 0).length + players.filter(p => p.hasFolded).length)
+      ) {
         // Showdown
         endHand();
       }
@@ -133,9 +139,9 @@ export default function Game() {
       else {
         nextStage();
       }
-      setIsFinale(false);
+      setIsEndRound(false);
     }
-  }, [isFinale])
+  }, [isEndRound])
 
   useEffect(() => {
     if (reset) {
@@ -143,6 +149,9 @@ export default function Game() {
       setReset(false);
     }
   }, [reset]);
+
+  // TODO: Reset player bet smallBlind and bigBlind and maybe ante
+  // SmallBlind should be not acted
 
   const resetBetsAndUpdateActivePlayer = () => {
     setPlayers(players.map(player => ({ 
@@ -284,11 +293,18 @@ export default function Game() {
       if (player.position === 'SB') {
         params.chips -= smallBlind;
         params.currentBet = smallBlind;
+        params.hasActed = true;
         // params.chipChange -= smallBlind; // Update chipChange for SB
       } else if (player.position === 'BB') {
         params.chips -= bigBlind;
         params.currentBet = bigBlind;
+        params.hasActed = true;
         // params.chipChange -= bigBlind; // Update chipChange for BB
+      } else if (player.position === "BTN" && players.length === 2) {
+        // When there are only 2 players, the BTN acts as the SB
+        player.currentBet = smallBlind;
+        params.chips -= smallBlind;
+        params.hasActed = true;
       }
       return params;
     })
@@ -341,6 +357,13 @@ export default function Game() {
     switch (action) {
       case 'Fold':
         newPlayers[activePlayerIndex].hasFolded = true;
+        console.log("player", player)
+        // Remove the folded player from all pots' eligible players
+        newPots = newPots.map(pot => ({
+          ...pot,
+          eligiblePlayers: pot.eligiblePlayers.filter(id => id !== player.id)
+        }));
+        setPots(newPots);
         // // Immediately check if only one player remains
         // if (checkForLastPlayerStanding(newPlayers)) {
         //   return; // Exit the function if the hand is over
@@ -427,7 +450,7 @@ export default function Game() {
       // Update pots after each action
       newPots = updatePots(newPots, newPlayers);
       setPots(newPots);
-      setIsFinale(true);
+      setIsEndRound(true);
     } else {
       moveToNextPlayer(newPlayers);
     }
@@ -468,20 +491,29 @@ export default function Game() {
 
   const updatePots = (currentPots: Pot[], currentPlayers: Player[]): Pot[] => {
     // if (currentPlayers[activePlayerIndex].hasFolded) return currentPots;
+
+    const printPots = (pots: Pot[]) => {
+      pots.forEach((pot, index) => {
+        console.log(`Pot ${index + 1} - Amount: ${pot.amount}, Eligible Players: ${pot.eligiblePlayers.join(', ')}`)
+      })
+    }
     
     let newPots: Pot[] = [...currentPots];
     let newPlayers = currentPlayers.map(p => ({...p}));
     let activePlayers = newPlayers.filter(p => !p.hasFolded && p.hasActed);
     let allInPlayers = activePlayers.filter(p => p.chips === 0);
     let remainingBets = newPlayers.map(p => p.currentBet);
+    console.log("before")
+    printPots(newPots)
     if (allInPlayers.length > 1) {
       // Sort all-in players by their bet amount, lowest to highest
       allInPlayers.sort((a, b) => a.currentBet - b.currentBet);
+      console.log("allInPlayers", allInPlayers)
       // Create or update pots for each all-in player
       allInPlayers.forEach((allInPlayer) => {
         if (remainingBets.every(bet => bet === 0)) return newPots;
         let potAmount = 0;
-        let eligiblePlayers = currentPlayers.filter(p => p.currentBet >= allInPlayer.currentBet).map(p => p.id);
+        let eligiblePlayers = activePlayers.filter(p => p.currentBet >= allInPlayer.currentBet).map(p => p.id);
         
         let updatedBetIndex: number[] = [];
         remainingBets = remainingBets.map((bet, index) => {
@@ -494,7 +526,7 @@ export default function Game() {
         });
         updatedBetIndex.forEach(i => {
           const betOwner = currentPlayers[i];
-          allInPlayers.forEach((p) => {
+          activePlayers.forEach((p) => {
             // Find out the bet owner in allInPlayers array
             if (betOwner.id === p.id) {
               // Set their currentBet to new value
@@ -502,18 +534,19 @@ export default function Game() {
             }
           })
         })
-
         // Find existing pot or create new one
         let potIndex = newPots.findIndex(pot => 
           pot.eligiblePlayers.length === eligiblePlayers.length && 
           pot.eligiblePlayers.every(id => eligiblePlayers.includes(id))
         );
         if (potIndex !== -1) {
-          newPots[potIndex].amount = potAmount;
+          newPots[potIndex].amount += potAmount;
           newPots[potIndex].eligiblePlayers = eligiblePlayers;
         } else {
           newPots.push({ amount: potAmount, eligiblePlayers });
         }
+        console.log("after")
+        printPots(newPots)
       });
     }
     // Create or update main pot with remaining bets
