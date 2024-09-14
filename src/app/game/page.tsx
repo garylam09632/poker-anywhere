@@ -10,6 +10,7 @@ import { Action, Stage } from '@/type/General';
 import { useBuyIn } from '@/hooks/useBuyIn';
 
 import BuyInModal from '@/components/BuyInModal';
+import { Position } from '@/type/enum/Position';
 
 const TEST = true;
 
@@ -45,13 +46,21 @@ export default function Game() {
     handleBuyIn
   } = useBuyIn(players, bustedPlayers, setPlayers, setBustedPlayers);
 
-  const positions = (length: number) => {
+  const positions = (length: number): string[] => {
     if (length === 2) {
-      return ['BTN', 'BB'];
+      return [Position.BTN, Position.BB];
     } else if (length === 3) {
-      return ['BTN', 'SB', 'BB'];
+      return [Position.BTN, Position.SB, Position.BB];
+    } else if (length === 4) {
+      return [Position.BTN, Position.SB, Position.BB, Position.UTG];
+    } else if (length === 5) {
+      return [Position.BTN, Position.SB, Position.BB, Position.UTG, Position.HJ];
+    } else if (length === 6) {
+      return [Position.BTN, Position.SB, Position.BB, Position.UTG, Position.HJ, Position.CO];
+    } else if (length === 7) {
+      return [Position.BTN, Position.SB, Position.BB, Position.UTG, Position.LJ, Position.HJ, Position.CO];
     } else {
-      return ['BTN', 'SB', 'BB', ...Array(Math.max(0, length - 3)).fill('').map((_, i) => `Player ${i + 4}`)]
+      return [Position.BTN, Position.SB, Position.BB, Position.UTG, ...Array.from({ length: length - 7 }, (_, i) => `${Position.UTG} + ${i}`), Position.LJ, Position.HJ, Position.CO];
     }
   }
 
@@ -103,15 +112,15 @@ export default function Game() {
   useEffect(() => {
     if (initialed) {
       for (let player of players) {
-        if (player.position === 'SB') {
+        if (player.position === Position.SB) {
           player.currentBet = smallBlind;
           player.chips -= smallBlind;
-        } else if (player.position === 'BB') {
+        } else if (player.position === Position.BB) {
           player.currentBet = bigBlind;
           player.chips -= bigBlind;
           // As the last player who act will be the big blind
           player.hasActed = true;
-        } else if (player.position === "BTN" && players.length === 2) {
+        } else if (player.position === Position.BTN && players.length === 2) {
           // When there are only 2 players, the BTN acts as the SB
           player.currentBet = smallBlind;
           player.chips -= smallBlind;
@@ -163,7 +172,7 @@ export default function Game() {
       hasActed: false
     })));
     setCurrentBet(0);
-    let nextPlayerIndex = players.length === 2 ? players.findIndex(p => p.position === 'BB') : players.findIndex(p => p.position === 'SB');
+    let nextPlayerIndex = players.length === 2 ? players.findIndex(p => p.position === Position.BB) : players.findIndex(p => p.position === Position.SB);
     while (players[nextPlayerIndex].hasFolded || players[nextPlayerIndex].chips === 0) {
       nextPlayerIndex = nextPlayerIndex + 1 % players.length === players.length ? 0 : nextPlayerIndex + 1;
     }
@@ -262,11 +271,11 @@ export default function Game() {
         newPlayers.push(p)
 
         // As the player is newly added, set the btnAt to the new player
-        if (p.position === "BTN") btnAt = newPlayers.length - 1
+        if (p.position === Position.BTN) btnAt = newPlayers.length - 1
         
         // btnNextPosition for recording the position of the next BTN
         // If the BTN is busted, set the btnNextPosition to the position of the next player
-        if (bustedPlayerMap.has("BTN")) {
+        if (bustedPlayerMap.has(Position.BTN)) {
           btnNextPosition = p.position;
         }
       }
@@ -274,7 +283,7 @@ export default function Game() {
     newBustedPlayers = newBustedPlayers.sort((a, b) => (a.id as number) - (b.id as number));
     setBustedPlayers(newBustedPlayers);
 
-    if (bustedPlayerMap.has("BTN")) {
+    if (bustedPlayerMap.has(Position.BTN)) {
       newPlayers.forEach((p, i) => {
         // If position is the same as btnNextPosition, set btnAt to the index
         if (p.position === btnNextPosition) {
