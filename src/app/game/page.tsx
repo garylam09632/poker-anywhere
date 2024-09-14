@@ -209,22 +209,6 @@ export default function Game() {
     resetBetsAndUpdateActivePlayer();
   };
 
-  // First case: BTN stays in the players list
-  // UTG, HJ, BTN, SB, BB
-  // UTG, BTN, SB
-  // SB, BB, BTN
-
-  // Second case: BTN is removed from the players list
-  // Finding the new BTN by knowing the next player 
-  // UTG, HJ, BTN, SB, BB
-  // UTG, SB, BB
-  
-  // BB, BTN, SB
-
-  // BB, UTG, HJ, BTN, SB
-  // UTG, HJ, BTN
-  // BTN, SB, BB
-
   const nextHand = () => {
     let tempPlayers: Player[] = players.map(p => ({...p}));
     let tempBustedPlayers: Player[] = bustedPlayers.map(p => ({...p}));
@@ -235,6 +219,10 @@ export default function Game() {
     let btnNextPosition: string | null = null;
 
     // Busted player return to table handling (if any)
+    
+    // First case: BTN stays in the players list
+    // Second case: BTN is removed from the players list
+    // Finding the new BTN by knowing the next player 
     tempPlayers.forEach((p) => {
       if (p.tempBuyIn && p.tempBuyIn > 0) { 
         p.buyIn += p.tempBuyIn; // 100000 + tempBuyIn
@@ -306,7 +294,7 @@ export default function Game() {
     
     
     setCurrentBet(bigBlind);
-    const bbIndex = newPlayers.findIndex(p => p.position === 'BB');
+    const bbIndex = newPlayers.findIndex(p => p.position === Position.BB);
     setActivePlayerIndex(bbIndex + 1 === newPlayers.length ? 0 : bbIndex + 1);
     // Set new players to state
     setPlayers(newPlayers);

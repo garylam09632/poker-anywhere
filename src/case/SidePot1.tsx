@@ -1,3 +1,4 @@
+import { Position } from "@/type/enum/Position";
 import { Stage } from "@/type/General";
 import Player from "@/type/interface/Player"
 import Pot from "@/type/interface/Pot"
@@ -7,7 +8,7 @@ const players: Player[] = [
     id: 1,
     name: "Gary",
     chips: 10200,
-    position: "BB",
+    position: Position.BB,
     hasFolded: false,
     currentBet: 0,
     hasActed: false,
@@ -19,7 +20,7 @@ const players: Player[] = [
     id: 2,
     name: "Makiyo",
     chips: 9200,
-    position: "Player 4",
+    position: Position.UTG,
     hasFolded: false,
     currentBet: 0,
     hasActed: false,
@@ -31,7 +32,7 @@ const players: Player[] = [
     id: 3,
     name: "Kyle",
     chips: 4700,
-    position: "Player 5",
+    position: Position.HJ,
     hasFolded: true,
     currentBet: 0,
     hasActed: false,
@@ -43,7 +44,7 @@ const players: Player[] = [
     id: 4,
     name: "Louie",
     chips: 18800,
-    position: "BTN",
+    position: Position.BTN,
     hasFolded: false,
     currentBet: 0,
     hasActed: false,
@@ -55,7 +56,7 @@ const players: Player[] = [
     id: 5,
     name: "Unix",
     chips: 3600,
-    position: "SB",
+    position: Position.SB,
     hasFolded: false,
     currentBet: 0,
     hasActed: false,
