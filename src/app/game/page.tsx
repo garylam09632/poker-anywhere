@@ -8,9 +8,10 @@ import Pot from '@/type/interface/Pot';
 import case1 from '@/case/SidePot1';
 import { Action, Stage } from '@/type/General';
 import { useBuyIn } from '@/hooks/useBuyIn';
+
 import BuyInModal from '@/components/BuyInModal';
 
-const TEST = false;
+const TEST = true;
 
 export default function Game() {
   const searchParams = useSearchParams();
@@ -108,6 +109,8 @@ export default function Game() {
         } else if (player.position === 'BB') {
           player.currentBet = bigBlind;
           player.chips -= bigBlind;
+          // As the last player who act will be the big blind
+          player.hasActed = true;
         } else if (player.position === "BTN" && players.length === 2) {
           // When there are only 2 players, the BTN acts as the SB
           player.currentBet = smallBlind;
@@ -121,10 +124,14 @@ export default function Game() {
 
   useEffect(() => {
     if (isEndRound) {
+      // If there is only one player left, declare the winner
+      if (checkForLastPlayerStanding(players)) {
+        // Logic executed in the function
+      } 
       // If stage is river
       // If all players are all in
       // If there is only one player hasn't fold and all in, all other players are folded or all in
-      if (
+      else if (
         stage === 'River' || 
         players.every(player => player.chips === 0) ||
         players.length - 1 === (players.filter(p => p.chips === 0).length + players.filter(p => p.hasFolded).length)
@@ -132,10 +139,6 @@ export default function Game() {
         // Showdown
         endHand();
       }
-      // If there is only one player left, declare the winner
-      else if (checkForLastPlayerStanding(players)) {
-        // Logic executed in the function
-      } 
       else {
         nextStage();
       }
@@ -289,24 +292,7 @@ export default function Game() {
     const rotatedPositions = rotatePositions(newPlayers, btnAt + 1);
     // Set initial bets for SB and BB
     newPlayers = rotatedPositions.map((player: Player, index: number) => {
-      let params: Player = resetPlayer(player);
-      if (player.position === 'SB') {
-        params.chips -= smallBlind;
-        params.currentBet = smallBlind;
-        params.hasActed = true;
-        // params.chipChange -= smallBlind; // Update chipChange for SB
-      } else if (player.position === 'BB') {
-        params.chips -= bigBlind;
-        params.currentBet = bigBlind;
-        params.hasActed = true;
-        // params.chipChange -= bigBlind; // Update chipChange for BB
-      } else if (player.position === "BTN" && players.length === 2) {
-        // When there are only 2 players, the BTN acts as the SB
-        player.currentBet = smallBlind;
-        params.chips -= smallBlind;
-        params.hasActed = true;
-      }
-      return params;
+      return resetPlayer(player);
     })
     
     
@@ -315,6 +301,7 @@ export default function Game() {
     setActivePlayerIndex(bbIndex + 1 === newPlayers.length ? 0 : bbIndex + 1);
     // Set new players to state
     setPlayers(newPlayers);
+    setInitialed(true)
   };
 
   const rotatePositions = (currentPlayers: Player[], newDealerIndex: number): Player[] => {
@@ -338,14 +325,6 @@ export default function Game() {
     return false;
   };
 
-  const isLastPlayerStanding = (currentPlayers: Player[]): boolean => {
-    const activePlayers = currentPlayers.filter(p => !p.hasFolded);
-    if (activePlayers.length === 1) {
-      return true;
-    }
-    return false;
-  };
-
   const handleAction = (action: Action, amount?: number) => {
     const player = players[activePlayerIndex];
     let newPlayers = [...players];
@@ -357,7 +336,6 @@ export default function Game() {
     switch (action) {
       case 'Fold':
         newPlayers[activePlayerIndex].hasFolded = true;
-        console.log("player", player)
         // Remove the folded player from all pots' eligible players
         newPots = newPots.map(pot => ({
           ...pot,
@@ -577,7 +555,6 @@ export default function Game() {
 
     const newPlayers = [...players];
     let remainingPots = [...pots];
-    console.log("remainingPots", remainingPots[0])
   
     const settle = (winners: number[], pot: Pot) => {
       const share = Math.floor(pot.amount / winners.length);
@@ -616,7 +593,7 @@ export default function Game() {
     });
   
     setPlayers(newPlayers);
-    setPots([{ amount: 0, eligiblePlayers: [] }]);
+    setPots([{ amount: 0, eligiblePlayers: newPlayers.map(p => p.id) }]);
     setShowdownMode(false);
     setSelectedWinners([]);
     setReset(true);
