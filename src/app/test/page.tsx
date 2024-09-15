@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import PlayerCard from '@/components/PlayerCard';
 import Player from '@/type/interface/Player';
@@ -11,8 +11,9 @@ import { useBuyIn } from '@/hooks/useBuyIn';
 
 import BuyInModal from '@/components/BuyInModal';
 import { Position } from '@/type/enum/Position';
+import PlayerUnit from '@/components/PlayerUnit';
 
-const TEST = true;
+const TEST = false;
 
 export default function Game() {
   const searchParams = useSearchParams();
@@ -46,6 +47,31 @@ export default function Game() {
     handleBuyIn
   } = useBuyIn(players, bustedPlayers, setPlayers, setBustedPlayers);
 
+  const [tableSize, setTableSize] = useState({ width: 0, height: 0 });
+
+  // Use useRef to get a reference to the table div
+  const tableRef = useRef<HTMLDivElement>(null);
+
+  // Use useEffect to measure the table size after render
+  useEffect(() => {
+    if (tableRef.current) {
+      const resizeObserver = new ResizeObserver(entries => {
+        for (let entry of entries) {
+          setTableSize({
+            width: entry.contentRect.width,
+            height: entry.contentRect.height
+          });
+        }
+      });
+
+      resizeObserver.observe(tableRef.current);
+
+      return () => {
+        resizeObserver.disconnect();
+      };
+    }
+  }, []);
+
   const positions = (length: number): string[] => {
     if (length === 2) {
       return [Position.BTN, Position.BB];
@@ -60,7 +86,7 @@ export default function Game() {
     } else if (length === 7) {
       return [Position.BTN, Position.SB, Position.BB, Position.UTG, Position.LJ, Position.HJ, Position.CO];
     } else {
-      return [Position.BTN, Position.SB, Position.BB, Position.UTG, ...Array.from({ length: length - 7 }, (_, i) => `${Position.UTG} + ${i}`), Position.LJ, Position.HJ, Position.CO];
+      return [Position.BTN, Position.SB, Position.BB, Position.UTG, ...Array.from({ length: length - 7 }, (_, i) => `+${i+1}`), Position.LJ, Position.HJ, Position.CO];
     }
   }
 
@@ -659,44 +685,74 @@ export default function Game() {
   // initialChip - (currentChip - buyIn) = hasChangedChip
   
   return (
-    <div className="h-full w-full bg-black text-white p-8 flex justify-center items-center">
-      <div className="
-        w-[95%] h-[95%]
-        xs:w-[90%] xs:h-[90%]
-        sm:w-[85%] sm:h-[85%]
-        md:w-[80%] md:h-[80%]
-        lg:w-[75%] lg:h-[75%]
-        xl:w-[70%] xl:h-[70%]
-        2xl:w-[65%] 2xl:h-[65%]
-        bg-grey rounded-full border-white border-4 sm:border-6 md:border-8
-      ">
-
+    <div className="h-full w-full bg-black text-white p-10 flex justify-center">
+      <div 
+        ref={tableRef}
+        className="
+          w-[90%] h-[90%]
+          xs:w-[90%] xs:h-[90%]
+          sm:w-[85%] sm:h-[85%]
+          md:w-[80%] md:h-[80%]
+          lg:w-[75%] lg:h-[75%]
+          xl:w-[70%] xl:h-[70%]
+          2xl:w-[65%] 2xl:h-[65%]
+          bg-grey rounded-full border-white border-4 sm:border-6 md:border-8
+          relative
+          scale-85
+        "
+      >
+          {mappingPlayers().map((player, index) => {
+            let isActive = player.originalIndex === activePlayerIndex;
+            player.originalIndex = undefined;
+            const position = getPlayerPosition(index, mappingPlayers().length, tableSize.width, tableSize.height);
+            const [left, top] = position.match(/\d+/g) || []; 
+            return (
+              <div 
+                key={player.id} 
+                style={{
+                  position: 'absolute',
+                  left: `${left}%`,
+                  top: `${top}%`,
+                  transform: 'translate(-50%, -50%)'
+                }}
+              >
+                <PlayerUnit
+                  key={player.id}
+                  player={player}
+                  isActive={isActive}
+                  isSelected={selectedPlayer?.id === player.id}
+                  currentBet={currentBet}
+                  bigBlind={bigBlind}
+                  onAction={handleAction}
+                  onNameChange={handleNameChange}
+                  onChipsChange={handleChipsChange}
+                  onSelect={handlePlayerSelect}
+                />
+              </div>
+            )
+          })}
       </div>
     </div>
   );
 }
 
-function getPlayerPosition(index: number, totalPlayers: number): string {
+function getPlayerPosition(index: number, totalPlayers: number, tableWidth: number, tableHeight: number): string {
   const positions = [
-    'top-0 left-1/2 -translate-x-1/2',
-    'top-1/4 right-0 -translate-y-1/2',
-    'bottom-1/4 right-0 translate-y-1/2',
-    'bottom-0 left-1/2 -translate-x-1/2',
-    'bottom-1/4 left-0 translate-y-1/2',
-    'top-1/4 left-0 -translate-y-1/2',
+    { x: 50, y: 100 },  // Bottom center
+    { x: 25, y: 100 },   // Bottom left
+    { x: 2, y: 80 },    // Left Bottom
+    { x: 2, y: 25 },   // Left Top
+    { x: 25, y: 0 },    // Top Left
+    { x: 50, y: 0 },   // Top Center
+    { x: 75, y: 0 },  // Top Right
+    { x: 98, y: 25 },   // Right Top
+    { x: 98, y: 80 }, // Right Botto
+    { x: 75, y: 100 }  // Bottom right
   ];
 
-  if (totalPlayers <= 6) {
-    return positions[index % 6];
-  } else {
-    // Add more positions for tables with more than 6 players
-    // You may need to adjust these for optimal placement
-    const extraPositions = [
-      'top-1/6 right-1/4 -translate-y-1/2',
-      'bottom-1/6 right-1/4 translate-y-1/2',
-      'bottom-1/6 left-1/4 translate-y-1/2',
-      'top-1/6 left-1/4 -translate-y-1/2',
-    ];
-    return index < 6 ? positions[index] : extraPositions[(index - 6) % 4];
-  }
+  // Adjust index based on total players to maintain SB at bottom center
+  let adjustedIndex = (index - Math.floor(totalPlayers / 2) + 10) % 10;
+  const position = positions[adjustedIndex];
+
+  return `left-[${position.x}%] top-[${position.y}%]`;
 }
