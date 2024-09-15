@@ -14,7 +14,7 @@ export default function Home() {
 
   const handleStartGame = () => {
     if (Number(playerCount) >= 2) {
-      router.push(`/game?players=${playerCount}&smallBlind=${smallBlind}&bigBlind=${bigBlind}&buyIn=${buyIn}`);
+      router.push(`/test?players=${playerCount}&smallBlind=${smallBlind}&bigBlind=${bigBlind}&buyIn=${buyIn}`);
     }
   };
 
