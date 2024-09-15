@@ -659,47 +659,18 @@ export default function Game() {
   // initialChip - (currentChip - buyIn) = hasChangedChip
   
   return (
-    <div className="min-h-screen bg-black text-white p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="relative w-full" style={{ paddingBottom: '56.25%' }}> {/* 16:9 aspect ratio */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="relative w-[90%] h-[90%]">
-              {/* Outer ellipse (thinner white border) */}
-              <div className="absolute inset-0 bg-white rounded-full"></div>
-              
-              {/* Inner ellipse (table felt) */}
-              <div className="absolute top-[2%] left-[2%] right-[2%] bottom-[2%] bg-grey rounded-full"></div>
-              
-              {/* Center rectangle */}
-              <div className="absolute top-[30%] left-[20%] right-[20%] bottom-[30%] bg-grey rounded-lg"></div>
-              
-              {/* Player positions */}
-              {/* {mappingPlayers().map((player, index) => (
-                <div key={player.id} className={`absolute ${getPlayerPosition(index, players.length)}`}>
-                  <PlayerCard
-                    player={player}
-                    isActive={player.originalIndex === activePlayerIndex}
-                    isSelected={selectedPlayer?.id === player.id}
-                    currentBet={currentBet}
-                    bigBlind={bigBlind}
-                    onAction={handleAction}
-                    onNameChange={handleNameChange}
-                    onChipsChange={handleChipsChange}
-                    onSelect={handlePlayerSelect}
-                  />
-                </div>
-              ))} */}
-            </div>
-          </div>
-        </div>
-        
-        {/* Game info and controls */}
-        {/* <div className="mt-8">
-          <h2 className="text-2xl font-semibold mb-2">Hand #{handNumber}</h2>
-          <p className="text-lg">Current Stage: {stage}</p>
-          <p className="text-lg">Total Pot: ${pots.reduce((sum, pot) => sum + pot.amount, 0)}</p>
-          <p className="text-lg">Current Bet: ${currentBet}</p>
-        </div> */}
+    <div className="h-full w-full bg-black text-white p-8 flex justify-center items-center">
+      <div className="
+        w-[95%] h-[95%]
+        xs:w-[90%] xs:h-[90%]
+        sm:w-[85%] sm:h-[85%]
+        md:w-[80%] md:h-[80%]
+        lg:w-[75%] lg:h-[75%]
+        xl:w-[70%] xl:h-[70%]
+        2xl:w-[65%] 2xl:h-[65%]
+        bg-grey rounded-full border-white border-4 sm:border-6 md:border-8
+      ">
+
       </div>
     </div>
   );
