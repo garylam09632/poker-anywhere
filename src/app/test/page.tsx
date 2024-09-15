@@ -709,12 +709,13 @@ export default function Game() {
             return (
               <div 
                 key={player.id} 
-                style={{
-                  position: 'absolute',
-                  left: `${left}%`,
-                  top: `${top}%`,
-                  transform: 'translate(-50%, -50%)'
-                }}
+                // style={{
+                //   position: 'absolute',
+                //   left: `${left}%`,
+                //   top: `${top}%`,
+                //   transform: 'translate(-50%, -50%)'
+                // }}
+                className={`absolute ${position}`}
               >
                 <PlayerUnit
                   key={player.id}
@@ -738,21 +739,31 @@ export default function Game() {
 
 function getPlayerPosition(index: number, totalPlayers: number, tableWidth: number, tableHeight: number): string {
   const positions = [
-    { x: 50, y: 100 },  // Bottom center
-    { x: 25, y: 100 },   // Bottom left
-    { x: 2, y: 80 },    // Left Bottom
-    { x: 2, y: 25 },   // Left Top
-    { x: 25, y: 0 },    // Top Left
-    { x: 50, y: 0 },   // Top Center
-    { x: 75, y: 0 },  // Top Right
-    { x: 98, y: 25 },   // Right Top
-    { x: 98, y: 80 }, // Right Botto
-    { x: 75, y: 100 }  // Bottom right
+    'left-1/2 bottom-0 -translate-x-1/2 translate-y-1/2',    // Bottom center
+    'right-[25%] bottom-0 translate-x-1/2 translate-y-1/2',  // Bottom right
+    'left-[25%] bottom-0 -translate-x-1/2 translate-y-1/2',  // Bottom left
+    'right-[2.5%] top-[25%] translate-x-1/2 -translate-y-1/2', // Right center
+    'left-[2.5%] top-[25%] -translate-x-1/2 -translate-y-1/2',      // Left center
+    'left-1/2 top-0 -translate-x-1/2 -translate-y-1/2',      // Top center
+    'right-[25%] top-0 translate-x-1/2 -translate-y-1/2',    // Top right
+    'left-[25%] top-0 -translate-x-1/2 -translate-y-1/2',    // Top left
+    'right-[2.5%] bottom-[25%] translate-x-1/2 translate-y-1/2',  // Right bottom
+    'left-[2.5%] bottom-[25%] -translate-x-1/2 translate-y-1/2',  // Left bottom
   ];
 
-  // Adjust index based on total players to maintain SB at bottom center
-  let adjustedIndex = (index - Math.floor(totalPlayers / 2) + 10) % 10;
-  const position = positions[adjustedIndex];
+  
+  // { x: 50, y: 100 },  // Bottom center
+  // { x: 25, y: 100 },   // Bottom left
+  // { x: 2, y: 80 },    // Left Bottom
+  // { x: 2, y: 25 },   // Left Top
+  // { x: 25, y: 0 },    // Top Left
+  // { x: 50, y: 0 },   // Top Center
+  // { x: 75, y: 0 },  // Top Right
+  // { x: 98, y: 25 },   // Right Top
+  // { x: 98, y: 80 }, // Right Botto
+  // { x: 75, y: 100 }  // Bottom right
 
-  return `left-[${position.x}%] top-[${position.y}%]`;
+  // Adjust index based on total players to maintain consistent positioning
+  let adjustedIndex = index % positions.length;
+  return positions[adjustedIndex];
 }

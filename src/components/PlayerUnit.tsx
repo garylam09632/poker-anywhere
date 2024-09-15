@@ -66,7 +66,7 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({ player, isActive, isSelected, c
       </div>
       
       {/* Main circle with chips */}
-      <div className={`w-24 h-24 ${chipEllipseClass} rounded-full flex items-center justify-center text-black font-bold text-xl border-4 border-gray-300`}>
+      <div className={`w-24 h-24 ${chipEllipseClass} rounded-full flex items-center justify-center text-black font-bold text-xl`}>
         {player.chips}
       </div>
       
