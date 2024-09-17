@@ -21,7 +21,7 @@ export const StyledButton: React.FC<StyledButtonProps> = ({ onClick, disabled = 
           ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
           : 'bg-black text-white hover:text-black'
         }
-        focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50
+        focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-0
         before:content-[''] before:absolute before:inset-0 before:bg-white 
         before:transform before:scale-x-0 before:origin-left
         before:transition-transform before:duration-300 before:ease-in-out

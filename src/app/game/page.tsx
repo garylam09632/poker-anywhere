@@ -12,7 +12,7 @@ import { useBuyIn } from '@/hooks/useBuyIn';
 import BuyInModal from '@/components/BuyInModal';
 import { Position } from '@/type/enum/Position';
 
-const TEST = true;
+const TEST = false;
 
 export default function Game() {
   const searchParams = useSearchParams();

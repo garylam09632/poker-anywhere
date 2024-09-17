@@ -12,6 +12,7 @@ import { useBuyIn } from '@/hooks/useBuyIn';
 import BuyInModal from '@/components/BuyInModal';
 import { Position } from '@/type/enum/Position';
 import PlayerUnit from '@/components/PlayerUnit';
+import { ActionButtons } from '@/components/ActionButtons';
 
 const TEST = false;
 
@@ -683,9 +684,31 @@ export default function Game() {
 
   // 18800 - 10000 
   // initialChip - (currentChip - buyIn) = hasChangedChip
+
+  const handleFold = () => {
+    handleAction('Fold');
+  };
+
+  const handleCheck = () => {
+    handleAction('Check');
+  };
+
+  const handleCall = () => {
+    handleAction('Call');
+  };
+
+  const handleRaise = (amount: number) => {
+    // You might want to open a modal or prompt for raise amount
+    handleAction('Raise', amount);
+  };
+
+  const activePlayer = players[activePlayerIndex];
+  const canCheck = activePlayer ? currentBet === activePlayer.currentBet : false;
+  const callAmount = activePlayer ? currentBet - activePlayer.currentBet : 0;
+  const minRaise = activePlayer ? Math.max(bigBlind, currentBet * 2 - activePlayer.currentBet) : bigBlind;
   
   return (
-    <div className="h-full w-full bg-black text-white p-10 flex justify-center">
+    <div className="h-full w-full bg-black text-white p-10 flex flex-col justify-center items-center">
       <div 
         ref={tableRef}
         className="
@@ -701,38 +724,71 @@ export default function Game() {
           scale-85
         "
       >
-          {mappingPlayers().map((player, index) => {
-            let isActive = player.originalIndex === activePlayerIndex;
-            player.originalIndex = undefined;
-            const position = getPlayerPosition(index, mappingPlayers().length, tableSize.width, tableSize.height);
-            const [left, top] = position.match(/\d+/g) || []; 
-            return (
-              <div 
-                key={player.id} 
-                // style={{
-                //   position: 'absolute',
-                //   left: `${left}%`,
-                //   top: `${top}%`,
-                //   transform: 'translate(-50%, -50%)'
-                // }}
-                className={`absolute ${position}`}
-              >
-                <PlayerUnit
-                  key={player.id}
-                  player={player}
-                  isActive={isActive}
-                  isSelected={selectedPlayer?.id === player.id}
-                  currentBet={currentBet}
-                  bigBlind={bigBlind}
-                  onAction={handleAction}
-                  onNameChange={handleNameChange}
-                  onChipsChange={handleChipsChange}
-                  onSelect={handlePlayerSelect}
-                />
-              </div>
-            )
-          })}
+        <div className="
+          absolute
+          left-1/2
+          top-1/2
+          -translate-x-1/2
+          -translate-y-1/2
+          w-1/2
+          h-1/3
+          rounded-xl
+          border-2
+          border-gray-400
+          flex
+          items-center
+          justify-center
+          text-white
+          text-lg
+          font-bold
+        ">
+          Pot: ${/* Add your pot amount here */}
+        </div>
+        {mappingPlayers().map((player, index) => {
+          let isActive = player.originalIndex === activePlayerIndex;
+          player.originalIndex = undefined;
+          const position = getPlayerPosition(index, mappingPlayers().length, tableSize.width, tableSize.height);
+          const [left, top] = position.match(/\d+/g) || []; 
+          return (
+            <div 
+              key={player.id} 
+              // style={{
+              //   position: 'absolute',
+              //   left: `${left}%`,
+              //   top: `${top}%`,
+              //   transform: 'translate(-50%, -50%)'
+              // }}
+              className={`absolute ${position}`}
+            >
+              <PlayerUnit
+                key={player.id}
+                player={player}
+                isActive={isActive}
+                isSelected={selectedPlayer?.id === player.id}
+                currentBet={currentBet}
+                bigBlind={bigBlind}
+                onAction={handleAction}
+                onNameChange={handleNameChange}
+                onChipsChange={handleChipsChange}
+                onSelect={handlePlayerSelect}
+              />
+            </div>
+          )
+        })}
       </div>
+      <ActionButtons
+        onFold={handleFold}
+        onCheck={handleCheck}
+        onCall={handleCall}
+        onRaise={handleRaise}
+        canCheck={canCheck}
+        callAmount={callAmount}
+        currentBet={currentBet}
+        playerChips={activePlayer ? activePlayer.chips : 0}
+        potSize={pots.reduce((total, pot) => total + pot.amount, 0)}
+        minRaise={minRaise}
+        disabled={!activePlayer}
+      />
     </div>
   );
 }
@@ -740,15 +796,15 @@ export default function Game() {
 function getPlayerPosition(index: number, totalPlayers: number, tableWidth: number, tableHeight: number): string {
   const positions = [
     'left-1/2 bottom-0 -translate-x-1/2 translate-y-1/2',    // Bottom center
-    'right-[25%] bottom-0 translate-x-1/2 translate-y-1/2',  // Bottom right
     'left-[25%] bottom-0 -translate-x-1/2 translate-y-1/2',  // Bottom left
-    'right-[2.5%] top-[25%] translate-x-1/2 -translate-y-1/2', // Right center
+    'left-[2.5%] bottom-[25%] -translate-x-1/2 translate-y-1/2',  // Left bottom
     'left-[2.5%] top-[25%] -translate-x-1/2 -translate-y-1/2',      // Left center
+    'left-[25%] top-0 -translate-x-1/2 -translate-y-1/2',    // Top left
     'left-1/2 top-0 -translate-x-1/2 -translate-y-1/2',      // Top center
     'right-[25%] top-0 translate-x-1/2 -translate-y-1/2',    // Top right
-    'left-[25%] top-0 -translate-x-1/2 -translate-y-1/2',    // Top left
+    'right-[2.5%] top-[25%] translate-x-1/2 -translate-y-1/2', // Right center
     'right-[2.5%] bottom-[25%] translate-x-1/2 translate-y-1/2',  // Right bottom
-    'left-[2.5%] bottom-[25%] -translate-x-1/2 translate-y-1/2',  // Left bottom
+    'right-[25%] bottom-0 translate-x-1/2 translate-y-1/2',  // Bottom right
   ];
 
   
