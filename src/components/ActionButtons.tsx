@@ -102,7 +102,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             </StyledButton>
           </div>
           {canRaise && (
-            <div className="w-full">
+            <div className="w-full relative">
               <input
                 type="range"
                 min="0"
@@ -115,9 +115,24 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
                   '--slider-value': sliderValue,
                 } as React.CSSProperties}
               />
-              <div className="w-full flex justify-between text-xs mt-1">
+              <div className="w-full absolute top-0 left-0 right-0 pointer-events-none" style={{ zIndex: 15 }}>
                 {sliderPoints.map((point, index) => (
-                  <span key={index}>{point.label}</span>
+                  <div 
+                    key={index}
+                    className="absolute w-3 h-3 bg-gray-500 rounded-full"
+                    style={{
+                      left: `calc(${index / (sliderPoints.length - 1)} * 100%)`,
+                      top: '50%',
+                      transform: 'translate(-50%, -50%)',
+                    }}
+                  ></div>
+                ))}
+              </div>
+              <div className="w-full flex justify-between text-xs mt-4 relative">
+                {sliderPoints.map((point, index) => (
+                  <div key={index} className="flex flex-col items-center relative">
+                    <span>{point.label}</span>
+                  </div>
                 ))}
               </div>
             </div>
@@ -128,6 +143,8 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         .custom-slider {
           --slider-points: ${sliderPoints.length};
           --slider-value: ${sliderValue};
+          position: relative;
+          z-index: 10;
         }
         .custom-slider::-webkit-slider-thumb {
           -webkit-appearance: none;
@@ -138,6 +155,8 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
           background: #333;
           cursor: pointer;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          position: relative;
+          z-index: 20;
         }
         .custom-slider::-moz-range-thumb {
           width: 20px;
@@ -146,25 +165,11 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
           background: #333;
           cursor: pointer;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          position: relative;
+          z-index: 20;
         }
         .custom-slider {
           background: linear-gradient(to right, #4a5568 0%, #4a5568 calc(100% * var(--slider-value) / (var(--slider-points) - 1)), #e2e8f0 calc(100% * var(--slider-value) / (var(--slider-points) - 1)), #e2e8f0 100%);
-        }
-        .custom-slider::before {
-          content: '';
-          position: absolute;
-          top: 50%;
-          left: 0;
-          right: 0;
-          height: 2px;
-          background: repeating-linear-gradient(
-            to right,
-            # ,
-            #718096 2px,
-            transparent 2px,
-            transparent calc(100% / (var(--slider-points) - 1))
-          );
-          pointer-events: none;
         }
       `}</style>
     </div>
