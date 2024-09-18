@@ -32,6 +32,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   const [sliderValue, setSliderValue] = useState(0);
 
   const sliderPoints = useMemo(() => {
+    console.log("potSize", potSize)
     const points = [
       { label: 'Min', value: minRaise },
       { label: '1/3', value: Math.floor(potSize / 3) },
@@ -66,55 +67,106 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   return (
     <div className="w-full flex flex-col items-center absolute bottom-10 px-10">
       <div className="w-full flex justify-between mb-4">
-        <div className="flex space-x-4 w-1/3">
-          <StyledButton onClick={onFold} disabled={disabled}>Fold</StyledButton>
-          {canCheck ? (
-            <StyledButton onClick={onCheck} disabled={disabled}>Check</StyledButton>
-          ) : (
-            <StyledButton onClick={onCall} disabled={disabled}>Call ${callAmount}</StyledButton>
-          )}
-          <StyledButton onClick={() => onRaise(raiseAmount)} disabled={disabled || !canRaise}>
-            {canRaise ? `Raise $${raiseAmount}` : `All-In $${playerChips}`}
-          </StyledButton>
-        </div>
-        <div className="flex space-x-4 w-1/3">
-          <StyledButton 
-            onClick={() => handleRaiseAmountChange(currentBet * 2)} 
-            disabled={disabled || currentBet * 2 > playerChips}
-          >
-            2x
-          </StyledButton>
-          <StyledButton 
-            onClick={() => handleRaiseAmountChange(currentBet * 3)} 
-            disabled={disabled || currentBet * 3 > playerChips}
-          >
-            3x
-          </StyledButton>
-          <StyledButton 
-            onClick={() => handleRaiseAmountChange(playerChips)} 
-            disabled={disabled}
-          >
-            ALL IN
-          </StyledButton>
-        </div>
-      </div>
-      {canRaise && (
-        <div className="w-1/3 flex flex-col items-center">
-          <input
-            type="range"
-            min="0"
-            max={sliderPoints.length - 1}
-            value={sliderValue}
-            onChange={handleSliderChange}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-          />
-          <div className="w-full flex justify-between text-xs mt-1">
-            {sliderPoints.map((point, index) => (
-              <span key={index}>{point.label}</span>
-            ))}
+        <div id="actionRegionContainer" className="flex items-center w-1/3">
+          <div className="flex space-x-4 w-full">
+            <StyledButton onClick={onFold} disabled={disabled}>Fold</StyledButton>
+            {canCheck ? (
+              <StyledButton onClick={onCheck} disabled={disabled}>Check</StyledButton>
+            ) : (
+              <StyledButton onClick={onCall} disabled={disabled}>Call ${callAmount}</StyledButton>
+            )}
+            <StyledButton onClick={() => onRaise(raiseAmount)} disabled={disabled || !canRaise}>
+              {canRaise ? `Raise $${raiseAmount}` : `All-In $${playerChips}`}
+            </StyledButton>
           </div>
         </div>
-      )}
+        <div id="betControlRegionContainer" className="flex flex-col items-center w-1/3">
+          <div className="flex space-x-4 w-full mb-2">
+            <StyledButton 
+              onClick={() => handleRaiseAmountChange(currentBet * 2)} 
+              disabled={disabled || currentBet * 2 > playerChips}
+            >
+              2x
+            </StyledButton>
+            <StyledButton 
+              onClick={() => handleRaiseAmountChange(currentBet * 3)} 
+              disabled={disabled || currentBet * 3 > playerChips}
+            >
+              3x
+            </StyledButton>
+            <StyledButton 
+              onClick={() => handleRaiseAmountChange(playerChips)} 
+              disabled={disabled}
+            >
+              ALL IN
+            </StyledButton>
+          </div>
+          {canRaise && (
+            <div className="w-full">
+              <input
+                type="range"
+                min="0"
+                max={sliderPoints.length - 1}
+                value={sliderValue}
+                onChange={handleSliderChange}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer custom-slider"
+                style={{
+                  '--slider-points': sliderPoints.length,
+                  '--slider-value': sliderValue,
+                } as React.CSSProperties}
+              />
+              <div className="w-full flex justify-between text-xs mt-1">
+                {sliderPoints.map((point, index) => (
+                  <span key={index}>{point.label}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      <style jsx>{`
+        .custom-slider {
+          --slider-points: ${sliderPoints.length};
+          --slider-value: ${sliderValue};
+        }
+        .custom-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: #333;
+          cursor: pointer;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .custom-slider::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: #333;
+          cursor: pointer;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .custom-slider {
+          background: linear-gradient(to right, #4a5568 0%, #4a5568 calc(100% * var(--slider-value) / (var(--slider-points) - 1)), #e2e8f0 calc(100% * var(--slider-value) / (var(--slider-points) - 1)), #e2e8f0 100%);
+        }
+        .custom-slider::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: repeating-linear-gradient(
+            to right,
+            # ,
+            #718096 2px,
+            transparent 2px,
+            transparent calc(100% / (var(--slider-points) - 1))
+          );
+          pointer-events: none;
+        }
+      `}</style>
     </div>
   );
 };

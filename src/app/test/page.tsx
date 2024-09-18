@@ -707,8 +707,9 @@ export default function Game() {
   const callAmount = activePlayer ? currentBet - activePlayer.currentBet : 0;
   const minRaise = activePlayer ? Math.max(bigBlind, currentBet * 2 - activePlayer.currentBet) : bigBlind;
   
+  console.log("pots", pots)
   return (
-    <div className="h-full w-full bg-black text-white p-10 flex flex-col justify-center items-center">
+    <div className="h-full w-full bg-black text-white p-10 flex flex-col items-center">
       <div 
         ref={tableRef}
         className="
