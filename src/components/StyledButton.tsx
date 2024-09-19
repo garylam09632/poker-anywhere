@@ -12,7 +12,10 @@ export const StyledButton: React.FC<StyledButtonProps> = ({ onClick, disabled = 
       onClick={onClick}
       disabled={disabled}
       className={`
-        w-full font-bold py-3 px-4 rounded-md
+        w-full font-bold 
+        py-3 px-4
+        sh:py-2 sh:px-1
+        rounded-md
         transition-colors duration-300 ease-in-out
         border border-gray-600
         relative

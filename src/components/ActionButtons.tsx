@@ -65,9 +65,9 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col items-center absolute bottom-10 px-10">
+    <div className="w-full flex flex-col items-center absolute bottom-10 px-10 sh:bottom-5 sh:h-1/5">
       <div className="w-full flex justify-between mb-4">
-        <div id="actionRegionContainer" className="flex items-center w-1/3">
+        <div id="actionRegionContainer" className="flex items-center w-1/3 sh:w-1/2">
           <div className="flex space-x-4 w-full">
             <StyledButton onClick={onFold} disabled={disabled}>Fold</StyledButton>
             {canCheck ? (
