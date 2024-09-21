@@ -707,19 +707,19 @@ export default function Game() {
   const callAmount = activePlayer ? currentBet - activePlayer.currentBet : 0;
   const minRaise = activePlayer ? Math.max(bigBlind, currentBet * 2 - activePlayer.currentBet) : bigBlind;
   
-  return (
-    <div className="h-full w-full bg-black text-white p-10 flex flex-col items-center">
+  return ( 
+    <div className="
+      h-full w-full bg-black text-white pt-36 flex flex-col items-center space-y-16 
+      md:pt-10 md:justify-start
+    ">
       <div 
         ref={tableRef}
         className="
-          w-[90%] h-[90%]
-          xs:w-[90%] xs:h-[90%]
-          sm:w-[85%] sm:h-[85%]
-          md:w-[80%] md:h-[80%]
-          lg:w-[75%] lg:h-[75%]
-          xl:w-[70%] xl:h-[70%]
-          2xl:w-[65%] 2xl:h-[65%]
-          bg-grey rounded-full border-white border-4 sm:border-6 md:border-8
+          w-[100%] h-[50%]
+          xs:w-[100%] xs:h-[50%]
+          md:w-[100%] md:h-[75%]
+          sh:w-[100%] sh:h-[100%]
+          bg-grey rounded-full border-white border-4 xs:border-4 sm:border-6 md:border-8
           relative
           scale-85
         "
@@ -730,8 +730,10 @@ export default function Game() {
           top-1/2
           -translate-x-1/2
           -translate-y-1/2
-          w-1/2
+          w-1/3
           h-1/3
+          sh:w-1/3
+          sh:h-1/4
           rounded-xl
           border-2
           border-gray-400
@@ -742,7 +744,7 @@ export default function Game() {
           text-lg
           font-bold
         ">
-          Pot: ${/* Add your pot amount here */}
+          {/* Pot: $Add your pot amount here */}
         </div>
         {mappingPlayers().map((player, index) => {
           let isActive = player.originalIndex === activePlayerIndex;

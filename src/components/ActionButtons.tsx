@@ -65,10 +65,12 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col items-center absolute bottom-10 px-10 sh:bottom-5 sh:h-1/5">
-      <div className="w-full flex justify-between mb-4">
-        <div id="actionRegionContainer" className="flex items-center w-1/3 sh:w-1/2">
-          <div className="flex space-x-4 w-full">
+    <div className="
+      w-[90%] flex flex-col items-center
+    ">
+      <div className="w-full flex justify-between mb-4 space-x-10">
+        <div id="actionRegionContainer" className="flex items-center w-1/2 md:w-1/3 sh:w-1/2">
+          <div className="flex flex-col space-x-0 space-y-4 w-full justify-between md:flex-row md:space-x-4 md:space-y-0">
             <StyledButton onClick={onFold} disabled={disabled}>Fold</StyledButton>
             {canCheck ? (
               <StyledButton onClick={onCheck} disabled={disabled}>Check</StyledButton>
@@ -80,8 +82,8 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             </StyledButton>
           </div>
         </div>
-        <div id="betControlRegionContainer" className="flex flex-col items-center w-1/3">
-          <div className="flex space-x-4 w-full mb-2">
+        <div id="betControlRegionContainer" className="flex flex-col items-center w-1/2 space-y-4 md:space-y-0 md:w-1/3 sh:w-1/2">
+          <div className="flex flex-col space-x-0 space-y-4 w-full justify-between md:flex-row md:space-x-4 md:space-y-0">
             <StyledButton 
               onClick={() => handleRaiseAmountChange(currentBet * 2)} 
               disabled={disabled || currentBet * 2 > playerChips}

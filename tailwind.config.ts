@@ -8,15 +8,6 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      screens: {
-        'xs': '480px',
-        'sm': '640px',
-        'md': '768px',
-        'lg': '1024px',
-        'xl': '1280px',
-        '2xl': '1536px',
-        'sh': { 'raw': '(max-height: 400px)' },
-      },
       colors: {
         'grey': '#101010',
       },
@@ -27,8 +18,23 @@ const config: Config = {
       },
       scale: {
         '85': '0.85',
+        '90': '0.90'
       },
     },
+    screens: {
+        'xs': '480px',
+        'sm': '640px',
+        'md': '768px',
+        'lg': '1024px',
+        'xl': '1280px',
+        '2xl': '1536px',
+        // 'sm': { 'raw': '(max-width: 640px)' },
+        // 'md': { 'raw': '(max-width: 768px)' },
+        // 'lg': { 'raw': '(max-width: 1024px)' },
+        // 'xl': { 'raw': '(max-width: 1280px)' },
+        // '2xl': { 'raw': '(max-width: 1536px)' },
+        'sh': { 'raw': '(max-height: 480px)' },
+      },
   },
   plugins: [],
 };

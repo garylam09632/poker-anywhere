@@ -59,7 +59,7 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({ player, isActive, isSelected, c
   }
   
   return (
-    <div className="relative flex flex-col items-center">
+    <div className="relative flex flex-col items-center scale-75 sh:scale-90 md:scale-100 lg:scale-110">
       {/* Position indicator */}
       <div className={`
         absolute -top-5 z-10 w-10 h-10 ${positionEllipseClass} rounded-full 
@@ -69,12 +69,18 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({ player, isActive, isSelected, c
       </div>
       
       {/* Main circle with chips */}
-      <div className={`w-24 h-24 ${chipEllipseClass} rounded-full flex items-center justify-center text-black font-bold text-xl sh:w-20 sh:h-20 sh:text-sm`}>
+      <div className={
+        `w-24 h-24 ${chipEllipseClass} rounded-full flex items-center justify-center
+       text-black font-bold text-xl sh:w-20 sh:h-20 sh:text-sm`
+      }>
         {player.chips}
       </div>
       
       {/* Name plate */}
-      <div className={`absolute -bottom-5 z-10 mt-2 px-3 py-1 ${nameClass} rounded-full text-sm sh:px-2 sh:py-1 sh:text-xs`}>
+      <div className={
+        `absolute -bottom-5 z-10 mt-2 px-3 py-1 ${nameClass} 
+        rounded-full text-sm sh:px-2 sh:py-1 sh:text-xs`
+      }>
         {player.name}
       </div>
     </div>
