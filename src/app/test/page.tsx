@@ -709,14 +709,14 @@ export default function Game() {
   
   return ( 
     <div className="
-      h-full w-full bg-black text-white pt-36 flex flex-col items-center space-y-16 
-      md:pt-10 md:justify-start
+      h-full w-full bg-black text-white pt-10 flex flex-col items-center space-y-12 md:justify-start
+      sh:h-[130%] sh:space-y-5
     ">
       <div 
         ref={tableRef}
         className="
-          w-[100%] h-[50%]
-          xs:w-[100%] xs:h-[50%]
+          w-[100%] h-[60%]
+          xs:w-[100%] xs:h-[60%]
           md:w-[100%] md:h-[75%]
           sh:w-[100%] sh:h-[90%]
           bg-grey rounded-full border-white border-4 xs:border-4 sm:border-6 md:border-8
