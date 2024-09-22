@@ -718,7 +718,7 @@ export default function Game() {
           w-[100%] h-[50%]
           xs:w-[100%] xs:h-[50%]
           md:w-[100%] md:h-[75%]
-          sh:w-[100%] sh:h-[100%]
+          sh:w-[100%] sh:h-[90%]
           bg-grey rounded-full border-white border-4 xs:border-4 sm:border-6 md:border-8
           relative
           scale-85

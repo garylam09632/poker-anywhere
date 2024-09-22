@@ -67,6 +67,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   return (
     <div className="
       w-[90%] flex flex-col items-center
+      sh:absolute sh:bottom-0 sh:translate-y- sh:scale-90
     ">
       <div className="w-full flex justify-between mb-4 space-x-10">
         <div id="actionRegionContainer" className="flex items-center w-1/2 md:w-1/3 sh:w-1/2">
