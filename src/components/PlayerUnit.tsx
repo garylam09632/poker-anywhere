@@ -59,7 +59,10 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({ player, isActive, isSelected, c
   }
   
   return (
-    <div className="relative flex flex-col items-center scale-75 sh:scale-85 md:scale-100 lg:scale-110">
+    <div 
+      className="relative flex flex-col items-center scale-75 
+      sh:scale-85 md:scale-100 lg:scale-110 mh:scale-90 animate-float-in"
+    >
       {/* Position indicator */}
       <div className={`
         absolute -top-5 z-10 w-10 h-10 ${positionEllipseClass} rounded-full 

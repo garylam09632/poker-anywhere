@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import PlayerCard from '@/components/PlayerCard';
 import Player from '@/type/interface/Player';
@@ -13,6 +13,8 @@ import BuyInModal from '@/components/BuyInModal';
 import { Position } from '@/type/enum/Position';
 import PlayerUnit from '@/components/PlayerUnit';
 import { ActionButtons } from '@/components/ActionButtons';
+import Chip from '@/components/Chip';
+import { PlayerCSSLocation, PlayerLocation } from '@/type/enum/Location';
 
 const TEST = false;
 
@@ -32,6 +34,7 @@ export default function Game() {
   const [showdownMode, setShowdownMode] = useState(false);
   const [selectedWinners, setSelectedWinners] = useState<number[]>([]);
   const [bustedPlayers, setBustedPlayers] = useState<Player[]>([]);
+  const [chipMovement, setChipMovement] = useState<'bet' | 'pot'>('bet');
 
   // State for trigger useEffect
   const [reset, setReset] = useState(false);
@@ -490,7 +493,6 @@ export default function Game() {
     );
   };
 
-
   const updatePots = (currentPots: Pot[], currentPlayers: Player[]): Pot[] => {
     // if (currentPlayers[activePlayerIndex].hasFolded) return currentPots;
 
@@ -685,6 +687,24 @@ export default function Game() {
   // 18800 - 10000 
   // initialChip - (currentChip - buyIn) = hasChangedChip
 
+  const moveChipsToPot = useCallback(() => {
+    setChipMovement('pot');
+    setTimeout(() => {
+      // Update pots and reset player bets
+      const newPots = updatePots(pots, players);
+      setPots(newPots);
+      setPlayers(players.map(p => ({ ...p, currentBet: 0 })));
+      setChipMovement('bet');
+    }, 500); // Wait for animation to complete
+  }, [pots, players]);
+
+  useEffect(() => {
+    if (isEndRound) {
+      moveChipsToPot();
+      // ... (rest of the isEndRound effect)
+    }
+  }, [isEndRound, moveChipsToPot]);
+
   const handleFold = () => {
     handleAction('Fold');
   };
@@ -705,12 +725,12 @@ export default function Game() {
   const activePlayer = players[activePlayerIndex];
   const canCheck = activePlayer ? currentBet === activePlayer.currentBet : false;
   const callAmount = activePlayer ? currentBet - activePlayer.currentBet : 0;
-  const minRaise = activePlayer ? Math.max(bigBlind, currentBet * 2 - activePlayer.currentBet) : bigBlind;
-  
+  const minRaise = activePlayer ? Math.max(bigBlind, currentBet * 2) : bigBlind;
+
   return ( 
     <div className="
       h-full w-full bg-black text-white pt-10 flex flex-col items-center space-y-12 md:justify-start
-      sh:h-[130%] sh:space-y-5
+      sh:h-[130%] sh:space-y-5 mh:space-y-10
     ">
       <div 
         ref={tableRef}
@@ -719,6 +739,7 @@ export default function Game() {
           xs:w-[100%] xs:h-[60%]
           md:w-[100%] md:h-[75%]
           sh:w-[100%] sh:h-[90%]
+          mh:w-[90%] mh:h-[75%]
           bg-grey rounded-full border-white border-4 xs:border-4 sm:border-6 md:border-8
           relative
           scale-85
@@ -732,34 +753,31 @@ export default function Game() {
           -translate-y-1/2
           w-1/3
           h-1/3
-          sh:w-1/3
-          sh:h-1/4
           rounded-xl
           border-2
           border-gray-400
           flex
+          flex-col
           items-center
           justify-center
           text-white
           text-lg
           font-bold
         ">
-          {/* Pot: $Add your pot amount here */}
+          {pots.map((pot, index) => (
+            <div key={index} className="flex items-center space-x-2">
+              <Chip amount={pot.amount} isPot={true} position="pot" />
+            </div>
+          ))}
         </div>
         {mappingPlayers().map((player, index) => {
           let isActive = player.originalIndex === activePlayerIndex;
           player.originalIndex = undefined;
           const position = getPlayerPosition(index, mappingPlayers().length, tableSize.width, tableSize.height);
-          const [left, top] = position.match(/\d+/g) || []; 
+          const chipPosition = getChipPosition(index, mappingPlayers().length);
           return (
             <div 
               key={player.id} 
-              // style={{
-              //   position: 'absolute',
-              //   left: `${left}%`,
-              //   top: `${top}%`,
-              //   transform: 'translate(-50%, -50%)'
-              // }}
               className={`absolute ${position}`}
             >
               <PlayerUnit
@@ -774,6 +792,13 @@ export default function Game() {
                 onChipsChange={handleChipsChange}
                 onSelect={handlePlayerSelect}
               />
+              {player.currentBet > 0 && (
+                <Chip 
+                  amount={player.currentBet} 
+                  position={chipMovement}
+                  playerLocation={chipPosition}
+                />
+              )}
             </div>
           )
         })}
@@ -795,18 +820,18 @@ export default function Game() {
   );
 }
 
-function getPlayerPosition(index: number, totalPlayers: number, tableWidth: number, tableHeight: number): string {
+const getPlayerPosition = (index: number, totalPlayers: number, tableWidth: number, tableHeight: number): string => {
   const positions = [
-    'left-1/2 bottom-0 -translate-x-1/2 translate-y-1/2',    // Bottom center
-    'left-[25%] bottom-0 -translate-x-1/2 translate-y-1/2',  // Bottom left
-    'left-[2.5%] bottom-[25%] -translate-x-1/2 translate-y-1/2',  // Left bottom
-    'left-[2.5%] top-[25%] -translate-x-1/2 -translate-y-1/2',      // Left center
-    'left-[25%] top-0 -translate-x-1/2 -translate-y-1/2',    // Top left
-    'left-1/2 top-0 -translate-x-1/2 -translate-y-1/2',      // Top center
-    'right-[25%] top-0 translate-x-1/2 -translate-y-1/2',    // Top right
-    'right-[2.5%] top-[25%] translate-x-1/2 -translate-y-1/2', // Right center
-    'right-[2.5%] bottom-[25%] translate-x-1/2 translate-y-1/2',  // Right bottom
-    'right-[25%] bottom-0 translate-x-1/2 translate-y-1/2',  // Bottom right
+    PlayerCSSLocation.BottomCenter,    // Bottom center
+    PlayerCSSLocation.BottomLeft,      // Bottom left
+    PlayerCSSLocation.LeftBottom,      // Left bottom
+    PlayerCSSLocation.LeftCenter,      // Left center
+    PlayerCSSLocation.TopLeft,         // Top left
+    PlayerCSSLocation.TopCenter,       // Top center
+    PlayerCSSLocation.TopRight,        // Top right
+    PlayerCSSLocation.RightCenter,     // Right center
+    PlayerCSSLocation.RightBottom,     // Right bottom
+    PlayerCSSLocation.BottomRight,     // Bottom right
   ];
 
   
@@ -825,3 +850,22 @@ function getPlayerPosition(index: number, totalPlayers: number, tableWidth: numb
   let adjustedIndex = index % positions.length;
   return positions[adjustedIndex];
 }
+
+const getChipPosition = (index: number, totalPlayers: number): PlayerLocation => {
+  const positions = [
+    PlayerLocation.BottomCenter,    // Bottom center
+    PlayerLocation.BottomLeft,      // Bottom left
+    PlayerLocation.LeftBottom,      // Left bottom
+    PlayerLocation.LeftCenter,      // Left center
+    PlayerLocation.TopLeft,         // Top left
+    PlayerLocation.TopCenter,       // Top center
+    PlayerLocation.TopRight,        // Top right
+    PlayerLocation.RightCenter,     // Right center
+    PlayerLocation.RightBottom,     // Right bottom
+    PlayerLocation.BottomRight,     // Bottom right
+  ];
+
+  let adjustedIndex = index % positions.length;
+  return positions[adjustedIndex];
+};
+

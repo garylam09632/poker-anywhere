@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 
 interface SliderPoint {
   label: string;
@@ -10,20 +10,30 @@ interface BetSliderProps {
   value: number;
   onChange: (value: number) => void;
   disabled?: boolean;
+  minValue: number;
+  maxValue: number;
 }
 
-export const BetSlider: React.FC<BetSliderProps> = ({ points, value, onChange, disabled = false }) => {
+export const BetSlider: React.FC<BetSliderProps> = ({ points, value, onChange, disabled = false, minValue, maxValue }) => {
   const sliderRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
+  const [continuousValue, setContinuousValue] = useState(value);
+
+  // console.log(points);
+  // console.log("points[0].value: ", points[0].value);
+  // console.log("maxValue / 3: ", maxValue / 3);
+  // console.log("minValue: ", minValue);
+  const filteredPoints = points.filter(point => point.value === minValue || point.value > maxValue / 3);
 
   const handleSliderChange = useCallback((clientX: number) => {
     if (sliderRef.current && !disabled) {
       const rect = sliderRef.current.getBoundingClientRect();
       const percentage = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-      const index = Math.round(percentage * (points.length - 1));
-      onChange(points[index].value);
+      const newValue = Math.round(minValue + percentage * (maxValue - minValue));
+      setContinuousValue(newValue);
+      onChange(newValue);
     }
-  }, [points, onChange, disabled]);
+  }, [minValue, maxValue, onChange, disabled]);
 
   const handleStart = useCallback((event: React.MouseEvent | React.TouchEvent) => {
     event.preventDefault();
@@ -49,27 +59,32 @@ export const BetSlider: React.FC<BetSliderProps> = ({ points, value, onChange, d
   }, [handleSliderChange]);
 
   useEffect(() => {
-    const currentValue = points.findIndex(point => point.value === value);
+    // Update continuousValue when minValue changes
+    if (continuousValue < minValue) {
+      setContinuousValue(minValue);
+      onChange(minValue);
+    }
+
     if (thumbRef.current && sliderRef.current) {
-      const percentage = currentValue / (points.length - 1);
+      const percentage = (continuousValue - minValue) / (maxValue - minValue);
       thumbRef.current.style.left = `${percentage * 100}%`;
     }
-  }, [value, points]);
+  }, [continuousValue, minValue, maxValue, onChange]);
 
   return (
     <div className="w-full relative">
       <div 
         ref={sliderRef}
-        className="w-full h-2 bg-gray-200 rounded-lg relative cursor-pointer"
+        className="w-full h-2 bg-gray-200 rounded-lg relative"
         onMouseDown={handleStart}
         onTouchStart={handleStart}
       >
-        {points.map((point, index) => (
+        {filteredPoints.map((point, index) => (
           <div 
             key={index}
-            className="absolute w-2 h-2 bg-gray-500 rounded-full top-0"
+            className="absolute w-3 h-3 bg-gray-500 rounded-full -top-1/4"
             style={{
-              left: `${(index / (points.length - 1)) * 100}%`,
+              left: `${((point.value - minValue) / (maxValue - minValue)) * 100}%`,
               transform: 'translateX(-50%)',
             }}
           ></div>
@@ -77,17 +92,24 @@ export const BetSlider: React.FC<BetSliderProps> = ({ points, value, onChange, d
         <div 
           className="absolute h-full bg-gray-500 rounded-l-lg"
           style={{
-            width: `${(points.findIndex(point => point.value === value) / (points.length - 1)) * 100}%`,
+            width: `${((continuousValue - minValue) / (maxValue - minValue)) * 100}%`,
           }}
         ></div>
         <div 
           ref={thumbRef}
-          className="absolute w-4 h-4 bg-white border-2 border-gray-500 rounded-full top-1/2 -translate-y-1/2 -translate-x-1/2"
+          className="absolute w-4 h-4 bg-white border-2 border-gray-500 rounded-full top-1/2 -translate-x-1/2 -translate-y-1/2"
         ></div>
       </div>
       <div className="w-full flex justify-between text-xs mt-2">
-        {points.map((point, index) => (
-          <div key={index} className="flex flex-col items-center">
+        {filteredPoints.map((point, index) => (
+          <div 
+            key={index}
+            className="absolute"
+            style={{
+              left: `${((point.value - minValue) / (maxValue - minValue)) * 100}%`,
+              transform: 'translateX(-50%)',
+            }}
+          >
             <span>{point.label}</span>
           </div>
         ))}

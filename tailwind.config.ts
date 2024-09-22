@@ -20,6 +20,15 @@ const config: Config = {
         '85': '0.85',
         '90': '0.90'
       },
+      keyframes: {
+        floatIn: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        'float-in': 'floatIn 0.5s ease-out',
+      },
     },
     screens: {
         'xs': '480px',
@@ -34,6 +43,7 @@ const config: Config = {
         // 'xl': { 'raw': '(max-width: 1280px)' },
         // '2xl': { 'raw': '(max-width: 1536px)' },
         'sh': { 'raw': '(max-height: 480px)' },
+        'mh': { 'raw': '(max-height: 640px)' },
       },
   },
   plugins: [],
