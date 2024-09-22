@@ -822,17 +822,29 @@ export default function Game() {
 
 const getPlayerPosition = (index: number, totalPlayers: number, tableWidth: number, tableHeight: number): string => {
   const positions = [
-    PlayerCSSLocation.BottomCenter,    // Bottom center
-    PlayerCSSLocation.BottomLeft,      // Bottom left
-    PlayerCSSLocation.LeftBottom,      // Left bottom
-    PlayerCSSLocation.LeftCenter,      // Left center
-    PlayerCSSLocation.TopLeft,         // Top left
-    PlayerCSSLocation.TopCenter,       // Top center
-    PlayerCSSLocation.TopRight,        // Top right
-    PlayerCSSLocation.RightCenter,     // Right center
-    PlayerCSSLocation.RightBottom,     // Right bottom
-    PlayerCSSLocation.BottomRight,     // Bottom right
+    'left-1/2 bottom-0 -translate-x-1/2 translate-y-1/2',    // Bottom center
+    'left-[25%] bottom-0 -translate-x-1/2 translate-y-1/2',  // Bottom left
+    'left-[2.5%] bottom-[25%] -translate-x-1/2 translate-y-1/2',  // Left bottom
+    'left-[2.5%] top-[25%] -translate-x-1/2 -translate-y-1/2',      // Left center
+    'left-[25%] top-0 -translate-x-1/2 -translate-y-1/2',    // Top left
+    'left-1/2 top-0 -translate-x-1/2 -translate-y-1/2',      // Top center
+    'right-[25%] top-0 translate-x-1/2 -translate-y-1/2',    // Top right
+    'right-[2.5%] top-[25%] translate-x-1/2 -translate-y-1/2', // Right center
+    'right-[2.5%] bottom-[25%] translate-x-1/2 translate-y-1/2',  // Right bottom
+    'right-[25%] bottom-0 translate-x-1/2 translate-y-1/2',  // Bottom right
   ];
+  // const positions = [
+  //   PlayerCSSLocation.BottomCenter,    // Bottom center
+  //   PlayerCSSLocation.BottomLeft,      // Bottom left
+  //   PlayerCSSLocation.LeftBottom,      // Left bottom
+  //   PlayerCSSLocation.LeftCenter,      // Left center
+  //   PlayerCSSLocation.TopLeft,         // Top left
+  //   PlayerCSSLocation.TopCenter,       // Top center
+  //   PlayerCSSLocation.TopRight,        // Top right
+  //   PlayerCSSLocation.RightCenter,     // Right center
+  //   PlayerCSSLocation.RightBottom,     // Right bottom
+  //   PlayerCSSLocation.BottomRight,     // Bottom right
+  // ];
 
   
   // { x: 50, y: 100 },  // Bottom center
