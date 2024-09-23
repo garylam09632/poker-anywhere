@@ -39,7 +39,7 @@ const config: Config = {
         },
       },
       animation: {
-        'float-in': 'floatIn 0.5s ease-out',
+        'float-in': 'floatIn 0.5s ease-in-out',
       },
     },
     screens: {
