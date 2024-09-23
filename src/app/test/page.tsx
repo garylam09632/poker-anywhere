@@ -115,6 +115,7 @@ export default function Game() {
       let eligiblePlayers: number[] = [];
       const initialPlayers = Array.from({ length: playerCount }, (_, i) => {
         const position = positions(playerCount)[i];
+        const location = locations(i);
         let currentBet = 0;
         let chips = buyIn;
         eligiblePlayers.push(i + 1);
@@ -124,7 +125,8 @@ export default function Game() {
           chips,
           buyIn,
           position,
-          currentBet,
+          location,
+          200,
           0,
           false,
           false,
@@ -766,19 +768,17 @@ export default function Game() {
         ">
           {pots.map((pot, index) => (
             <div key={index} className="flex items-center space-x-2">
-              <Chip amount={pot.amount} isPot={true} position="pot" />
+              <Chip amount={pot.amount} type="pot" />
             </div>
           ))}
         </div>
         {mappingPlayers().map((player, index) => {
           let isActive = player.originalIndex === activePlayerIndex;
           player.originalIndex = undefined;
-          const position = getPlayerPosition(index, mappingPlayers().length, tableSize.width, tableSize.height);
-          const chipPosition = getChipPosition(index, mappingPlayers().length);
           return (
             <div 
               key={player.id} 
-              className={`absolute ${position}`}
+              className={`absolute ${PlayerCSSLocation[player.location]}`}
             >
               <PlayerUnit
                 key={player.id}
@@ -792,13 +792,6 @@ export default function Game() {
                 onChipsChange={handleChipsChange}
                 onSelect={handlePlayerSelect}
               />
-              {player.currentBet > 0 && (
-                <Chip 
-                  amount={player.currentBet} 
-                  position={chipMovement}
-                  playerLocation={chipPosition}
-                />
-              )}
             </div>
           )
         })}
@@ -819,6 +812,23 @@ export default function Game() {
     </div>
   );
 }
+
+const locations = (index: number): PlayerLocation => {
+  const positions = [
+    PlayerLocation.BottomCenter,    // Bottom center
+    PlayerLocation.BottomLeft,      // Bottom left
+    PlayerLocation.LeftBottom,      // Left bottom
+    PlayerLocation.LeftCenter,      // Left center
+    PlayerLocation.TopLeft,         // Top left
+    PlayerLocation.TopCenter,       // Top center
+    PlayerLocation.TopRight,        // Top right
+    PlayerLocation.RightCenter,     // Right center
+    PlayerLocation.RightBottom,     // Right bottom
+    PlayerLocation.BottomRight,     // Bottom right
+  ];
+  return positions[index % positions.length];
+}
+
 
 const getPlayerPosition = (index: number, totalPlayers: number, tableWidth: number, tableHeight: number): string => {
   const positions = [

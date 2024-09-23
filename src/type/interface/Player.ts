@@ -1,9 +1,12 @@
+import { PlayerLocation } from "../enum/Location";
+
 export default class Player {
   id: number;
   name: string;
   chips: number;
   buyIn: number;
   position: string;
+  location: PlayerLocation;
   currentBet: number;
   chipChange: number;
   hasFolded: boolean;
@@ -18,6 +21,7 @@ export default class Player {
     chips: number, 
     buyIn: number, 
     position: string, 
+    location: PlayerLocation,
     currentBet: number, 
     chipChange: number, 
     hasFolded: boolean, 
@@ -30,6 +34,7 @@ export default class Player {
     this.chips = chips;
     this.buyIn = buyIn;
     this.position = position;
+    this.location = location;
     this.currentBet = currentBet;
     this.chipChange = chipChange;
     this.hasFolded = hasFolded;
