@@ -753,9 +753,11 @@ export default function Game() {
           top-1/2
           -translate-x-1/2
           -translate-y-1/2
-          w-1/3
-          h-1/3
-          rounded-xl
+          w-[92%]
+          h-[90%]
+          md:w-[96%]
+          md:h-[90%]
+          rounded-full
           border-2
           border-gray-400
           flex
@@ -766,11 +768,21 @@ export default function Game() {
           text-lg
           font-bold
         ">
-          {pots.map((pot, index) => (
-            <div key={index} className="flex items-center space-x-2">
-              <Chip amount={pot.amount} type="pot" />
+          <div className="flex flex-col items-center space-y-6 -translate-y-10 sh:space-y-2 sh:-translate-y-5">
+            <div 
+              className={
+                `rounded-full text-sm sm:text-xs md:text-md font-bold bg-white text-black px-3 py-1
+                sh:-bottom-3 sh:px-2 sh:py-0 sh:text-xxs`
+              }
+            >
+              {stage}
             </div>
-          ))}
+            {pots.map((pot, index) => (
+              <div key={index} className="flex items-center space-x-2">
+                <Chip amount={pot.amount} type="pot" />
+              </div>
+            ))}
+          </div>
         </div>
         {mappingPlayers().map((player, index) => {
           let isActive = player.originalIndex === activePlayerIndex;

@@ -65,16 +65,16 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({ player, isActive, isSelected, c
         setCss('top-0 left-1/3');
         break;
       case PlayerLocation.LeftCenter:
-        setCss('right-0 bottom-1/4');
+        setCss('right-4 bottom-1/4 md:right-0');
         break;
       case PlayerLocation.LeftBottom:
-        setCss('right-0 top-1/4');
+        setCss('right-4 top-1/4 md:right-0');
         break;
       case PlayerLocation.RightCenter:
-        setCss('left-0 bottom-1/4');
+        setCss('left-4 bottom-1/4 md:left-0');
         break;
       case PlayerLocation.RightBottom:
-        setCss('left-0 top-1/4');
+        setCss('left-4 top-1/4 md:left-0');
         break;
     }
   }, [])
@@ -113,7 +113,7 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({ player, isActive, isSelected, c
     }
   }
   return (
-    <div className={`w-64 h-64 sh:w-40 sh:h-40 flex items-center justify-center`}>
+    <div className={`w-64 h-64 sh:w-40 sh:h-40 flex items-center justify-center scale-75 md:scale-100`}>
       <div 
         id={`player-unit-${player.id}`}
         className="relative flex flex-col items-center animate-float-in
