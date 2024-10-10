@@ -5,9 +5,13 @@ const config: Config = {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/type/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
+      inset: {
+        "1/5": '20%'
+      },
       colors: {
         'grey': '#101010',
       },
@@ -27,11 +31,13 @@ const config: Config = {
         '8/7': '114.285714%',
         '9/8': '112.5%',
         '10/9': '111.111111%',
-        
       },
       scale: {
         '85': '0.85',
-        '90': '0.90'
+        '90': '0.90',
+        '120': '1.20',
+        '125': '1.25',
+        '150': '1.50',
       },
       keyframes: {
         floatIn: {

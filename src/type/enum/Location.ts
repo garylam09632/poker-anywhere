@@ -13,6 +13,7 @@ export enum PlayerLocation {
 
 export const PlayerCSSLocation = {
   [PlayerLocation.BottomCenter]: 'left-1/2 bottom-0 -translate-x-1/2 translate-y-1/2',
+  // [PlayerLocation.BottomLeft]: 'left-[22.5%] bottom-5 -translate-x-1/2 translate-y-1/2 md:left-[25%] md:bottom-0 md:-translate-x-1/2 md:translate-y-1/2',
   [PlayerLocation.BottomLeft]: 'left-[25%] bottom-0 -translate-x-1/2 translate-y-1/2',
   [PlayerLocation.LeftBottom]: 'left-[2.5%] bottom-[25%] -translate-x-1/2 translate-y-1/2',
   [PlayerLocation.LeftCenter]: 'left-[2.5%] top-[25%] -translate-x-1/2 -translate-y-1/2',
@@ -25,14 +26,14 @@ export const PlayerCSSLocation = {
 }
 
 export const ChipCSSLocation = {
-  [PlayerLocation.BottomCenter]: 'bottom-0 left-1/2 transform -translate-x-1/2 -translate-y-96',
-  [PlayerLocation.BottomLeft]: 'bottom-0 right-0 transform translate-x-full -translate-y-3/1',
-  [PlayerLocation.LeftBottom]: 'left-0 bottom-0 transform translate-x-3/1  -translate-y-3/2',
-  [PlayerLocation.LeftCenter]: 'left-0 top-1/2 transform translate-x-3/1 translate-y-2/3',
-  [PlayerLocation.TopLeft]: 'top-0 right-0 transform translate-x-full translate-y-3/1',
-  [PlayerLocation.TopCenter]: 'top-0 left-1/2 transform -translate-x-1/2 translate-y-3/1',
-  [PlayerLocation.TopRight]: 'top-0 left-0 transform -translate-x-full translate-y-3/1',
-  [PlayerLocation.RightCenter]: 'right-0 top-1/2 transform -translate-x-3/1 translate-y-2/3',
-  [PlayerLocation.RightBottom]: 'right-0 bottom-0 transform -translate-x-3/1 -translate-y-3/2',
-  [PlayerLocation.BottomRight]: 'bottom-0 left-0 transform -translate-x-full -translate-y-3/1'
+  [PlayerLocation.BottomCenter]: 'top-0',
+  [PlayerLocation.BottomLeft]: 'top-0 right-1/3',
+  [PlayerLocation.LeftBottom]: 'right-4 top-1/4 md:right-0',
+  [PlayerLocation.LeftCenter]: 'right-4 bottom-1/4 md:right-0',
+  [PlayerLocation.TopLeft]: 'bottom-0 right-1/3',
+  [PlayerLocation.TopCenter]: 'bottom-0',
+  [PlayerLocation.TopRight]: 'bottom-0 left-1/3',
+  [PlayerLocation.RightCenter]: 'left-4 bottom-1/4 md:left-0',
+  [PlayerLocation.RightBottom]: 'left-4 top-1/4 md:left-0',
+  [PlayerLocation.BottomRight]: 'top-0 left-1/3'
 }

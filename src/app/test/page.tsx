@@ -15,6 +15,7 @@ import PlayerUnit from '@/components/PlayerUnit';
 import { ActionButtons } from '@/components/ActionButtons';
 import Chip from '@/components/Chip';
 import { PlayerCSSLocation, PlayerLocation } from '@/type/enum/Location';
+import { ShowdownMode } from '@/type/enum/ShowdownMode';
 
 const TEST = false;
 
@@ -35,6 +36,7 @@ export default function Game() {
   const [selectedWinners, setSelectedWinners] = useState<number[]>([]);
   const [bustedPlayers, setBustedPlayers] = useState<Player[]>([]);
   const [chipMovement, setChipMovement] = useState<'bet' | 'pot'>('bet');
+  const [selectedRanks, setSelectedRanks] = useState<{[key: number]: number}>({});
 
   // State for trigger useEffect
   const [reset, setReset] = useState(false);
@@ -55,6 +57,12 @@ export default function Game() {
 
   // Use useRef to get a reference to the table div
   const tableRef = useRef<HTMLDivElement>(null);
+
+  // Variables
+  const activePlayer = players[activePlayerIndex];
+  const canCheck = activePlayer ? currentBet === activePlayer.currentBet : false;
+  const callAmount = activePlayer ? currentBet - activePlayer.currentBet : 0;
+  const minRaise = activePlayer ? Math.max(bigBlind, currentBet * 2) : bigBlind;
 
   // Use useEffect to measure the table size after render
   useEffect(() => {
@@ -126,7 +134,7 @@ export default function Game() {
           buyIn,
           position,
           location,
-          200,
+          0,
           0,
           false,
           false,
@@ -151,7 +159,7 @@ export default function Game() {
           player.currentBet = bigBlind;
           player.chips -= bigBlind;
           // As the last player who act will be the big blind
-          player.hasActed = true;
+          // player.hasActed = true;
         } else if (player.position === Position.BTN && players.length === 2) {
           // When there are only 2 players, the BTN acts as the SB
           player.currentBet = smallBlind;
@@ -165,14 +173,10 @@ export default function Game() {
 
   useEffect(() => {
     if (isEndRound) {
-      // If there is only one player left, declare the winner
-      if (checkForLastPlayerStanding(players)) {
-        // Logic executed in the function
-      } 
       // If stage is river
       // If all players are all in
       // If there is only one player hasn't fold and all in, all other players are folded or all in
-      else if (
+      if (
         stage === 'River' || 
         players.every(player => player.chips === 0) ||
         players.length - 1 === (players.filter(p => p.chips === 0).length + players.filter(p => p.hasFolded).length)
@@ -330,6 +334,7 @@ export default function Game() {
     setActivePlayerIndex(bbIndex + 1 === newPlayers.length ? 0 : bbIndex + 1);
     // Set new players to state
     setPlayers(newPlayers);
+    setChipMovement('bet');
     setInitialed(true)
   };
 
@@ -455,11 +460,16 @@ export default function Game() {
     // Check if the round is complete
     if (isRoundComplete(newPlayers, newCurrentBet)) {
       // Update pots after each action
+      setChipMovement('pot');
       newPots = updatePots(newPots, newPlayers);
       setPots(newPots);
       setIsEndRound(true);
     } else {
-      moveToNextPlayer(newPlayers);
+      // If there is only one player left, declare the winner
+      if (!checkForLastPlayerStanding(players)) {
+        // Logic executed in the function
+        moveToNextPlayer(newPlayers);
+      } 
     }
   };
 
@@ -580,7 +590,6 @@ export default function Game() {
 
   const declareWinners = (winnerIds: number[]) => {
     if (winnerIds.length === 0) return;
-
     const newPlayers = [...players];
     let remainingPots = [...pots];
   
@@ -641,13 +650,12 @@ export default function Game() {
 
   const mappingPlayers = (): Player[] => {
     // if (bustedPlayers.length === 0) return players;
-
     let newPlayers: Player[] = [];
     let bustedPlayersMap = new Map<number, Player>();
     bustedPlayers.forEach(p => {
       bustedPlayersMap.set(p.id, p);
     })
-
+    
     // Combine players and busted players
     let playerIndex = 0;
     for (let i=0; i<players.length + bustedPlayers.length; i++) {
@@ -660,6 +668,35 @@ export default function Game() {
     }
     return newPlayers;
   }
+
+  const renderDeclareWinnerButton = () => {
+    return (
+      <div className="relative h-32 sh:h-8 w-full flex items-center justify-center">
+        <div 
+          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ease-in-out ${selectedWinners.length > 0 ? 'opacity-0' : 'opacity-100'}`}
+        >
+          <div className="text-white text-3xl sh:text-2xl font-bold">
+            Who wins?
+          </div>
+        </div>
+        <div 
+          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ease-in-out ${selectedWinners.length > 0 ? 'opacity-100' : 'opacity-0'}`}
+        >
+          <button 
+            className={`
+              bg-white text-black rounded-full transition-all duration-200 ease-in-out
+              hover:scale-120
+              px-6 py-6 text-2xl sh:px-4 sh:py-4 sh:text-base
+              ${selectedWinners.length > 0 ? 'opacity-100' : 'opacity-0'}
+            `}
+            onClick={() => declareWinners(selectedWinners)}
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   const resetPlayer = (player: Player) => {
     return {
@@ -689,23 +726,23 @@ export default function Game() {
   // 18800 - 10000 
   // initialChip - (currentChip - buyIn) = hasChangedChip
 
-  const moveChipsToPot = useCallback(() => {
-    setChipMovement('pot');
-    setTimeout(() => {
-      // Update pots and reset player bets
-      const newPots = updatePots(pots, players);
-      setPots(newPots);
-      setPlayers(players.map(p => ({ ...p, currentBet: 0 })));
-      setChipMovement('bet');
-    }, 500); // Wait for animation to complete
-  }, [pots, players]);
+  // const moveChipsToPot = useCallback(() => {
+  //   setChipMovement('pot');
+  //   setTimeout(() => {
+  //     // Update pots and reset player bets
+  //     const newPots = updatePots(pots, players);
+  //     setPots(newPots);
+  //     setPlayers(players.map(p => ({ ...p, currentBet: 0 })));
+  //     setChipMovement('bet');
+  //   }, 500); // Wait for animation to complete
+  // }, [pots, players]);
 
-  useEffect(() => {
-    if (isEndRound) {
-      moveChipsToPot();
-      // ... (rest of the isEndRound effect)
-    }
-  }, [isEndRound, moveChipsToPot]);
+  // useEffect(() => {
+  //   if (isEndRound) {
+  //     moveChipsToPot();
+  //     // ... (rest of the isEndRound effect)
+  //   }
+  // }, [isEndRound, moveChipsToPot]);
 
   const handleFold = () => {
     handleAction('Fold');
@@ -724,10 +761,18 @@ export default function Game() {
     handleAction('Raise', amount);
   };
 
-  const activePlayer = players[activePlayerIndex];
-  const canCheck = activePlayer ? currentBet === activePlayer.currentBet : false;
-  const callAmount = activePlayer ? currentBet - activePlayer.currentBet : 0;
-  const minRaise = activePlayer ? Math.max(bigBlind, currentBet * 2) : bigBlind;
+  const handleSelectWinner = (playerId: number, rank?: number) => {
+    console.log("playerId", playerId)
+    const activePlayers = players.filter(p => !p.hasFolded);
+    if (activePlayers.length === 2) {
+      toggleWinner(playerId);
+    } else if (activePlayers.length > 2) {
+      setSelectedRanks(prev => ({
+        ...prev,
+        [playerId]: rank || 1
+      }));
+    }
+  };
 
   return ( 
     <div className="
@@ -771,11 +816,11 @@ export default function Game() {
           <div className="flex flex-col items-center space-y-6 -translate-y-10 sh:space-y-2 sh:-translate-y-5">
             <div 
               className={
-                `rounded-full text-sm sm:text-xs md:text-md font-bold bg-white text-black px-3 py-1
+                `rounded-full text-sm sm:text-xs md:text-base font-bold bg-white text-black px-3 py-1
                 sh:-bottom-3 sh:px-2 sh:py-0 sh:text-xxs`
               }
             >
-              {stage}
+              { showdownMode ? `#${handNumber} Showdown` : `#${handNumber} ${stage}`}
             </div>
             {pots.map((pot, index) => (
               <div key={index} className="flex items-center space-x-2">
@@ -786,7 +831,9 @@ export default function Game() {
         </div>
         {mappingPlayers().map((player, index) => {
           let isActive = player.originalIndex === activePlayerIndex;
+          let isEligible = pots[0].eligiblePlayers.includes(player.id);
           player.originalIndex = undefined;
+          if (showdownMode) isActive = isEligible ? true : false;
           return (
             <div 
               key={player.id} 
@@ -799,28 +846,39 @@ export default function Game() {
                 isSelected={selectedPlayer?.id === player.id}
                 currentBet={currentBet}
                 bigBlind={bigBlind}
+                selectedWinners={selectedWinners}
+                selectedRank={selectedRanks[player.id]}
+                showdownMode={showdownMode ? players.filter(p => !p.hasFolded).length : ShowdownMode.None}
+                isEligible={isEligible}
                 onAction={handleAction}
                 onNameChange={handleNameChange}
                 onChipsChange={handleChipsChange}
                 onSelect={handlePlayerSelect}
+                onSelectWinner={handleSelectWinner}
               />
             </div>
           )
         })}
       </div>
-      <ActionButtons
-        onFold={handleFold}
-        onCheck={handleCheck}
-        onCall={handleCall}
-        onRaise={handleRaise}
-        canCheck={canCheck}
-        callAmount={callAmount}
-        currentBet={currentBet}
-        playerChips={activePlayer ? activePlayer.chips : 0}
-        potSize={pots.reduce((total, pot) => total + pot.amount, 0)}
-        minRaise={minRaise}
-        disabled={!activePlayer}
-      />
+      {
+        showdownMode ? (
+          renderDeclareWinnerButton()
+        ) : (
+          <ActionButtons
+            onFold={handleFold}
+            onCheck={handleCheck}
+            onCall={handleCall}
+            onRaise={handleRaise}
+            canCheck={canCheck}
+            callAmount={callAmount}
+            currentBet={currentBet}
+            playerChips={activePlayer ? activePlayer.chips : 0}
+            potSize={pots.reduce((total, pot) => total + pot.amount, 0)}
+            minRaise={minRaise}
+            disabled={!activePlayer}
+          />
+        )
+      }
     </div>
   );
 }

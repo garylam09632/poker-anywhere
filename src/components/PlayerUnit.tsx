@@ -7,6 +7,9 @@ import React, { useEffect, useState } from 'react';
 import Chip from './Chip';
 import { ChipCSSLocation, PlayerLocation } from '@/type/enum/Location';
 import useWindowSize from '@/app/hook/useWindowSize';
+import { RiCheckLine, RiNumber1, RiNumber2, RiNumber3, RiNumber4, RiNumber5 } from 'react-icons/ri';
+import { ShowdownMode } from '@/type/enum/ShowdownMode';
+import RankSelector from './RankSelector';
 
 interface PlayerUnitProps {
   player: Player;
@@ -14,22 +17,47 @@ interface PlayerUnitProps {
   currentBet: number;
   bigBlind: number;
   isSelected: boolean;
+  showdownMode: number;
+  isEligible: boolean;
+  selectedRank?: number;
+  selectedWinners: number[];
   onSelect: (player: Player) => void;
   onAction: (action: Action, amount?: number) => void;
   onNameChange: (id: number, name: string) => void; // New prop
   onChipsChange: (id: number, chips: number) => void; // New prop
+  onSelectWinner: (playerId: number, rank?: number) => void;
 }
 
-const PlayerUnit: React.FC<PlayerUnitProps> = ({ player, isActive, isSelected, currentBet, bigBlind, onAction, onNameChange, onChipsChange, onSelect  }: PlayerUnitProps) => {
+const PlayerUnit: React.FC<PlayerUnitProps> = ({ 
+  player, 
+  isActive, 
+  isSelected, 
+  currentBet, 
+  bigBlind, 
+  showdownMode, 
+  isEligible, 
+  selectedRank,
+  selectedWinners,
+  onAction, 
+  onNameChange, 
+  onChipsChange, 
+  onSelect, 
+  onSelectWinner, 
+}: PlayerUnitProps) => {
   
   const [betAmount, setBetAmount] = useState(currentBet);
   const [rule, setRule] = useState<Rule>(new NormalRule());
   const [css, setCss] = useState('');
+  const [showContent, setShowContent] = useState<'chips' | 'showdown'>('chips');
+  const [isHovered, setIsHovered] = useState(false);
+
   // const [isResized, setIsResized] = useState(false);
   // const { width, height } = useWindowSize();
+  
   let positionEllipseClass = isActive ? "bg-white border-black border-4 text-black" : "bg-black border-white border-4 text-white"
   let chipEllipseClass = isActive ? "bg-white border-black border-4 text-black" : "bg-black border-white border-4 text-white"
   let nameClass = isActive ? "bg-white border-black border-2 text-black" : "bg-black border-white border-2 text-white"
+  let optionClass = "bg-white text-black"
 
   // useEffect(() => {
   //   console.log(width, height)
@@ -45,38 +73,11 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({ player, isActive, isSelected, c
   // }, [width, height]);
 
   useEffect(() => {
-    switch (player.location) {
-      case PlayerLocation.TopCenter:
-        setCss('bottom-0');
-        break;
-      case PlayerLocation.TopLeft:
-        setCss('bottom-0 right-1/3');
-        break;
-      case PlayerLocation.TopRight:
-        setCss('bottom-0 left-1/3');
-        break;
-      case PlayerLocation.BottomCenter:
-        setCss('top-0');
-        break;
-      case PlayerLocation.BottomLeft:
-        setCss('top-0 right-1/3');
-        break;
-      case PlayerLocation.BottomRight:
-        setCss('top-0 left-1/3');
-        break;
-      case PlayerLocation.LeftCenter:
-        setCss('right-4 bottom-1/4 md:right-0');
-        break;
-      case PlayerLocation.LeftBottom:
-        setCss('right-4 top-1/4 md:right-0');
-        break;
-      case PlayerLocation.RightCenter:
-        setCss('left-4 bottom-1/4 md:left-0');
-        break;
-      case PlayerLocation.RightBottom:
-        setCss('left-4 top-1/4 md:left-0');
-        break;
-    }
+    setShowContent(showdownMode && isEligible ? 'showdown' : 'chips');
+  }, [showdownMode, isEligible]);
+
+  useEffect(() => {
+    setCss(ChipCSSLocation[player.location])
   }, [])
 
   const getAvailableActions = (): Action[] => {
@@ -112,8 +113,44 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({ player, isActive, isSelected, c
       setBetAmount(bet);
     }
   }
+
+  // }, [width, height]);
+  const renderShowdownOption = () => {
+    if (!showdownMode || !isEligible) return null;
+
+    const iconClass = "w-2/5 h-2/5 transition-all duration-200 ease-in-out";
+    const selectedClass = "w-full h-full bg-black text-white border-4 border-white";
+    const unselectedClass = `text-black ${isHovered ? "scale-150" : ""}`;
+
+    if (showdownMode === 2) {
+      const isSelected = selectedWinners.includes(player.id);
+      return (
+        <div 
+          className={
+            `w-2/5 h-2/5 
+            ${isSelected ? selectedClass : unselectedClass}
+            rounded-full transition-all duration-200 ease-in-out 
+            flex flex-col items-center justify-center`
+          }
+        >
+          <RiCheckLine className={`${isSelected ? "w-4/5 h-4/5" : "w-full h-full"}`} />
+        </div>
+      );
+    } else if (showdownMode > 2) {
+      return (
+        <RankSelector
+          showdownMode={showdownMode}
+          selectedRank={selectedRank}
+          onSelectWinner={onSelectWinner}
+          playerId={player.id}
+        />
+      );
+    }
+  };
+
+
   return (
-    <div className={`w-64 h-64 sh:w-40 sh:h-40 flex items-center justify-center scale-75 md:scale-100`}>
+    <div className={`${showdownMode ? "w-48" : "w-64"} h-64 sh:w-40 sh:h-40 flex items-center justify-center scale-75 md:scale-100`}>
       <div 
         id={`player-unit-${player.id}`}
         className="relative flex flex-col items-center animate-float-in
@@ -129,12 +166,35 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({ player, isActive, isSelected, c
         >
           {player.position}
         </div>
-        {/* Main circle with chips */}
-        <div className={
-          `w-24 h-24 ${chipEllipseClass} rounded-full flex items-center justify-center
-        text-black font-bold text-xl sh:w-16 sh:h-16 sh:text-xs`
-        }>
-          {player.chips}
+        {/* Main circle with chips or showdown options */}
+        <div id={`chips-${player.id}`} className={`
+          w-24 h-24 ${chipEllipseClass} rounded-full flex items-center justify-center
+          text-black font-bold text-xl sh:w-16 sh:h-16 sh:text-xs
+          relative ${(showdownMode && isEligible) && 'cursor-pointer'}
+        `}
+          onClick={() => { 
+            if (showdownMode && isEligible) { 
+              console.log("Clicked")
+              onSelectWinner(player.id) 
+            }
+          }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          <div className={`
+            absolute inset-0 flex items-center justify-center
+            transition-opacity duration-300 ease-in-out
+            ${showContent === 'chips' ? 'opacity-100' : 'opacity-0'}
+          `}>
+            {player.chips}
+          </div>
+          <div className={`
+            absolute inset-0 flex items-center justify-center
+            transition-opacity duration-300 ease-in-out
+            ${showContent === 'showdown' ? 'opacity-100' : 'opacity-0'}
+          `}>
+            {renderShowdownOption()}
+          </div>
         </div>
         
         {/* Name plate */}
