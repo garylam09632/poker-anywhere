@@ -150,7 +150,12 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
 
 
   return (
-    <div className={`${showdownMode ? "w-48" : "w-64"} h-64 sh:w-40 sh:h-40 flex items-center justify-center scale-75 md:scale-100`}>
+    <div className={`
+      ${showdownMode ? "w-48" : "w-64"}
+      ${player.hasFolded ? "brightness-50" : ""} 
+      h-64 sh:w-40 sh:h-40 flex items-center 
+      justify-center scale-75 md:scale-100
+    `}>
       <div 
         id={`player-unit-${player.id}`}
         className="relative flex flex-col items-center animate-float-in
@@ -210,7 +215,7 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
       </div>
       {/* Betting chip */}
       {
-        player.currentBet > 0 && (
+        (player.currentBet > 0 && showdownMode === ShowdownMode.None) && (
           <div id={`bet-${player.id}`} className={`absolute ${css}`}> {/* Adjust the top position to place it above the position indicator */}
             <Chip amount={player.currentBet} />
           </div>

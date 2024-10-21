@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
 interface RankSelectorProps {
   showdownMode: number;
@@ -14,23 +14,51 @@ const RankSelector: React.FC<RankSelectorProps> = ({
   playerId,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [currentRank, setCurrentRank] = useState(selectedRank || 1);
 
   useEffect(() => {
     const element = scrollRef.current;
     if (element) {
       const handleWheel = (e: WheelEvent) => {
         e.preventDefault();
-        element.scrollTop += e.deltaY;
+        const delta = Math.sign(e.deltaY);
+        updateRank(delta);
       };
-      element.addEventListener('wheel', handleWheel, { passive: false });
-      return () => element.removeEventListener('wheel', handleWheel);
-    }
-  }, []);
 
-  const ranks = Array.from({ length: showdownMode }, (_, i) => i + 1);
-  
-  const selectedClass = "w-full h-full font-bold text-base";
-  const unselectedClass = "text-black";
+      const handleTouchStart = (e: TouchEvent) => {
+        const touch = e.touches[0];
+        element.dataset.startY = touch.clientY.toString();
+      };
+
+      const handleTouchMove = (e: TouchEvent) => {
+        const touch = e.touches[0];
+        const startY = Number(element.dataset.startY || 0);
+        const deltaY = startY - touch.clientY;
+        if (Math.abs(deltaY) > 10) {
+          updateRank(Math.sign(deltaY));
+          element.dataset.startY = touch.clientY.toString();
+        }
+      };
+
+      element.addEventListener('wheel', handleWheel, { passive: false });
+      element.addEventListener('touchstart', handleTouchStart);
+      element.addEventListener('touchmove', handleTouchMove);
+
+      return () => {
+        element.removeEventListener('wheel', handleWheel);
+        element.removeEventListener('touchstart', handleTouchStart);
+        element.removeEventListener('touchmove', handleTouchMove);
+      };
+    }
+  }, [showdownMode, onSelectWinner, playerId]);
+
+  const updateRank = (delta: number) => {
+    setCurrentRank((prev) => {
+      const newRank = Math.max(1, Math.min(showdownMode, prev + delta));
+      onSelectWinner(playerId, newRank);
+      return newRank;
+    });
+  };
 
   const getRankSuffix = (rank: number) => {
     if (rank === 1) return 'st';
@@ -39,24 +67,30 @@ const RankSelector: React.FC<RankSelectorProps> = ({
     return 'th';
   };
 
+  const renderRank = (rank: number, isCenter: boolean) => (
+    <div
+      key={rank}
+      className={`absolute left-0 right-0 transition-all duration-300 ease-in-out ${
+        isCenter ? 'text-2xl font-bold' : 'text-sm opacity-50'
+      }`}
+      style={{
+        transform: `translateY(${(rank - currentRank) * 35}px)`,
+      }}
+    >
+      <div className="flex items-center justify-center">
+        {`${rank}${getRankSuffix(rank)}`}
+      </div>
+    </div>
+  );
+
   return (
     <div 
       ref={scrollRef}
-      className="w-full h-24 overflow-y-scroll scrollbar-none touch-pan-y"
-      style={{ WebkitOverflowScrolling: 'touch' }}
+      className="w-full h-full flex items-center justify-center cursor-ns-resize overflow-hidden relative"
     >
-      {ranks.map((rank) => (
-        <div 
-          key={rank}
-          className={`
-            py-1 px-2 mb-1 rounded cursor-pointer text-center text-sm
-            ${selectedRank === rank ? selectedClass : unselectedClass}
-          `}
-          onClick={() => onSelectWinner(playerId, rank)}
-        >
-          {`${rank}${getRankSuffix(rank)}`}
-        </div>
-      ))}
+      {[currentRank - 1, currentRank, currentRank + 1]
+        .filter(rank => rank > 0 && rank <= showdownMode)
+        .map(rank => renderRank(rank, rank === currentRank))}
     </div>
   );
 };

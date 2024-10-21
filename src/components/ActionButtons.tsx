@@ -6,7 +6,7 @@ interface ActionButtonsProps {
   onFold: () => void;
   onCheck: () => void;
   onCall: () => void;
-  onRaise: (amount: number) => void;
+  onRaise: (amount: number, isRaise?: boolean) => void;
   canCheck: boolean;
   callAmount: number;
   currentBet: number;
@@ -32,7 +32,6 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   const [raiseAmount, setRaiseAmount] = useState(minRaise);
 
   const sliderPoints = useMemo(() => {
-    console.log("potSize", potSize)
     const points = [
       { label: 'Min', value: minRaise },
       { label: '1/3', value: Math.floor(potSize / 3) },
@@ -55,7 +54,6 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       setRaiseAmount(amount);
     }
   };
-
   // sh:absolute sh:bottom-0 sh:translate-y-24 sh:scale-90
   return (
     <div className="
@@ -67,9 +65,9 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             {canCheck ? (
               <StyledButton onClick={onCheck} disabled={disabled}>Check</StyledButton>
             ) : (
-              <StyledButton onClick={onCall} disabled={disabled}>Call ${callAmount}</StyledButton>
+              <StyledButton onClick={onCall} disabled={disabled}>Call ${playerChips < callAmount ? playerChips : callAmount}</StyledButton>
             )}
-            <StyledButton onClick={() => onRaise(raiseAmount)} disabled={disabled || !canRaise}>
+            <StyledButton onClick={() => onRaise(raiseAmount, canRaise)}>
               {canRaise ? `Raise $${raiseAmount}` : `All-In $${playerChips}`}
             </StyledButton>
             <StyledButton onClick={onFold} disabled={disabled}>Fold</StyledButton>

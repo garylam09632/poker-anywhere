@@ -1,8 +1,22 @@
+import { PlayerLocation } from "@/type/enum/Location";
 import { Position } from "@/type/enum/Position";
 import { Stage } from "@/type/General";
 import Player from "@/type/interface/Player"
 import Pot from "@/type/interface/Pot"
 
+// this.id = id;
+// this.name = name;
+// this.chips = chips;
+// this.buyIn = buyIn;
+// this.position = position;
+// this.location = location;
+// this.currentBet = currentBet;
+// this.chipChange = chipChange;
+// this.hasFolded = hasFolded;
+// this.hasActed = hasActed;
+// this.hasBusted = hasBusted;
+// this.originalIndex = undefined;
+// this.tempBuyIn = 0;
 const players: Player[] = [
   {
     id: 1,
@@ -15,6 +29,7 @@ const players: Player[] = [
     chipChange: 1400,
     buyIn: 10000,
     hasBusted: false,
+    location: PlayerLocation.LeftBottom
   },
   {
     id: 2,
@@ -27,6 +42,7 @@ const players: Player[] = [
     chipChange: -600,
     buyIn: 10000,
     hasBusted: false,
+    location: PlayerLocation.LeftCenter
   },
   {
     id: 3,
@@ -39,6 +55,7 @@ const players: Player[] = [
     chipChange: -5200,
     buyIn: 10000,
     hasBusted: false,
+    location: PlayerLocation.TopRight
   },
   {
     id: 4,
@@ -51,6 +68,7 @@ const players: Player[] = [
     chipChange: 10200,
     buyIn: 10000,
     hasBusted: false,
+    location: PlayerLocation.BottomCenter
   },
   {
     id: 5,
@@ -63,6 +81,7 @@ const players: Player[] = [
     chipChange: -5200,
     buyIn: 10000,
     hasBusted: false,
+    location: PlayerLocation.BottomLeft
   },
 ]
 
