@@ -29,7 +29,8 @@ const players: Player[] = [
     chipChange: 1400,
     buyIn: 10000,
     hasBusted: false,
-    location: PlayerLocation.LeftBottom
+    location: PlayerLocation.LeftBottom,
+    betHistory: []
   },
   {
     id: 2,
@@ -42,7 +43,8 @@ const players: Player[] = [
     chipChange: -600,
     buyIn: 10000,
     hasBusted: false,
-    location: PlayerLocation.LeftCenter
+    location: PlayerLocation.LeftCenter,
+    betHistory: []
   },
   {
     id: 3,
@@ -55,7 +57,8 @@ const players: Player[] = [
     chipChange: -5200,
     buyIn: 10000,
     hasBusted: false,
-    location: PlayerLocation.TopRight
+    location: PlayerLocation.TopRight,
+    betHistory: []
   },
   {
     id: 4,
@@ -68,7 +71,8 @@ const players: Player[] = [
     chipChange: 10200,
     buyIn: 10000,
     hasBusted: false,
-    location: PlayerLocation.BottomCenter
+    location: PlayerLocation.BottomCenter,
+    betHistory: []
   },
   {
     id: 5,
@@ -81,7 +85,8 @@ const players: Player[] = [
     chipChange: -5200,
     buyIn: 10000,
     hasBusted: false,
-    location: PlayerLocation.BottomLeft
+    location: PlayerLocation.BottomLeft,
+    betHistory: []
   },
 ]
 

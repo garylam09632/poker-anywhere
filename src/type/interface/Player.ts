@@ -12,6 +12,7 @@ export default class Player {
   hasFolded: boolean;
   hasActed: boolean;
   hasBusted: boolean;
+  betHistory: number[];
   originalIndex?: number;
   tempBuyIn?: number;
 
@@ -42,5 +43,6 @@ export default class Player {
     this.hasBusted = hasBusted;
     this.originalIndex = undefined;
     this.tempBuyIn = 0;
+    this.betHistory = [];
   }
 }

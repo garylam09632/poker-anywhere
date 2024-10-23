@@ -213,7 +213,8 @@ export default function Game() {
     setPlayers(players.map(player => ({ 
       ...player, 
       currentBet: 0, 
-      hasActed: false
+      hasActed: false,
+      betHistory: []
     })));
     setCurrentBet(0);
     let nextPlayerIndex = players.length === 2 ? players.findIndex(p => p.position === Position.BB) : players.findIndex(p => p.position === Position.SB);
@@ -415,6 +416,7 @@ export default function Game() {
         }
         newPlayers[activePlayerIndex].chips -= betAmount;
         newPlayers[activePlayerIndex].currentBet += betAmount;
+        newPlayers[activePlayerIndex].betHistory.push(betAmount);
         newCurrentBet = Math.max(newCurrentBet, newPlayers[activePlayerIndex].currentBet);
         if (action === 'Bet' || action === 'Raise') {
           // Reset hasActed for all players except the current player and folded players
@@ -516,7 +518,6 @@ export default function Game() {
     let eligiblePlayers = newPlayers.filter(p => !p.hasFolded).map(p => p.id);
     let allInPlayers = newPlayers.filter(p => !p.hasFolded && p.id !== activePlayer.id && p.chips === 0);
 
-
     // Find the highest bet amount within all in players
     let currentBet = activePlayer.currentBet;
     let remainingBets = 0;
@@ -532,13 +533,16 @@ export default function Game() {
       isFullPaid?: boolean,
     }[] = [];
     
-    // console.log("oldPots", newPots)
     remainingBets = currentBet;
+    // Deduct all previous bets from the current bet besides the latest bet
+    activePlayer.betHistory.forEach((bet, index) => {
+      if (index === activePlayer.betHistory.length - 1) return;
+      remainingBets -= bet;
+    })
     for (let i=0; i<newPots.length; i++) {
       let pot = newPots[i];
       let potHasAllIn = false;
       let isFullPaid = false;
-      console.log("pot", pot)
       // Check if pot's eligible players include all in players
       for (let eligiblePlayer of pot.eligiblePlayers) {
         if (newPlayers[eligiblePlayer - 1]?.chips === 0 && eligiblePlayer !== activePlayer.id) {
@@ -549,11 +553,22 @@ export default function Game() {
         }
       }
 
-      remainingBets = remainingBets - (pot.distribution?.[activePlayer.id] || 0);
+      // remainingBets = remainingBets - (pot.distribution?.[activePlayer.id] || 0);
 
+      // Case 1:
+      // One player goes all in, mp call, btn raise
+      // 
+      // Case 2:
+      // One player goes all in, no one raise
+      // Case 3:
+      // One player goes all in, mp raise, others call or fold
+      // 9200 - 3600 = 5600
+      // 3600 * 3 = 10800
+      // 7200 - 3600 = 3600
+      // 3600 + 5600 = 11200 - 
 
       // All in players exist
-      console.log("potHasAllIn", potHasAllIn, "isFullPaid", isFullPaid)
+      // console.log("potHasAllIn", potHasAllIn, "isFullPaid", isFullPaid)
       if (potHasAllIn && !isFullPaid) {
         // If the remaining bet is 0, the is likely a call action
         if (remainingBets === 0) break;
@@ -573,13 +588,12 @@ export default function Game() {
           let bet = remainingBets - (pot.baseAmount - remainingBets); // 5600 - (6600 - 5600)
           potsUpdate.push({ potIndex: i, bet, baseAmount: remainingBets, baseUpdatedBy: activePlayer.id, paidPlayers: [...(pot.paidPlayers || []), activePlayer.id] });
           remainingBets = pot.baseAmount - remainingBets; // 1000
-          console.log(`{ potIndex: ${i}, bet: ${bet}, baseAmount: ${remainingBets} }`)
+          // console.log(`{ potIndex: ${i}, bet: ${bet}, baseAmount: ${remainingBets} }`)
         }
         // If after the loop, remainingBets is still greater than 0, it means the remaining bets are for the main pot
         // Will create a new pot for the remaining bets afterwards
       }
       if (!potHasAllIn) {
-        console.log("pot", pot)
         // No all in players
         // let potIndex = newPots.findIndex(pot => 
         //   pot.eligiblePlayers.length === eligiblePlayers.length && 
@@ -593,59 +607,13 @@ export default function Game() {
         if (stage === "Preflop" && (activePlayer.position === Position.SB || activePlayer.position === Position.BB)) {
           remainingBets -= (activePlayer.position === Position.SB ? smallBlind : bigBlind);
         }
-        potsUpdate.push({ potIndex, bet: remainingBets, baseAmount: currentBet, baseUpdatedBy: activePlayer.id });
+        potsUpdate.push({ potIndex, bet: remainingBets, baseAmount: remainingBets, baseUpdatedBy: activePlayer.id });
         remainingBets = 0;
       }
     }
-    
-    // // All in players exist
-    // if (allInPlayers.length > 0) {
-    //   remainingBets = currentBet;
-    //   for (let i=0; i<newPots.length; i++) {
-    //     let pot = newPots[i];
-    //     // If the remaining bet is 0, the is likely a call action
-    //     if (remainingBets === 0) break;
-    //     if (pot.baseAmount === undefined || pot.baseAmount === null) {
-    //       alert("Error: newPots[i].baseAmount is undefined")
-    //       return currentPots;
-    //     }
-    //     if (pot.paidPlayers && pot.paidPlayers.includes(activePlayer.id)) continue;
-    //     if (remainingBets >= pot.baseAmount) {
-    //       // If the remaining bet is greater than the this pot amount, the new pot will be created by the current player
-    //       if (pot.baseUpdatedBy) newPotBaseUpdatedBy = activePlayer.id;
-    //       remainingBets -= pot.baseAmount;
-    //       potsUpdate.push({ potIndex: i, bet: pot.baseAmount, paidPlayers: [...(pot.paidPlayers || []), activePlayer.id] });
-    //     } else {
-    //       // If the remaining bet is less than the this pot amount, new pot need to be created by the current baseUpdatedBy
-    //       if (pot.baseUpdatedBy) newPotBaseUpdatedBy = pot.baseUpdatedBy;
-    //       let bet = remainingBets - (pot.baseAmount - remainingBets); // 5600 - (6600 - 5600)
-    //       potsUpdate.push({ potIndex: i, bet, baseAmount: remainingBets, baseUpdatedBy: activePlayer.id, paidPlayers: [...(pot.paidPlayers || []), activePlayer.id] });
-    //       remainingBets = pot.baseAmount - remainingBets; // 1000
-    //       console.log(`{ potIndex: ${i}, bet: ${bet}, baseAmount: ${remainingBets} }`)
-    //     }
-    //   }
-    //   // If after the loop, remainingBets is still greater than 0, it means the remaining bets are for the main pot
-    //   // Will create a new pot for the remaining bets afterwards
-    // } else {
-    //   // No all in players
-    //   let potIndex = newPots.findIndex(pot => 
-    //     pot.eligiblePlayers.length === eligiblePlayers.length && 
-    //     pot.eligiblePlayers.every(id => eligiblePlayers.includes(id))
-    //   );
-    //   potIndex = newPots.findIndex(pot => pot.eligiblePlayers.includes(activePlayer.id));
-    //   if (potIndex === -1) {
-    //     alert("Error: potIndex === -1")
-    //     return currentPots;
-    //   }
-    //   if (stage === "Preflop" && (activePlayer.position === Position.SB || activePlayer.position === Position.BB)) {
-    //     currentBet -= (activePlayer.position === Position.SB ? smallBlind : bigBlind);
-    //   }
-    //   potsUpdate.push({ potIndex, bet: currentBet, baseAmount: currentBet, baseUpdatedBy: activePlayer.id });
-    // }
 
     // Update the pots
     for (let { potIndex, bet, baseAmount, baseUpdatedBy, paidPlayers } of potsUpdate) {
-      console.log("potIndex", potIndex, "bet", bet, "baseAmount", baseAmount, "baseUpdatedBy", baseUpdatedBy, "paidPlayers", paidPlayers)
       const pot = newPots[potIndex];
       pot.amount += bet;
       if (pot.distribution) {
@@ -663,11 +631,9 @@ export default function Game() {
       // if (isLessThanPotHighestBet) {
       //   eligiblePlayers = eligiblePlayers.filter(id => !newPots.map(p => p.baseUpdatedBy).includes(id));
       // }
-
       eligiblePlayers = eligiblePlayers.filter(id => !newPots.map(p => p.baseUpdatedBy).includes(id));
       newPots.push({ amount: remainingBets, eligiblePlayers, baseAmount: remainingBets, baseUpdatedBy: newPotBaseUpdatedBy });
     }
-    // console.log("newPots", newPots)
     return newPots;
   }
 
@@ -871,7 +837,7 @@ export default function Game() {
 
   const printPots = (pots: Pot[]) => {
     pots.forEach((pot, index) => {
-      console.log(`Pot ${index + 1} - Amount: ${pot.amount}, Eligible Players: ${pot.eligiblePlayers.join(', ')}`)
+      console.log(`Pot ${index + 1} - Amount: ${pot.amount}, Base Amount: ${pot.baseAmount}, Eligible Players: ${pot.eligiblePlayers.join(', ')}`)
     })
   }
 
@@ -897,7 +863,6 @@ export default function Game() {
   }
 
   const renderDeclareWinnerButton = () => {
-    console.log("selectedRanks", selectedRanks)
     return (
       <div className="relative h-32 sh:h-8 w-full flex items-center justify-center">
         <div 
