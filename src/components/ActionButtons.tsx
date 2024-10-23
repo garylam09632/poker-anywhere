@@ -67,8 +67,8 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             ) : (
               <StyledButton onClick={onCall} disabled={disabled}>Call ${playerChips < callAmount ? playerChips : callAmount}</StyledButton>
             )}
-            <StyledButton onClick={() => onRaise(raiseAmount, canRaise)}>
-              {canRaise ? `Raise $${raiseAmount}` : `All-In $${playerChips}`}
+            <StyledButton onClick={() => onRaise(raiseAmount, canRaise && raiseAmount !== playerChips)}>
+              {canRaise && raiseAmount !== playerChips ? `Raise $${raiseAmount}` : `All-In $${playerChips}`}
             </StyledButton>
             <StyledButton onClick={onFold} disabled={disabled}>Fold</StyledButton>
           </div>

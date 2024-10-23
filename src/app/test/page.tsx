@@ -17,7 +17,7 @@ import Chip from '@/components/Chip';
 import { PlayerCSSLocation, PlayerLocation } from '@/type/enum/Location';
 import { ShowdownMode } from '@/type/enum/ShowdownMode';
 
-const TEST = true;
+const TEST = false;
 
 export default function Game() {
   const searchParams = useSearchParams();
@@ -135,15 +135,18 @@ export default function Game() {
         if (player.position === Position.SB) {
           player.currentBet = smallBlind;
           player.chips -= smallBlind;
+          player.betHistory.push(smallBlind);
         } else if (player.position === Position.BB) {
           player.currentBet = bigBlind;
           player.chips -= bigBlind;
+          player.betHistory.push(bigBlind);
           // As the last player who act will be the big blind
           // player.hasActed = true;
         } else if (player.position === Position.BTN && players.length === 2) {
           // When there are only 2 players, the BTN acts as the SB
           player.currentBet = smallBlind;
           player.chips -= smallBlind;
+          player.betHistory.push(smallBlind);
         }
       }
       setPlayers(players);
@@ -412,7 +415,11 @@ export default function Game() {
             console.error('Invalid bet amount');
             return;
           }
+          console.log("amount", amount)
+          console.log("player.currentBet", player.currentBet)
+          console.log("player.chips", player.chips)
           betAmount = Math.min(amount - player.currentBet, player.chips);
+          console.log("betAmount", betAmount)
         }
         newPlayers[activePlayerIndex].chips -= betAmount;
         newPlayers[activePlayerIndex].currentBet += betAmount;
@@ -438,7 +445,6 @@ export default function Game() {
         let secondHighestBet = -Infinity;
         if (players.length === 2) {
           secondHighestBet = Math.min(players[0].currentBet, players[1].currentBet);
-          return players.filter(player => player.currentBet > secondHighestBet);   
         }
   
         for (const player of activePlayers) {
@@ -553,20 +559,6 @@ export default function Game() {
         }
       }
 
-      // remainingBets = remainingBets - (pot.distribution?.[activePlayer.id] || 0);
-
-      // Case 1:
-      // One player goes all in, mp call, btn raise
-      // 
-      // Case 2:
-      // One player goes all in, no one raise
-      // Case 3:
-      // One player goes all in, mp raise, others call or fold
-      // 9200 - 3600 = 5600
-      // 3600 * 3 = 10800
-      // 7200 - 3600 = 3600
-      // 3600 + 5600 = 11200 - 
-
       // All in players exist
       // console.log("potHasAllIn", potHasAllIn, "isFullPaid", isFullPaid)
       if (potHasAllIn && !isFullPaid) {
@@ -634,6 +626,7 @@ export default function Game() {
       eligiblePlayers = eligiblePlayers.filter(id => !newPots.map(p => p.baseUpdatedBy).includes(id));
       newPots.push({ amount: remainingBets, eligiblePlayers, baseAmount: remainingBets, baseUpdatedBy: newPotBaseUpdatedBy });
     }
+    printPots(newPots)
     return newPots;
   }
 
