@@ -8,5 +8,6 @@ export default interface Pot {
   distribution?: PlayerBet;
   baseAmount?: number;
   baseUpdatedBy?: number;
+  // Only all in will push player's id to paidPlayers
   paidPlayers?: number[];
 }

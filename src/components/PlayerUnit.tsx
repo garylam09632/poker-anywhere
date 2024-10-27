@@ -6,8 +6,7 @@ import Player from '@/type/interface/Player';
 import React, { useEffect, useState } from 'react';
 import Chip from './Chip';
 import { ChipCSSLocation, PlayerLocation } from '@/type/enum/Location';
-import useWindowSize from '@/app/hook/useWindowSize';
-import { RiCheckLine, RiNumber1, RiNumber2, RiNumber3, RiNumber4, RiNumber5 } from 'react-icons/ri';
+import { RiCheckLine, RiSettings4Line } from 'react-icons/ri';
 import { ShowdownMode } from '@/type/enum/ShowdownMode';
 import RankSelector from './RankSelector';
 
@@ -21,12 +20,15 @@ interface PlayerUnitProps {
   isEligible: boolean;
   selectedRank?: number;
   selectedWinners: number[];
+  openModal: () => void;
   onSelect: (player: Player) => void;
   onAction: (action: Action, amount?: number) => void;
   onNameChange: (id: number, name: string) => void; // New prop
   onChipsChange: (id: number, chips: number) => void; // New prop
   onSelectWinner: (playerId: number, rank?: number) => void;
 }
+
+type ContentType = 'chips' | 'showdown' | 'busted';
 
 const PlayerUnit: React.FC<PlayerUnitProps> = ({ 
   player, 
@@ -38,26 +40,24 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
   isEligible, 
   selectedRank,
   selectedWinners,
+  openModal,
+  onSelect, 
   onAction, 
   onNameChange, 
   onChipsChange, 
-  onSelect, 
   onSelectWinner, 
 }: PlayerUnitProps) => {
   
   const [betAmount, setBetAmount] = useState(currentBet);
   const [rule, setRule] = useState<Rule>(new NormalRule());
   const [css, setCss] = useState('');
-  const [showContent, setShowContent] = useState<'chips' | 'showdown'>('chips');
+  const [showContent, setShowContent] = useState<ContentType>('chips');
   const [isHovered, setIsHovered] = useState(false);
 
   // const [isResized, setIsResized] = useState(false);
-  // const { width, height } = useWindowSize();
-  
   let positionEllipseClass = isActive ? "bg-white border-black border-4 text-black" : "bg-black border-white border-4 text-white"
   let chipEllipseClass = isActive ? "bg-white border-black border-4 text-black" : "bg-black border-white border-4 text-white"
   let nameClass = isActive ? "bg-white border-black border-2 text-black" : "bg-black border-white border-2 text-white"
-  let optionClass = "bg-white text-black"
 
   // useEffect(() => {
   //   console.log(width, height)
@@ -73,8 +73,12 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
   // }, [width, height]);
 
   useEffect(() => {
-    setShowContent(showdownMode && isEligible ? 'showdown' : 'chips');
-  }, [showdownMode, isEligible]);
+    if (player.hasBusted) {
+      setShowContent('busted');
+    } else {
+      setShowContent(showdownMode && isEligible ? 'showdown' : 'chips');
+    }
+  }, [showdownMode, isEligible, player.hasBusted]);
 
   useEffect(() => {
     setCss(ChipCSSLocation[player.location])
@@ -114,7 +118,6 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
     }
   }
 
-  // }, [width, height]);
   const renderShowdownOption = () => {
     if (!showdownMode || !isEligible) return null;
 
@@ -148,24 +151,67 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
     }
   };
 
+  const getContainerStyle = (position: PlayerLocation) => {
+    switch (position) {
+      case PlayerLocation.BottomCenter:
+        return "w-1 h-64";
+      case PlayerLocation.BottomLeft:
+        return "w-64 h-64";
+      case PlayerLocation.LeftCenter:
+        return "w-64 h-36";
+      case PlayerLocation.LeftBottom:
+        return "w-64 h-36";
+      case PlayerLocation.TopLeft:
+        return "w-64 h-64";
+      case PlayerLocation.TopCenter:
+        return "w-1 h-64";
+      case PlayerLocation.TopRight:
+        return "w-48 h-64";
+      case PlayerLocation.RightCenter:
+        return "w-64 h-36";
+      case PlayerLocation.RightBottom:
+        return "w-64 h-36";
+      case PlayerLocation.BottomRight:
+        return "w-64 h-64";
+      default:
+        return "w-0";
+    }
+  }
+
+  const onPlayerSettingsClick = () => {
+    console.log("onPlayerSettingsClicked");
+    onSelect(player);
+    openModal();
+  }
 
   return (
-    <div className={`
-      ${showdownMode ? "w-48" : "w-64"}
-      ${player.hasFolded ? "brightness-50" : ""} 
-      h-64 sh:w-40 sh:h-40 flex items-center 
-      justify-center scale-75 md:scale-100
-    `}>
+    <div 
+      className={`
+        sh:w-40 sh:h-40 flex items-center 
+        justify-center scale-75 md:scale-100
+        transition-all duration-300 ease-in-out
+        group
+        ${showdownMode ? "w-0" : getContainerStyle(player.location)}
+        ${player.hasFolded || player.hasBusted ? "brightness-50" : ""} 
+      `}
+    >
       <div 
         id={`player-unit-${player.id}`}
-        className="relative flex flex-col items-center animate-float-in
-        transition-all ease-in-out"
+        className={`
+          relative flex flex-col items-center animate-float-in
+          transition-all ease-in-out duration-500
+          ${(!showdownMode && isHovered) && "group-hover:shadow-[0_0_25px_5px_rgba(255,255,255,0.7)]"}
+          rounded-full cursor-pointer
+        `}
+        onClick={onPlayerSettingsClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
         {/* Position indicator */}
         <div 
           id={`position-indicator-${player.id}`}
           className={`
-            absolute -top-5 z-10 w-10 h-10 sh:-top-4 sh:w-7 sh:h-7 sh:text-xxs ${positionEllipseClass} rounded-full 
+            absolute -top-5 z-10 w-10 h-10 sh:-top-3 sh:w-7 sh:h-7 sh:text-xxs ${positionEllipseClass} rounded-full 
             flex items-center justify-center text-black font-bold text-xs
           `}
         >
@@ -183,15 +229,31 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
               onSelectWinner(player.id) 
             }
           }}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
         >
           <div className={`
             absolute inset-0 flex items-center justify-center
             transition-opacity duration-300 ease-in-out
             ${showContent === 'chips' ? 'opacity-100' : 'opacity-0'}
           `}>
-            {player.chips}
+            <div className={`absolute z-10 font-bold transition-opacity duration-300 ease-in-out ${isHovered ? 'opacity-0' : 'opacity-100'}`}>
+              {player.chips}
+            </div>
+            <div 
+              className={`
+                absolute z-10 w-[60%] font-bold transition-all duration-300 ease-in-out 
+                ${isHovered ? 'opacity-100 transform rotate-180' : 'opacity-0'}`
+              } 
+            >
+              {/* TODO: Add clickable config icon */}
+              <RiSettings4Line className="w-full h-full" />
+            </div>
+          </div>
+          <div className={`
+            absolute inset-0 flex items-center justify-center
+            transition-opacity duration-300 ease-in-out
+            ${showContent === 'busted' ? 'opacity-100' : 'opacity-0'}
+          `}>
+            Busted
           </div>
           <div className={`
             absolute inset-0 flex items-center justify-center

@@ -1,3 +1,4 @@
+import useWindowSize from '@/hooks/useWindowSize';
 import React, { useRef, useEffect, useState } from 'react';
 
 interface RankSelectorProps {
@@ -15,6 +16,7 @@ const RankSelector: React.FC<RankSelectorProps> = ({
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentRank, setCurrentRank] = useState(selectedRank || 1);
+  const { height } = useWindowSize();
 
   useEffect(() => {
     const element = scrollRef.current;
@@ -71,10 +73,10 @@ const RankSelector: React.FC<RankSelectorProps> = ({
     <div
       key={rank}
       className={`absolute left-0 right-0 transition-all duration-300 ease-in-out ${
-        isCenter ? 'text-2xl font-bold' : 'text-sm opacity-50'
+        isCenter ? 'text-2xl sh:text-sm font-bold' : 'text-sm sh:text-xs opacity-50'
       }`}
       style={{
-        transform: `translateY(${(rank - currentRank) * 35}px)`,
+        transform: `translateY(${(rank - currentRank) * getRankSpacing()}px)`,
       }}
     >
       <div className="flex items-center justify-center">
@@ -82,6 +84,13 @@ const RankSelector: React.FC<RankSelectorProps> = ({
       </div>
     </div>
   );
+
+  // Determine the appropriate rank spacing based on viewport width
+  const getRankSpacing = (): number => {
+    if (height && height < 480) return 22; // sh
+    if (height && height < 640) return 26; // mh
+    return 35; // default
+  };
 
   return (
     <div 

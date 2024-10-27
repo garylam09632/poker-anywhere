@@ -12,7 +12,8 @@ export default class Player {
   hasFolded: boolean;
   hasActed: boolean;
   hasBusted: boolean;
-  betHistory: number[];
+  actualBet: number;
+  betHistory: number[]; // For recording each player bet for later development
   originalIndex?: number;
   tempBuyIn?: number;
 
@@ -44,5 +45,6 @@ export default class Player {
     this.originalIndex = undefined;
     this.tempBuyIn = 0;
     this.betHistory = [];
+    this.actualBet = 0;
   }
 }

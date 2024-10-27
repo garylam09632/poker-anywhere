@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { StyledButton } from './StyledButton';
 import { BetSlider } from './BetSlider';
+import { useSearchParams } from 'next/navigation';
 
 interface ActionButtonsProps {
   onFold: () => void;
@@ -29,7 +30,10 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   minRaise,
   disabled
 }) => {
+  const searchParams = useSearchParams();
   const [raiseAmount, setRaiseAmount] = useState(minRaise);
+  const [canRaise, setCanRaise] = useState(playerChips > minRaise);
+  const bb = Number(searchParams.get('bigBlind') || 2);
 
   const sliderPoints = useMemo(() => {
     const points = [
@@ -43,11 +47,11 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
     return points.filter(point => point.value <= playerChips && point.value >= minRaise);
   }, [potSize, playerChips, minRaise]);
 
-  const canRaise = playerChips > minRaise;
-
+  
   useEffect(() => {
-    setRaiseAmount(canRaise ? minRaise : playerChips);
-  }, [canRaise, minRaise, playerChips]);
+    setCanRaise(playerChips > minRaise);
+    setRaiseAmount(playerChips > minRaise ? minRaise : playerChips);
+  }, [minRaise, playerChips]);
 
   const handleRaiseAmountChange = (amount: number) => {
     if (amount <= playerChips) {
@@ -76,14 +80,14 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         <div id="betControlRegionContainer" className="flex flex-col items-center w-1/2 space-y-3 md:w-1/3 sh:w-1/2">
           <div className="flex flex-col space-x-0 space-y-4 w-full justify-between md:flex-row md:space-x-4 md:space-y-0">
             <StyledButton 
-              onClick={() => handleRaiseAmountChange(currentBet * 2)} 
-              disabled={disabled || currentBet * 2 > playerChips}
+              onClick={() => handleRaiseAmountChange((currentBet || bb) * 2)} 
+              disabled={disabled || (currentBet || bb) * 2 > playerChips}
             >
               2x
             </StyledButton>
             <StyledButton 
-              onClick={() => handleRaiseAmountChange(currentBet * 3)} 
-              disabled={disabled || currentBet * 3 > playerChips}
+              onClick={() => handleRaiseAmountChange((currentBet || bb) * 3)} 
+              disabled={disabled || (currentBet || bb) * 3 > playerChips}
             >
               3x
             </StyledButton>
@@ -94,16 +98,16 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
               ALL IN
             </StyledButton>
           </div>
-          {canRaise && (
-            <BetSlider
-              points={sliderPoints}
-              value={raiseAmount}
-              onChange={handleRaiseAmountChange}
-              disabled={disabled}
-              minValue={minRaise}
-              maxValue={playerChips}
-            />
-          )}
+          {/* {canRaise && (
+          )} */}
+          <BetSlider
+            points={sliderPoints}
+            value={raiseAmount}
+            onChange={handleRaiseAmountChange}
+            disabled={disabled}
+            minValue={minRaise}
+            maxValue={playerChips}
+          />
         </div>
       </div>
     </div>
