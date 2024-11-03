@@ -2,14 +2,11 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
-import PlayerCard from '@/components/PlayerCard';
 import Player from '@/type/interface/Player';
 import Pot from '@/type/interface/Pot';
 import case1 from '@/case/SidePot1';
 import { Action, Stage } from '@/type/General';
 import { useModal } from '@/hooks/useModal';
-
-import BuyInModal from '@/components/BuyInModal';
 import { Position } from '@/type/enum/Position';
 import PlayerUnit from '@/components/PlayerUnit';
 import { ActionButtons } from '@/components/ActionButtons';
@@ -18,6 +15,9 @@ import { PlayerCSSLocation, PlayerLocation } from '@/type/enum/Location';
 import { ShowdownMode } from '@/type/enum/ShowdownMode';
 import Modal from '@/components/Modal';
 import { ModalType } from '@/type/enum/ModalType';
+import { IconButton } from '@/components/IconButton';
+import { FiSettings } from 'react-icons/fi';
+import { RiMoneyDollarBoxLine } from 'react-icons/ri';
 
 const TEST = false;
 
@@ -48,12 +48,16 @@ export default function Game() {
 
   // Buy in state
   const {
+    type: modalType,
     selectedPlayer,
     visible: modalVisible,
+    withHeader: modalWithHeader,
     handlePlayerSelect,
     openModal,
     closeModal,
-    handleBuyIn
+    handleBuyIn,
+    setType: setModalType,
+    setWithHeader: setModalWithHeader
   } = useModal(players, bustedPlayers, setPlayers, setBustedPlayers);
 
   // Use useRef to get a reference to the table div
@@ -562,8 +566,8 @@ export default function Game() {
     }[] = [];
     
     remainingBets = currentBet;
-    console.log("initial remainingBets", remainingBets)
-    console.log("activePlayer", activePlayer)
+    // console.log("initial remainingBets", remainingBets)
+    // console.log("activePlayer", activePlayer)
     // Deduct all previous bets from the current bet besides the latest bet
     // activePlayer.betHistory.forEach((bet, index) => {
     //   if (index === activePlayer.betHistory.length - 1) return;
@@ -1022,11 +1026,37 @@ export default function Game() {
     }
   };
 
+  const onShowPlayerSettings = (player: Player) => {
+    handlePlayerSelect(player);
+    setModalType(ModalType.PlayerSettings);
+    setModalWithHeader(false);
+    openModal();
+  }
+
+  const onShowBuyIn = () => {
+    setModalType(ModalType.BuyIn);
+    setModalWithHeader(true);
+    openModal();
+  }
+
   return ( 
     <div className="
       h-full w-full bg-black text-white pt-10 flex flex-col items-center space-y-12 md:justify-start
       sh:h-[130%] sh:space-y-5 mh:space-y-10
     ">
+      {/* Add button area */}
+      <div className="absolute top-4 right-4 flex items-center space-x-2 z-10">
+        <IconButton
+          icon={<RiMoneyDollarBoxLine />}
+          onClick={onShowBuyIn}
+          tooltip="Buy In"
+        />
+        <IconButton
+          icon={<FiSettings />}
+          onClick={() => extractGameState()}
+          tooltip="Game State"
+        />
+      </div>
       <div 
         ref={tableRef}
         className="
@@ -1108,7 +1138,7 @@ export default function Game() {
                 onAction={handleAction}
                 onNameChange={handleNameChange}
                 onChipsChange={handleChipsChange}
-                onSelect={handlePlayerSelect}
+                onSelect={onShowPlayerSettings}
                 onSelectWinner={handleSelectWinner}
               />
             </div>
@@ -1135,14 +1165,16 @@ export default function Game() {
         )
       }
       <Modal
-        title="Buy In"
         players={players}
-        setPlayers={setPlayers}
+        bustedPlayers={bustedPlayers}
+        type={modalType}
         visible={modalVisible}
-        onClose={closeModal}
-        type={ModalType.PlayerSettings}
-        withHeader={false}
+        withHeader={modalWithHeader}
         selectedPlayer={selectedPlayer}
+        setPlayers={setPlayers}
+        onClose={closeModal}
+        setSelectedPlayer={handlePlayerSelect}
+        handleBuyIn={handleBuyIn}
       />
     </div>
   );

@@ -44,9 +44,29 @@ const config: Config = {
           '0%': { opacity: '0', transform: 'translateY(20px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        slideUp: {
+          '0%': { transform: 'translateY(100%)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        slideDown: {
+          '0%': { transform: 'translateY(0)', opacity: '0.5' },
+          '100%': { transform: 'translateY(100%)', opacity: '0' },
+        },
+        fadeIn: {
+          '0%': { backgroundColor: 'rgba(0, 0, 0, 0)' },
+          '100%': { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+        },
+        fadeOut: {
+          '0%': { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+          '100%': { backgroundColor: 'rgba(0, 0, 0, 0)' },
+        },
       },
       animation: {
         'float-in': 'floatIn 0.5s ease-in-out',
+        'slide-up': 'slideUp 0.3s ease-out forwards',
+        'slide-down': 'slideDown 0.3s ease-out forwards',
+        'fade-in': 'fadeIn 0.3s ease-out forwards',
+        'fade-out': 'fadeOut 0.3s ease-out forwards',
       },
       fontSize: {
         'xxs': '0.5rem',

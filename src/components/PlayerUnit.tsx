@@ -179,6 +179,7 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
   }
 
   const onPlayerSettingsClick = () => {
+    if (showdownMode) return;
     console.log("onPlayerSettingsClicked");
     onSelect(player);
     openModal();

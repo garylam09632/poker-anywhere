@@ -19,6 +19,11 @@ export const BetSlider: React.FC<BetSliderProps> = ({ points, value, onChange, d
   const thumbRef = useRef<HTMLDivElement>(null);
   const [continuousValue, setContinuousValue] = useState(value);
 
+  // Add this new effect to sync with external value
+  useEffect(() => {
+    setContinuousValue(value);
+  }, [value]);
+
   // console.log(points);
   // console.log("points[0].value: ", points[0].value);
   // console.log("maxValue / 3: ", maxValue / 3);
@@ -59,23 +64,27 @@ export const BetSlider: React.FC<BetSliderProps> = ({ points, value, onChange, d
   }, [handleSliderChange]);
 
   useEffect(() => {
-    // Update continuousValue when minValue changes
+    // Update continuousValue when min/max values change
     if (continuousValue < minValue) {
       setContinuousValue(minValue);
       onChange(minValue);
     }
+    if (continuousValue > maxValue) {
+      setContinuousValue(maxValue);
+      onChange(maxValue);
+    }
 
     if (thumbRef.current && sliderRef.current) {
-      const percentage = (continuousValue - minValue) / (maxValue - minValue);
+      const percentage = Math.min(1, Math.max(0, (continuousValue - minValue) / (maxValue - minValue)));
       thumbRef.current.style.left = `${percentage * 100}%`;
     }
   }, [continuousValue, minValue, maxValue, onChange]);
-
+  
   return (
     <div className="w-full relative">
       <div 
         ref={sliderRef}
-        className="w-full h-2 bg-gray-200 rounded-lg relative"
+        className={`w-full h-2 bg-gray-200 rounded-lg relative ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
         onMouseDown={handleStart}
         onTouchStart={handleStart}
       >
@@ -97,7 +106,7 @@ export const BetSlider: React.FC<BetSliderProps> = ({ points, value, onChange, d
         ></div>
         <div 
           ref={thumbRef}
-          className="absolute w-4 h-4 bg-white border-2 border-gray-500 rounded-full top-1/2 -translate-x-1/2 -translate-y-1/2"
+          className={`absolute w-4 h-4 bg-white border-2 border-gray-500 rounded-full top-1/2 -translate-x-1/2 -translate-y-1/2 ${disabled ? 'cursor-not-allowed' : 'cursor-grab'}`}
         ></div>
       </div>
       <div className="w-full flex justify-between text-xs mt-2">

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Player from '@/type/interface/Player';
+import { ModalType } from '@/type/enum/ModalType';
 
 export const useModal = (
   players: Player[], 
@@ -7,11 +8,12 @@ export const useModal = (
   setPlayers: React.Dispatch<React.SetStateAction<Player[]>>, 
   setBustedPlayers: React.Dispatch<React.SetStateAction<Player[]>>
 ) => {
+  const [type, setType] = useState(ModalType.PlayerSettings);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [visible, setVisible] = useState(false);
+  const [withHeader, setWithHeader] = useState(false);
 
   const handlePlayerSelect = (player: Player) => {
-    console.log("handlePlayerSelect", player);
     if (player.id === selectedPlayer?.id) setSelectedPlayer(null);
     else setSelectedPlayer(player);
   };
@@ -22,10 +24,14 @@ export const useModal = (
 
   const closeModal = () => {
     setVisible(false);
-    setSelectedPlayer(null);
+    setTimeout(() => {
+      setSelectedPlayer(null);
+    }, 300);
   };
 
   const handleBuyIn = (amount: number) => {
+    console.log("selectedPlayer", selectedPlayer);
+    console.log("amount", amount);
     if (selectedPlayer) {
       const bustedPlayer = bustedPlayers.find(p => p.id === selectedPlayer.id);
 
@@ -41,6 +47,7 @@ export const useModal = (
         playerList = [...players];
         setFunction = setPlayers;
       }
+      console.log("playerList", playerList);
       setFunction(playerList.map(p => {
         if (p.id === selectedPlayer.id) p.tempBuyIn = amount;
         return p;
@@ -56,9 +63,13 @@ export const useModal = (
   return {
     selectedPlayer,
     visible,
+    withHeader,
+    type,
+    closeModal,
     handlePlayerSelect,
     openModal,
-    closeModal,
-    handleBuyIn
+    handleBuyIn,
+    setType,
+    setWithHeader,
   };
 };

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { StyledButton } from './StyledButton';
 import { BetSlider } from './BetSlider';
 import { useSearchParams } from 'next/navigation';
+import { StyledInput } from './StyledInput';
 
 interface ActionButtonsProps {
   onFold: () => void;
@@ -98,16 +99,24 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
               ALL IN
             </StyledButton>
           </div>
-          {/* {canRaise && (
-          )} */}
-          <BetSlider
-            points={sliderPoints}
-            value={raiseAmount}
-            onChange={handleRaiseAmountChange}
-            disabled={disabled}
-            minValue={minRaise}
-            maxValue={playerChips}
-          />
+          <div className="w-full flex flex-row items-center space-x-4">
+            <StyledInput
+              value={raiseAmount}
+              onChange={(value) => handleRaiseAmountChange(Number(value))}
+              type="number"
+              min={minRaise}
+              max={playerChips}
+              disabled={disabled}
+            />
+            <BetSlider
+              points={sliderPoints}
+              value={raiseAmount}
+              onChange={handleRaiseAmountChange}
+              disabled={disabled}
+              minValue={minRaise}
+              maxValue={playerChips}
+            />
+          </div>
         </div>
       </div>
     </div>
