@@ -48,6 +48,18 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
     return points.filter(point => point.value <= playerChips && point.value >= minRaise);
   }, [potSize, playerChips, minRaise]);
 
+  const upperOptions = [
+    { label: '2x', value: (currentBet || bb) * 2 },
+    { label: '3x', value: (currentBet || bb) * 3 },
+    { label: '4x', value: (currentBet || bb) * 4 },
+    { label: 'All-In', value: playerChips }
+  ];
+
+  const lowerOptions = [
+    { label: '33%', value: potSize * 0.33 },
+    { label: '50%', value: potSize * 0.5 },
+    { label: '75%', value: potSize * 0.75 }
+  ];
   
   useEffect(() => {
     setCanRaise(playerChips > minRaise);
@@ -67,6 +79,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       <div className="w-full flex justify-between mb-4 space-x-10">
         <div id="actionRegionContainer" className="flex items-center w-1/2 md:w-1/2 sh:w-1/2">
           <div className="flex flex-col space-x-0 space-y-4 w-full justify-between md:flex-row md:space-x-4 md:space-y-0">
+            <StyledButton onClick={onFold} disabled={disabled}>Fold</StyledButton>
             {canCheck ? (
               <StyledButton onClick={onCheck} disabled={disabled}>Check</StyledButton>
             ) : (
@@ -75,47 +88,50 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             <StyledButton onClick={() => onRaise(raiseAmount, canRaise && raiseAmount !== playerChips)}>
               {canRaise && raiseAmount !== playerChips ? `Raise $${raiseAmount}` : `All-In $${playerChips}`}
             </StyledButton>
-            <StyledButton onClick={onFold} disabled={disabled}>Fold</StyledButton>
           </div>
         </div>
-        <div id="betControlRegionContainer" className="flex flex-col items-center w-1/2 space-y-3 md:w-1/3 sh:w-1/2">
+        <div id="betControlRegionContainer" className="flex flex-col items-center w-1/2 space-y-3 md:w-1/2 sh:w-1/2">
           <div className="flex flex-col space-x-0 space-y-4 w-full justify-between md:flex-row md:space-x-4 md:space-y-0">
-            <StyledButton 
-              onClick={() => handleRaiseAmountChange((currentBet || bb) * 2)} 
-              disabled={disabled || (currentBet || bb) * 2 > playerChips}
-            >
-              2x
-            </StyledButton>
-            <StyledButton 
-              onClick={() => handleRaiseAmountChange((currentBet || bb) * 3)} 
-              disabled={disabled || (currentBet || bb) * 3 > playerChips}
-            >
-              3x
-            </StyledButton>
-            <StyledButton 
-              onClick={() => handleRaiseAmountChange(playerChips)} 
-              disabled={disabled}
-            >
-              ALL IN
-            </StyledButton>
+            {upperOptions.map((option) => (
+              <StyledButton 
+                key={option.label}
+                onClick={() => handleRaiseAmountChange(option.value)} 
+                disabled={disabled || option.value > playerChips}
+              >
+                {option.label}
+              </StyledButton>
+            ))}
           </div>
           <div className="w-full flex flex-row items-center space-x-4">
-            <StyledInput
-              value={raiseAmount}
-              onChange={(value) => handleRaiseAmountChange(Number(value))}
-              type="number"
-              min={minRaise}
-              max={playerChips}
-              disabled={disabled}
-            />
-            <BetSlider
-              points={sliderPoints}
-              value={raiseAmount}
-              onChange={handleRaiseAmountChange}
-              disabled={disabled}
-              minValue={minRaise}
-              maxValue={playerChips}
-            />
+            <div className="flex flex-row w-1/3 space-x-3">              
+              {lowerOptions.map((option) => (
+                <StyledButton 
+                  key={option.label}
+                  onClick={() => handleRaiseAmountChange(option.value)} 
+                  disabled={disabled || option.value > playerChips}
+                >
+                  {option.label}
+                </StyledButton>
+              ))}
+            </div>
+            <div className="flex flex-row items-center w-3/4 space-x-4">
+              <StyledInput
+                value={raiseAmount}
+                onChange={(value) => handleRaiseAmountChange(Number(value))}
+                type="number"
+                min={minRaise}
+                max={playerChips}
+                disabled={disabled}
+              />
+              <BetSlider
+                points={sliderPoints}
+                value={raiseAmount}
+                onChange={handleRaiseAmountChange}
+                disabled={disabled}
+                minValue={minRaise}
+                maxValue={playerChips}
+              />
+            </div>
           </div>
         </div>
       </div>

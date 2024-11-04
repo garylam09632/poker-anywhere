@@ -1,4 +1,5 @@
 export enum ModalType {
   PlayerSettings = 'Player Settings',
-  BuyIn = 'Buy In'
+  BuyIn = 'Buy In',
+  Statics = 'Statics'
 }

@@ -1,24 +1,30 @@
 import React from 'react';
 
 interface StyledButtonProps {
-  onClick: () => void;
-  disabled?: boolean;
+  size?: 'xxs' | 'xs' | 'sm' | 'md' | 'lg';
   children: React.ReactNode;
+  disabled?: boolean;
+  onClick: () => void;
 }
 
-export const StyledButton: React.FC<StyledButtonProps> = ({ onClick, disabled = false, children }) => {
+export const StyledButton: React.FC<StyledButtonProps> = ({ 
+  size = 'sm',
+  children,
+  disabled = false, 
+  onClick, 
+}) => {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
       className={`
         w-full font-bold
-        text-sm
-        py-3 px-3
+        text-${size}
+        py-3
         sh:text-xs
         md:text-base
-        md:py-3 md:px-4
-        sh:py-2 sh:px-2
+        md:py-3
+        sh:py-2
         rounded-md
         transition-colors duration-300 ease-in-out
         border border-gray-600
@@ -35,7 +41,7 @@ export const StyledButton: React.FC<StyledButtonProps> = ({ onClick, disabled = 
         hover:before:scale-x-100
       `}
     >
-      <span className="relative z-10">{children}</span>
+      <span className={`relative z-10 text-${size}`}>{children}</span>
     </button>
   );
 };

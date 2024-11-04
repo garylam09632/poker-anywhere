@@ -17,7 +17,7 @@ import Modal from '@/components/Modal';
 import { ModalType } from '@/type/enum/ModalType';
 import { IconButton } from '@/components/IconButton';
 import { FiSettings } from 'react-icons/fi';
-import { RiMoneyDollarBoxLine } from 'react-icons/ri';
+import { RiBarChartLine, RiMoneyDollarBoxLine } from 'react-icons/ri';
 
 const TEST = false;
 
@@ -1038,132 +1038,145 @@ export default function Game() {
     setModalWithHeader(true);
     openModal();
   }
-
-  return ( 
-    <div className="
-      h-full w-full bg-black text-white pt-10 flex flex-col items-center space-y-12 md:justify-start
-      sh:h-[130%] sh:space-y-5 mh:space-y-10
-    ">
-      {/* Add button area */}
-      <div className="absolute top-4 right-4 flex items-center space-x-2 z-10">
-        <IconButton
-          icon={<RiMoneyDollarBoxLine />}
-          onClick={onShowBuyIn}
-          tooltip="Buy In"
-        />
-        <IconButton
-          icon={<FiSettings />}
-          onClick={() => extractGameState()}
-          tooltip="Game State"
-        />
-      </div>
-      <div 
-        ref={tableRef}
-        className="
-          w-[100%] h-[60%]
-          xs:w-[100%] xs:h-[60%]
-          md:w-[100%] md:h-[75%]
-          sh:w-[100%] sh:h-[90%]
-          mh:w-[90%] mh:h-[75%]
-          bg-grey rounded-full border-white border-4 xs:border-4 sm:border-6 md:border-8
-          relative
-          scale-85
-        "
-      >
-        <div className="
-          absolute
-          left-1/2
-          top-1/2
-          -translate-x-1/2
-          -translate-y-1/2
-          w-[92%]
-          h-[90%]
-          md:w-[96%]
-          md:h-[90%]
-          rounded-full
-          border-2
-          border-gray-400
-          flex
-          flex-col
-          items-center
-          justify-center
-          text-white
-          text-lg
-          font-bold
-        ">
-          <div className="flex flex-col items-center space-y-6 -translate-y-10 sh:space-y-2 sh:-translate-y-5">
-            <div 
-              className={
-                `rounded-full text-sm sm:text-xs md:text-base font-bold bg-white text-black px-3 py-1
-                sh:-bottom-3 sh:px-2 sh:py-0 sh:text-xxs`
-              }
-            >
-              { showdownMode ? `#${handNumber} Showdown` : `#${handNumber} ${stage}`}
-            </div>
-            {
-              pots.length > 0 && (
-                <div className="flex items-center space-x-2">
-                  {pots.map((pot, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                    <Chip amount={pot.amount} type="pot" />
-                    </div>
-                  ))}
-                </div>
-              )
-            }
-          </div>
-        </div>
-        {mappingPlayers().map((player, index) => {
-          let isActive = player.originalIndex === activePlayerIndex;
-          let isEligible = pots[0].eligiblePlayers.includes(player.id);
-          player.originalIndex = undefined;
-          if (showdownMode) isActive = isEligible ? true : false;
-          return (
-            <div 
-              key={player.id} 
-              className={`absolute ${PlayerCSSLocation[player.location]}`}
-            >
-              <PlayerUnit
-                key={player.id}
-                player={player}
-                isActive={isActive}
-                isSelected={selectedPlayer?.id === player.id}
-                currentBet={currentBet}
-                bigBlind={bigBlind}
-                selectedWinners={selectedWinners}
-                selectedRank={selectedRanks[player.id]}
-                showdownMode={showdownMode ? getPlayerNotFolded().length : ShowdownMode.None}
-                isEligible={isEligible}
-                openModal={openModal}
-                onAction={handleAction}
-                onNameChange={handleNameChange}
-                onChipsChange={handleChipsChange}
-                onSelect={onShowPlayerSettings}
-                onSelectWinner={handleSelectWinner}
-              />
-            </div>
-          )
-        })}
-      </div>
-      {
-        showdownMode ? (
-          renderDeclareWinnerButton()
-        ) : (
-          <ActionButtons
-            onFold={handleFold}
-            onCheck={handleCheck}
-            onCall={handleCall}
-            onRaise={handleRaise}
-            canCheck={canCheck}
-            callAmount={callAmount}
-            currentBet={currentBet}
-            playerChips={activePlayer ? activePlayer.chips : 0}
-            potSize={pots.reduce((total, pot) => total + pot.amount, 0)}
-            minRaise={minRaise}
-            disabled={!activePlayer}
+  
+  const onShowStatics = () => {
+    setModalType(ModalType.Statics);
+    setModalWithHeader(true);
+    openModal();
+  }
+  
+  return (
+    <>
+      <div className="
+        h-full w-full bg-black text-white pt-10 flex flex-col items-center space-y-12 md:justify-start
+        sh:h-[130%] sh:space-y-5 mh:space-y-10
+      ">
+        {/* Add button area */}
+        <div className="absolute top-4 right-4 flex items-center space-x-2 z-10">
+          <IconButton
+            icon={<RiMoneyDollarBoxLine />}
+            onClick={onShowBuyIn}
+            tooltip="Buy In"
           />
-        )
-      }
+          <IconButton
+            icon={<RiBarChartLine />}
+            onClick={onShowStatics}
+            tooltip="Statics"
+          />
+          <IconButton
+            icon={<FiSettings />}
+            onClick={() => extractGameState()}
+            tooltip="Game State"
+          />
+        </div>
+        <div 
+          ref={tableRef}
+          className="
+            w-[100%] h-[60%]
+            xs:w-[100%] xs:h-[60%]
+            md:w-[100%] md:h-[75%]
+            sh:w-[100%] sh:h-[90%]
+            mh:w-[90%] mh:h-[75%]
+            bg-grey rounded-full border-white border-4 xs:border-4 sm:border-6 md:border-8
+            relative
+            scale-85
+          "
+        >
+          <div className="
+            absolute
+            left-1/2
+            top-1/2
+            -translate-x-1/2
+            -translate-y-1/2
+            w-[92%]
+            h-[90%]
+            md:w-[96%]
+            md:h-[90%]
+            rounded-full
+            border-2
+            border-gray-400
+            flex
+            flex-col
+            items-center
+            justify-center
+            text-white
+            text-lg
+            font-bold
+          ">
+            <div className="flex flex-col items-center space-y-6 -translate-y-10 sh:space-y-2 sh:-translate-y-5">
+              <div 
+                className={
+                  `rounded-full text-sm sm:text-xs md:text-base font-bold bg-white text-black px-3 py-1
+                  sh:-bottom-3 sh:px-2 sh:py-0 sh:text-xxs`
+                }
+              >
+                { showdownMode ? `#${handNumber} Showdown` : `#${handNumber} ${stage}`}
+              </div>
+              {
+                pots.length > 0 && (
+                  <div className="flex items-center space-x-2">
+                    {pots.map((pot, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                      <Chip amount={pot.amount} type="pot" />
+                      </div>
+                    ))}
+                  </div>
+                )
+              }
+            </div>
+          </div>
+          {mappingPlayers().map((player, index) => {
+            let isActive = player.originalIndex === activePlayerIndex;
+            let isEligible = pots[0].eligiblePlayers.includes(player.id);
+            player.originalIndex = undefined;
+            if (showdownMode) isActive = isEligible ? true : false;
+            return (
+              <div 
+                key={player.id} 
+                className={`absolute ${PlayerCSSLocation[player.location]}`}
+              >
+                <PlayerUnit
+                  key={player.id}
+                  player={player}
+                  isActive={isActive}
+                  isSelected={selectedPlayer?.id === player.id}
+                  currentBet={currentBet}
+                  bigBlind={bigBlind}
+                  selectedWinners={selectedWinners}
+                  selectedRank={selectedRanks[player.id]}
+                  showdownMode={showdownMode ? getPlayerNotFolded().length : ShowdownMode.None}
+                  isEligible={isEligible}
+                  openModal={openModal}
+                  onAction={handleAction}
+                  onNameChange={handleNameChange}
+                  onChipsChange={handleChipsChange}
+                  onSelect={onShowPlayerSettings}
+                  onSelectWinner={handleSelectWinner}
+                />
+              </div>
+            )
+          })}
+        </div>
+        {
+          showdownMode ? (
+            renderDeclareWinnerButton()
+          ) : (
+            <ActionButtons
+              onFold={handleFold}
+              onCheck={handleCheck}
+              onCall={handleCall}
+              onRaise={handleRaise}
+              canCheck={canCheck}
+              callAmount={callAmount}
+              currentBet={currentBet}
+              playerChips={activePlayer ? activePlayer.chips : 0}
+              potSize={pots.reduce((total, pot) => total + pot.amount, 0)}
+              minRaise={minRaise}
+              disabled={!activePlayer}
+            />
+          )
+        }
+      </div>
       <Modal
         players={players}
         bustedPlayers={bustedPlayers}
@@ -1176,7 +1189,7 @@ export default function Game() {
         setSelectedPlayer={handlePlayerSelect}
         handleBuyIn={handleBuyIn}
       />
-    </div>
+    </>
   );
 }
 

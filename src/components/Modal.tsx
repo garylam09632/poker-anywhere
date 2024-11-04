@@ -36,6 +36,11 @@ interface BuyInProps {
   setSelectedPlayer: (player: Player) => void;
 }
 
+interface StaticsProps {
+  players: Player[];
+  bustedPlayers: Player[];
+}
+
 const Modal: React.FC<ModalProps> = ({ 
   type,
   players,
@@ -88,6 +93,8 @@ const Modal: React.FC<ModalProps> = ({
           setSelectedPlayer={setSelectedPlayer} 
         />
       )
+    } else if (type === ModalType.Statics) {
+      return <Statics players={players} bustedPlayers={bustedPlayers} />
     }
   }
 
@@ -133,7 +140,7 @@ const PlayerSettings: React.FC<PlayerSettingsProps> = ({ player, setPlayer }) =>
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-[40vw] md:w-[20vw]">
       <StyledInput
         label="Player Name"
         value={name}
@@ -243,5 +250,37 @@ const BuyIn: React.FC<BuyInProps> = ({
     </div>
   );
 };
+
+const Statics: React.FC<StaticsProps> = ({ players, bustedPlayers }) => {
+  return (
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">Game Statistics</h2>
+      <div className="space-y-3">
+        {players.map((player) => (
+          <div key={player.id} className="flex justify-between items-center">
+            <span className="font-semibold">{player.name}</span>
+            {player.chipChange !== 0 && (
+              <span className={`font-bold ${
+                player.chipChange > 0 
+                  ? 'bg-white text-black px-2 rounded' 
+                  : 'text-white'
+              }`}>
+                {player.chipChange > 0 ? '+' : '-'}${Math.abs(player.chipChange)}
+              </span>
+            )}
+          </div>
+        ))}
+        {bustedPlayers.map((player) => (
+          <div key={player.id} className="flex justify-between items-center opacity-50">
+            <span className="font-semibold">{player.name} (Busted)</span>
+            <span className="text-white font-bold">
+              -${Math.abs(player.chipChange)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default Modal;

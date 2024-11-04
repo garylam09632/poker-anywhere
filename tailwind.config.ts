@@ -70,6 +70,7 @@ const config: Config = {
       },
       fontSize: {
         'xxs': '0.5rem',
+        'xs': '0.625rem',
       },
     },
     screens: {

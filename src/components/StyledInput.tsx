@@ -26,7 +26,7 @@ export const StyledInput: React.FC<StyledInputProps> = ({ label, value, onChange
         max={max}
         className={`w-full bg-black text-white border ${
           isFocused ? 'border-white' : 'border-gray-600'
-        } rounded-md px-3 py-2 focus:outline-none transition-colors duration-200 ease-in-out
+        } rounded-md px-3 py-3 focus:outline-none transition-colors duration-200 ease-in-out
         [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       />
