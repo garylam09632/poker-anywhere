@@ -38,7 +38,7 @@ export default class Player {
     this.position = position;
     this.location = location;
     this.currentBet = currentBet;
-    this.chipChange = chipChange;
+    this.chipChange = chipChange || 0;
     this.hasFolded = hasFolded;
     this.hasActed = hasActed;
     this.hasBusted = hasBusted;

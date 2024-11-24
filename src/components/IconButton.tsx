@@ -28,7 +28,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
           }
         `}
       >
-        <span className="w-8 h-8 flex items-center justify-center text-3xl hover:scale-110
+        <span className="w-8 h-8 md:w-8 md:h-8 flex items-center justify-center text-3xl hover:scale-110
           transition-all duration-200
           group-hover:text-white group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
         >

@@ -9,8 +9,19 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      width: {
+        '36': '9rem',
+        '64': '16rem',
+      },
+      height: {
+        '36': '9rem',
+        '64': '16rem',
+      },
       inset: {
         "1/5": '20%'
+      },
+      borderRadius: {
+        'medium': '193px',
       },
       colors: {
         'grey': '#101010',
@@ -74,9 +85,13 @@ const config: Config = {
       },
     },
     screens: {
+      // Mobile
+      'xxs': { 'raw': '(max-width: 480px)' },
       'xs': '480px',
       'sm': '640px',
+      // Tablet
       'md': '768px',
+      // Desktop
       'lg': '1024px',
       'xl': '1280px',
       '2xl': '1536px',

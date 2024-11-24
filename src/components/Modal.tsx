@@ -140,7 +140,7 @@ const PlayerSettings: React.FC<PlayerSettingsProps> = ({ player, setPlayer }) =>
   };
 
   return (
-    <div className="space-y-6 w-[40vw] md:w-[20vw]">
+    <div className="space-y-6 w-[75vw] md:w-[20vw]">
       <StyledInput
         label="Player Name"
         value={name}
@@ -196,7 +196,7 @@ const BuyIn: React.FC<BuyInProps> = ({
   };
 
   return (
-    <div className="w-[70vw] md:w-[40vw] space-y-6 overflow-x-hidden">
+    <div className="w-[75vw] md:w-[40vw] space-y-6 overflow-x-hidden">
       <StyledSelect
         label="Player"
         value={selectedPlayer?.id || ''}
@@ -253,21 +253,19 @@ const BuyIn: React.FC<BuyInProps> = ({
 
 const Statics: React.FC<StaticsProps> = ({ players, bustedPlayers }) => {
   return (
-    <div className="p-4">
+    <div className="p-4 w-[65vw] md:w-[40vw]">
       <h2 className="text-xl font-bold mb-4">Game Statistics</h2>
       <div className="space-y-3">
         {players.map((player) => (
           <div key={player.id} className="flex justify-between items-center">
             <span className="font-semibold">{player.name}</span>
-            {player.chipChange !== 0 && (
-              <span className={`font-bold ${
-                player.chipChange > 0 
-                  ? 'bg-white text-black px-2 rounded' 
-                  : 'text-white'
-              }`}>
-                {player.chipChange > 0 ? '+' : '-'}${Math.abs(player.chipChange)}
-              </span>
-            )}
+            <span className={`font-bold ${
+              player.chipChange > 0 
+                ? 'bg-white text-black px-2 rounded' 
+                : 'text-white'
+            }`}>
+              {player.chipChange > 0 ? '+' : player.chipChange < 0 ? '-' : ''}${Math.abs(player.chipChange)}
+            </span>
           </div>
         ))}
         {bustedPlayers.map((player) => (

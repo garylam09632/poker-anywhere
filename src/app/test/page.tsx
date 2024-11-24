@@ -9,20 +9,25 @@ import { Action, Stage } from '@/type/General';
 import { useModal } from '@/hooks/useModal';
 import { Position } from '@/type/enum/Position';
 import PlayerUnit from '@/components/PlayerUnit';
-import { ActionButtons } from '@/components/ActionButtons';
 import Chip from '@/components/Chip';
-import { PlayerCSSLocation, PlayerLocation } from '@/type/enum/Location';
+import { PlayerCSSLocation, PlayerCSSLocationMobile, PlayerLocation } from '@/type/enum/Location';
 import { ShowdownMode } from '@/type/enum/ShowdownMode';
 import Modal from '@/components/Modal';
 import { ModalType } from '@/type/enum/ModalType';
 import { IconButton } from '@/components/IconButton';
-import { FiSettings } from 'react-icons/fi';
-import { RiBarChartLine, RiMoneyDollarBoxLine } from 'react-icons/ri';
+import { FiLogOut, FiSettings } from 'react-icons/fi';
+import { RiArrowGoBackLine, RiBarChartLine, RiLogoutBoxLine, RiMoneyDollarBoxLine } from 'react-icons/ri';
+import { useLocation } from '@/hooks/useLocation';
+import { ActionButtons } from '@/components/ActionButtons';
+import { MobileActionButtons } from '@/components/MobileActionButtons';
+import { LocalStorage } from '@/utils/LocalStorage';
+import { History } from '@/type/History';
 
 const TEST = false;
 
 export default function Game() {
   const searchParams = useSearchParams();
+  const [loading, setLoading] = useState(true);
 
   // Game state
   const [players, setPlayers] = useState<Player[]>([]);
@@ -40,6 +45,9 @@ export default function Game() {
   const [bustedPlayers, setBustedPlayers] = useState<Player[]>([]);
   const [chipMovement, setChipMovement] = useState<'bet' | 'pot'>('bet');
   const [selectedRanks, setSelectedRanks] = useState<{[key: number]: number}>({});
+
+  // Mobile State
+  const [showBetControls, setShowBetControls] = useState(false);
 
   // State for trigger useEffect
   const [reset, setReset] = useState(false);
@@ -60,6 +68,9 @@ export default function Game() {
     setWithHeader: setModalWithHeader
   } = useModal(players, bustedPlayers, setPlayers, setBustedPlayers);
 
+  // Location
+  const { isMobile, playerLocation } = useLocation();
+
   // Use useRef to get a reference to the table div
   const tableRef = useRef<HTMLDivElement>(null);
 
@@ -67,7 +78,8 @@ export default function Game() {
   const activePlayer = players[activePlayerIndex];
   const canCheck = activePlayer ? currentBet === activePlayer.currentBet : false;
   const callAmount = activePlayer ? currentBet - activePlayer.currentBet : 0;
-  const minRaise = activePlayer ? Math.max(bigBlind, currentBet * 2) : bigBlind;
+  let minRaise = activePlayer ? Math.max(bigBlind, currentBet * 2) : bigBlind;
+  minRaise = minRaise > activePlayer?.chips ? activePlayer?.chips : minRaise;
 
   const positions = (length: number): string[] => {
     if (length === 2) {
@@ -86,6 +98,17 @@ export default function Game() {
       return [Position.BTN, Position.SB, Position.BB, Position.UTG, ...Array.from({ length: length - 7 }, (_, i) => `+${i+1}`), Position.LJ, Position.HJ, Position.CO];
     }
   }
+
+  useEffect(() => {
+    LocalStorage.set('history', []);
+    setLoading(false);
+    const tableContainer = document.getElementById('tableContainer');
+    if (tableContainer) {
+      tableContainer.ontouchmove = function(event: TouchEvent) {
+        event.preventDefault();
+      };
+    }
+  }, [])
 
   useEffect(() => {
     const playerCount = Number(searchParams.get('players') || 2);
@@ -188,15 +211,24 @@ export default function Game() {
       console.log("round not complete")
       // If there is only one player left, declare the winner
       moveToNextPlayer(players);
+      LocalStorage.set('history', [...LocalStorage.get('history').toObject<History[]>() || [], {
+        players,
+        currentBet,
+        pots,
+        stage,
+        dealerIndex,
+        activePlayerIndex,
+        initialed
+      }]);
     }
   }, [pots])
 
   useEffect(() => {
     if (isEndRound) {
-      console.log("isEndRound")
-      console.log("stage === 'River'", stage === 'River')
-      console.log("players.every(player => player.chips === 0)", players.every(player => player.chips === 0))
-      console.log("players.length - 1 === (players.filter(p => p.chips === 0).length + players.filter(p => p.hasFolded).length)", players.length - 1 === (players.filter(p => p.chips === 0).length + players.filter(p => p.hasFolded).length))
+      // console.log("isEndRound")
+      // console.log("stage === 'River'", stage === 'River')
+      // console.log("players.every(player => player.chips === 0)", players.every(player => player.chips === 0))
+      // console.log("players.length - 1 === (players.filter(p => p.chips === 0).length + players.filter(p => p.hasFolded).length)", players.length - 1 === (players.filter(p => p.chips === 0).length + players.filter(p => p.hasFolded).length))
       // If stage is river
       // If all active players are all in
       const activePlayers = players.filter(p => !p.hasFolded);
@@ -921,7 +953,7 @@ export default function Game() {
 
   const renderDeclareWinnerButton = () => {
     return (
-      <div className="relative h-32 sh:h-8 w-full flex items-center justify-center">
+      <div className="relative h-[10%] xxs:-translate-y-5 sh:h-8 w-full">
         <div 
           className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ease-in-out 
             ${selectedWinners.length > 0 || Object.keys(selectedRanks).length > 0 ? 'opacity-0' : 'opacity-100'}`}
@@ -931,7 +963,7 @@ export default function Game() {
           </div>
         </div>
         <div 
-          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ease-in-out 
+          className={`absolute inset-0 flex items-start justify-center transition-opacity duration-300 ease-in-out 
             ${selectedWinners.length > 0 || Object.keys(selectedRanks).length > 0 ? 'opacity-100' : 'opacity-0'}`}
         >
           <button 
@@ -1044,15 +1076,46 @@ export default function Game() {
     setModalWithHeader(true);
     openModal();
   }
+
+  const setGameState = (history: History) => {
+    const { players, currentBet, pots, stage, dealerIndex, activePlayerIndex, initialed } = history;
+    setPlayers(players)
+    setCurrentBet(currentBet)
+    setPots(pots)
+    setStage(stage)
+    setDealerIndex(dealerIndex)
+    setActivePlayerIndex(activePlayerIndex)
+    setInitialed(initialed)
+  }
+
+  const rollback = () => {
+    const history = LocalStorage.get('history').toObject<History[]>() || [];
+    if (history.length > 0) {
+      setGameState(history[history.length - 1]);
+    }
+  }
   
-  return (
+  return !loading && (
     <>
-      <div className="
-        h-full w-full bg-black text-white pt-10 flex flex-col items-center space-y-12 md:justify-start
-        sh:h-[130%] sh:space-y-5 mh:space-y-10
-      ">
+      <div
+        id="tableContainer"
+        className="
+          h-full w-full bg-black text-white pt-10 flex flex-col items-center overflow-hidden space-y-12 md:justify-start
+          sh:h-[130%] xxs:space-y-5 sh:space-y-5 mh:space-y-10
+        "
+      >
         {/* Add button area */}
-        <div className="absolute top-4 right-4 flex items-center space-x-2 z-10">
+        <div className="absolute top-4 right-4 md:top-4 md:right-4 xxs:top-2 xxs:right-2 flex items-center space-x-2 z-10">
+          <IconButton
+            icon={<RiArrowGoBackLine />}
+            onClick={rollback}
+            tooltip="Rollback"
+          />
+          <IconButton
+            icon={<RiLogoutBoxLine />}
+            onClick={() => window.location.href = '/'}
+            tooltip="Back"
+          />
           <IconButton
             icon={<RiMoneyDollarBoxLine />}
             onClick={onShowBuyIn}
@@ -1073,14 +1136,16 @@ export default function Game() {
           ref={tableRef}
           className="
             w-[100%] h-[60%]
-            xs:w-[100%] xs:h-[60%]
+            xxs:w-[95%] xxs:h-[85%]
+            xs:w-[100%] xs:h-[90%]
             md:w-[100%] md:h-[75%]
             sh:w-[100%] sh:h-[90%]
             mh:w-[90%] mh:h-[75%]
-            bg-grey rounded-full border-white border-4 xs:border-4 sm:border-6 md:border-8
+            bg-grey rounded-full md:rounded-full xxs:rounded-medium border-white border-4 xs:border-4 sm:border-6 md:border-8
             relative
             scale-85
           "
+          onClick={(e) => {setShowBetControls(false)}}
         >
           <div className="
             absolute
@@ -1090,9 +1155,12 @@ export default function Game() {
             -translate-y-1/2
             w-[92%]
             h-[90%]
+            xxs:w-[88%] xxs:h-[93%]
             md:w-[96%]
             md:h-[90%]
             rounded-full
+            md:rounded-full
+            xxs:rounded-medium
             border-2
             border-gray-400
             flex
@@ -1128,12 +1196,13 @@ export default function Game() {
           {mappingPlayers().map((player, index) => {
             let isActive = player.originalIndex === activePlayerIndex;
             let isEligible = pots[0].eligiblePlayers.includes(player.id);
+            const locationSettings = playerLocation[player.location];
             player.originalIndex = undefined;
             if (showdownMode) isActive = isEligible ? true : false;
             return (
               <div 
                 key={player.id} 
-                className={`absolute ${PlayerCSSLocation[player.location]}`}
+                className={`absolute ${locationSettings}`}
               >
                 <PlayerUnit
                   key={player.id}
@@ -1161,19 +1230,37 @@ export default function Game() {
           showdownMode ? (
             renderDeclareWinnerButton()
           ) : (
-            <ActionButtons
-              onFold={handleFold}
-              onCheck={handleCheck}
-              onCall={handleCall}
-              onRaise={handleRaise}
-              canCheck={canCheck}
-              callAmount={callAmount}
-              currentBet={currentBet}
-              playerChips={activePlayer ? activePlayer.chips : 0}
-              potSize={pots.reduce((total, pot) => total + pot.amount, 0)}
-              minRaise={minRaise}
-              disabled={!activePlayer}
-            />
+            isMobile ? (
+              <MobileActionButtons
+                onFold={handleFold}
+                onCheck={handleCheck}
+                onCall={handleCall}
+                onRaise={handleRaise}
+                setShowBetControls={setShowBetControls}
+                showBetControls={showBetControls}
+                canCheck={canCheck}
+                callAmount={callAmount}
+                currentBet={currentBet}
+                playerChips={activePlayer ? activePlayer.chips : 0}
+                potSize={pots.reduce((total, pot) => total + pot.amount, 0)}
+                minRaise={minRaise}
+                disabled={!activePlayer}
+              />
+            ) : (
+              <ActionButtons
+                onFold={handleFold}
+                onCheck={handleCheck}
+                onCall={handleCall}
+                onRaise={handleRaise}
+                canCheck={canCheck}
+                callAmount={callAmount}
+                currentBet={currentBet}
+                playerChips={activePlayer ? activePlayer.chips : 0}
+                potSize={pots.reduce((total, pot) => total + pot.amount, 0)}
+                minRaise={minRaise}
+                disabled={!activePlayer}
+              />
+            )
           )
         }
       </div>

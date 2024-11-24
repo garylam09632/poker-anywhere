@@ -1,6 +1,6 @@
-import { ChipCSSLocation, PlayerLocation } from '@/type/enum/Location';
+import { PlayerLocation } from '@/type/enum/Location';
 import Player from '@/type/interface/Player';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 interface ChipProps {
   amount: number;

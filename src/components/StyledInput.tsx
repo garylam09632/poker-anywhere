@@ -1,24 +1,35 @@
 import React, { useState } from 'react';
 
 interface StyledInputProps {
+  value?: string | number;
+  onChange: (value: string, event?: React.ChangeEvent<HTMLInputElement>) => void;
   label?: string;
-  value: string | number;
-  onChange: (value: string) => void;
   type?: 'text' | 'number';
   disabled?: boolean;
   min?: number;
   max?: number;
+  defaultValue?: number;
 }
 
-export const StyledInput: React.FC<StyledInputProps> = ({ label, value, onChange, type = 'text', disabled = false, min, max }) => {
+export const StyledInput: React.FC<StyledInputProps> = ({ 
+  label, 
+  value, 
+  onChange, 
+  type = 'text', 
+  disabled = false, 
+  min = -1, 
+  max = Infinity,
+  defaultValue,
+}) => {
   const [isFocused, setIsFocused] = useState(false);
 
   return (
     <div className="relative">
       <input
         type={type}
+        defaultValue={defaultValue}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value, e)}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         disabled={disabled}

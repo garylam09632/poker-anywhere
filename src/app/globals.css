@@ -18,11 +18,23 @@
 
 html, body, :root {
   height: 100%;
+  overflow: hidden;
+}
+
+html, body {
+  position: fixed;
+  width: 100%;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: none;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-start-rgb));
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 @layer utilities {
@@ -31,3 +43,18 @@ body {
   }
 }
 
+.w-64 {
+  width: 16rem;
+}
+
+.w-36 {
+  width: 9rem;
+}
+
+.h-64 {
+  height: 16rem;
+}
+
+.h-36 {
+  height: 9rem;
+}

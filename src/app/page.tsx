@@ -19,8 +19,8 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto p-8">
+    <div className="min-h-screen bg-black text-white flex justify-center items-center">
+      <div className="container mx-auto p-8 xxs:items-center xxs:pr-0 xxs:pl-0">
         <h1 className="text-4xl font-bold mb-2 text-center">Poker Anywhere!</h1>
         <p className="text-md mb-8 text-center text-gray-400">Focus on the game, not the chips</p>
         <div className="max-w-md mx-auto bg-black text-white p-8 rounded-lg shadow-2xl border border-gray-700">

@@ -1,3 +1,4 @@
+import { useLocation } from '@/hooks/useLocation';
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 
 interface SliderPoint {
@@ -18,6 +19,7 @@ export const BetSlider: React.FC<BetSliderProps> = ({ points, value, onChange, d
   const sliderRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
   const [continuousValue, setContinuousValue] = useState(value);
+  const { isMobile } = useLocation();
 
   // Add this new effect to sync with external value
   useEffect(() => {
@@ -64,6 +66,9 @@ export const BetSlider: React.FC<BetSliderProps> = ({ points, value, onChange, d
   }, [handleSliderChange]);
 
   useEffect(() => {
+    // console.log("continuousValue", continuousValue)
+    // console.log("minValue", minValue)
+    // console.log("maxValue", maxValue)
     // Update continuousValue when min/max values change
     if (continuousValue < minValue) {
       setContinuousValue(minValue);
@@ -106,7 +111,7 @@ export const BetSlider: React.FC<BetSliderProps> = ({ points, value, onChange, d
         ></div>
         <div 
           ref={thumbRef}
-          className={`absolute w-4 h-4 bg-white border-2 border-gray-500 rounded-full top-1/2 -translate-x-1/2 -translate-y-1/2 ${disabled ? 'cursor-not-allowed' : 'cursor-grab'}`}
+          className={`absolute ${isMobile ? 'w-5' : 'w-4'} ${isMobile ? 'h-5' : 'h-4'} bg-white border-2 border-gray-500 rounded-full top-1/2 -translate-x-1/2 -translate-y-1/2 ${disabled ? 'cursor-not-allowed' : 'cursor-grab'}`}
         ></div>
       </div>
       <div className="w-full flex justify-between text-xs mt-2">

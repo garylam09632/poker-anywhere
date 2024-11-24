@@ -3,6 +3,7 @@ import { StyledButton } from './StyledButton';
 import { BetSlider } from './BetSlider';
 import { useSearchParams } from 'next/navigation';
 import { StyledInput } from './StyledInput';
+import Player from '@/type/interface/Player';
 
 interface ActionButtonsProps {
   onFold: () => void;
@@ -29,10 +30,11 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   playerChips,
   potSize,
   minRaise,
-  disabled
+  disabled,
 }) => {
   const searchParams = useSearchParams();
   const [raiseAmount, setRaiseAmount] = useState(minRaise);
+  const [inputValue, setInputValue] = useState(String(minRaise));
   const [canRaise, setCanRaise] = useState(playerChips > minRaise);
   const bb = Number(searchParams.get('bigBlind') || 2);
 
@@ -49,16 +51,17 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   }, [potSize, playerChips, minRaise]);
 
   const upperOptions = [
-    { label: '2x', value: (currentBet || bb) * 2 },
-    { label: '3x', value: (currentBet || bb) * 3 },
-    { label: '4x', value: (currentBet || bb) * 4 },
+    { label: '33%', value: Math.floor(potSize * 0.33) },
+    { label: '50%', value: Math.floor(potSize * 0.5) },
+    { label: '75%', value: Math.floor(potSize * 0.75) },
+    { label: '100%', value: potSize },
     { label: 'All-In', value: playerChips }
   ];
 
   const lowerOptions = [
-    { label: '33%', value: potSize * 0.33 },
-    { label: '50%', value: potSize * 0.5 },
-    { label: '75%', value: potSize * 0.75 }
+    { label: '2x', value: (currentBet || bb) * 2 },
+    { label: '3x', value: (currentBet || bb) * 3 },
+    { label: '4x', value: (currentBet || bb) * 4 },
   ];
   
   useEffect(() => {
@@ -66,11 +69,27 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
     setRaiseAmount(playerChips > minRaise ? minRaise : playerChips);
   }, [minRaise, playerChips]);
 
-  const handleRaiseAmountChange = (amount: number) => {
+  // Represents raise amount input that are controlled such as button & slider
+  const handleControlledRaiseAmountChange = (amount: number) => {
     if (amount <= playerChips) {
       setRaiseAmount(amount);
+      setInputValue(String(amount));
+    }
+  }
+
+  // Represents raise amount input that are uncontrolled such as number input
+  const handleRaiseAmountChange = (value: string, event?: React.ChangeEvent<HTMLInputElement>) => {
+    const numValue = Number(value);
+    setInputValue(value);
+    
+    if (numValue >= minRaise && numValue <= playerChips) {
+      setRaiseAmount(numValue);
+    } else if (numValue > playerChips) {
+      setRaiseAmount(playerChips);
     }
   };
+
+  console.log("minRaise", minRaise)
   // sh:absolute sh:bottom-0 sh:translate-y-24 sh:scale-90
   return (
     <div className="
@@ -95,8 +114,8 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             {upperOptions.map((option) => (
               <StyledButton 
                 key={option.label}
-                onClick={() => handleRaiseAmountChange(option.value)} 
-                disabled={disabled || option.value > playerChips}
+                onClick={() => handleControlledRaiseAmountChange(option.value)} 
+                disabled={disabled || option.value > playerChips || option.value < minRaise}
               >
                 {option.label}
               </StyledButton>
@@ -107,8 +126,8 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
               {lowerOptions.map((option) => (
                 <StyledButton 
                   key={option.label}
-                  onClick={() => handleRaiseAmountChange(option.value)} 
-                  disabled={disabled || option.value > playerChips}
+                  onClick={() => handleControlledRaiseAmountChange(option.value)} 
+                  disabled={disabled || option.value > playerChips || option.value < minRaise}
                 >
                   {option.label}
                 </StyledButton>
@@ -116,17 +135,16 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             </div>
             <div className="flex flex-row items-center w-3/4 space-x-4">
               <StyledInput
-                value={raiseAmount}
-                onChange={(value) => handleRaiseAmountChange(Number(value))}
+                value={inputValue}
+                onChange={(value, e) => handleRaiseAmountChange(value, e)}
                 type="number"
-                min={minRaise}
                 max={playerChips}
                 disabled={disabled}
               />
               <BetSlider
                 points={sliderPoints}
                 value={raiseAmount}
-                onChange={handleRaiseAmountChange}
+                onChange={handleControlledRaiseAmountChange}
                 disabled={disabled}
                 minValue={minRaise}
                 maxValue={playerChips}

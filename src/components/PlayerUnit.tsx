@@ -5,10 +5,11 @@ import { Action } from '@/type/General';
 import Player from '@/type/interface/Player';
 import React, { useEffect, useState } from 'react';
 import Chip from './Chip';
-import { ChipCSSLocation, PlayerLocation } from '@/type/enum/Location';
+import { ChipCSSLocation, ChipCSSLocationMobile, PlayerLocation } from '@/type/enum/Location';
 import { RiCheckLine, RiSettings4Line } from 'react-icons/ri';
 import { ShowdownMode } from '@/type/enum/ShowdownMode';
 import RankSelector from './RankSelector';
+import { useLocation } from '@/hooks/useLocation';
 
 interface PlayerUnitProps {
   player: Player;
@@ -54,6 +55,9 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
   const [showContent, setShowContent] = useState<ContentType>('chips');
   const [isHovered, setIsHovered] = useState(false);
 
+  // Location
+  const { isMobile, chipLocation, containerStyle } = useLocation();
+  
   // const [isResized, setIsResized] = useState(false);
   let positionEllipseClass = isActive ? "bg-white border-black border-4 text-black" : "bg-black border-white border-4 text-white"
   let chipEllipseClass = isActive ? "bg-white border-black border-4 text-black" : "bg-black border-white border-4 text-white"
@@ -81,8 +85,8 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
   }, [showdownMode, isEligible, player.hasBusted]);
 
   useEffect(() => {
-    setCss(ChipCSSLocation[player.location])
-  }, [])
+    setCss(chipLocation[player.location])
+  }, [isMobile, player.location])
 
   const getAvailableActions = (): Action[] => {
     const actions: Action[] = ['Fold'];
@@ -151,36 +155,8 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
     }
   };
 
-  const getContainerStyle = (position: PlayerLocation) => {
-    switch (position) {
-      case PlayerLocation.BottomCenter:
-        return "w-1 h-64";
-      case PlayerLocation.BottomLeft:
-        return "w-64 h-64";
-      case PlayerLocation.LeftCenter:
-        return "w-64 h-36";
-      case PlayerLocation.LeftBottom:
-        return "w-64 h-36";
-      case PlayerLocation.TopLeft:
-        return "w-64 h-64";
-      case PlayerLocation.TopCenter:
-        return "w-1 h-64";
-      case PlayerLocation.TopRight:
-        return "w-48 h-64";
-      case PlayerLocation.RightCenter:
-        return "w-64 h-36";
-      case PlayerLocation.RightBottom:
-        return "w-64 h-36";
-      case PlayerLocation.BottomRight:
-        return "w-64 h-64";
-      default:
-        return "w-0";
-    }
-  }
-
   const onPlayerSettingsClick = () => {
     if (showdownMode) return;
-    console.log("onPlayerSettingsClicked");
     onSelect(player);
     openModal();
   }
@@ -192,7 +168,7 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
         justify-center scale-75 md:scale-100
         transition-all duration-300 ease-in-out
         group
-        ${showdownMode ? "w-0" : getContainerStyle(player.location)}
+        ${showdownMode ? "w-0" : containerStyle(player.location)}
         ${player.hasFolded || player.hasBusted ? "brightness-50" : ""} 
       `}
     >
