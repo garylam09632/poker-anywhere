@@ -89,7 +89,6 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
     }
   };
 
-  console.log("minRaise", minRaise)
   // sh:absolute sh:bottom-0 sh:translate-y-24 sh:scale-90
   return (
     <div className="

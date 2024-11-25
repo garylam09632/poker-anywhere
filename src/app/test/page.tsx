@@ -53,6 +53,7 @@ export default function Game() {
   const [reset, setReset] = useState(false);
   const [initialed, setInitialed] = useState(false);
   const [isEndRound, setIsEndRound] = useState(false);
+  const [isSwitchState, setIsSwitchState] = useState(false);
 
   // Buy in state
   const {
@@ -109,6 +110,10 @@ export default function Game() {
       };
     }
   }, [])
+
+  useEffect(() => {
+    if (isSwitchState) setIsSwitchState(false);
+  }, [isSwitchState])
 
   useEffect(() => {
     const playerCount = Number(searchParams.get('players') || 2);
@@ -189,6 +194,16 @@ export default function Game() {
       setPots(pots)
       setPlayers(players);
       setInitialed(false);
+
+      LocalStorage.set('history', [...LocalStorage.get('history').toObject<History[]>() || [], {
+        players,
+        currentBet,
+        pots,
+        stage,
+        dealerIndex,
+        activePlayerIndex,
+        initialed
+      }]);
     } 
   }, [initialed, players]);
 
@@ -201,16 +216,8 @@ export default function Game() {
     } 
 
     if (!players[activePlayerIndex]?.hasActed) return;
-    // Check if the round is complete
-    if (isRoundComplete(players, currentBet)) {
-      console.log("round complete")
-      // Update pots after each action
-      setChipMovement('pot');
-      setIsEndRound(true);
-    } else {
-      console.log("round not complete")
-      // If there is only one player left, declare the winner
-      moveToNextPlayer(players);
+    if (!isSwitchState) {
+      // If isn't switching state, set the history
       LocalStorage.set('history', [...LocalStorage.get('history').toObject<History[]>() || [], {
         players,
         currentBet,
@@ -220,6 +227,15 @@ export default function Game() {
         activePlayerIndex,
         initialed
       }]);
+    }
+    // Check if the round is complete
+    if (isRoundComplete(players, currentBet)) {
+      // Update pots after each action
+      setChipMovement('pot');
+      setIsEndRound(true);
+    } else {
+      // If there is only one player left, declare the winner
+      moveToNextPlayer(players);
     }
   }, [pots])
 
@@ -253,10 +269,6 @@ export default function Game() {
       setReset(false);
     }
   }, [reset]);
-
-  useEffect(() => {
-    console.log("selectedRanks", selectedRanks)
-  }, [selectedRanks])
 
   // 20240522007G
   // 20241002004C 
@@ -556,7 +568,6 @@ export default function Game() {
   };
 
   const endHand = () => {
-    console.log("endHand")
     setShowdownMode(true);
     if (getPlayerNotFolded().length > 2) {
       let selectedRanks: { [key: number]: number } = {};
@@ -627,7 +638,7 @@ export default function Game() {
           isFullPaid = true;
         }
       }
-      console.log("potHasAllIn", potHasAllIn, "isFullPaid", isFullPaid)
+      // console.log("potHasAllIn", potHasAllIn, "isFullPaid", isFullPaid)
       if (isFullPaid) {
         // Pot distribution is set, deduct the distribution from the remaining bets
         // Every stage each pot distribution is clear to be {}, therefore bet will not be deducted 
@@ -656,10 +667,8 @@ export default function Game() {
         remainingBets = 0;
       }
 
-      console.log("Loop", i)
       // All in players exist
       if (potHasAllIn && !isFullPaid) {
-        console.log("potHasAllIn && !isFullPaid")
         // If the remaining bet is 0, the is likely a call action
         if (remainingBets === 0) break;
         if (pot.baseAmount === undefined || pot.baseAmount === null) {
@@ -668,23 +677,17 @@ export default function Game() {
         }
         if (pot.paidPlayers && pot.paidPlayers.includes(activePlayer.id)) continue;
         if (remainingBets >= pot.baseAmount) {
-          console.log("remainingBets >= pot.baseAmount")
           // If the remaining bet is greater than the this pot amount, the new pot will be created by the current player
           if (pot.baseUpdatedBy) newPotBaseUpdatedBy = activePlayer.id;
-          console.log("before", remainingBets)
           remainingBets -= pot.baseAmount;
-          console.log("after", remainingBets)
-          console.log("distribution", distribution)
           console.log( { potIndex: i, bet: pot.baseAmount - distribution, paidPlayers: [...(pot.paidPlayers || []), activePlayer.id] }  )
           potsUpdate.push({ potIndex: i, bet: pot.baseAmount - distribution, paidPlayers: [...(pot.paidPlayers || []), activePlayer.id] });
         } else {
-          console.log("remainingBets < pot.baseAmount")
           // If the remaining bet is less than the this pot amount, new pot need to be created by the current baseUpdatedBy
           if (pot.baseUpdatedBy) newPotBaseUpdatedBy = pot.baseUpdatedBy;
           let bet = remainingBets - (pot.baseAmount - remainingBets); // 5600 - (6600 - 5600)
           potsUpdate.push({ potIndex: i, bet, baseAmount: remainingBets, baseUpdatedBy: activePlayer.id, paidPlayers: [...(pot.paidPlayers || []), activePlayer.id] });
           remainingBets = pot.baseAmount - remainingBets; // 1000
-          // console.log(`{ potIndex: ${i}, bet: ${bet}, baseAmount: ${remainingBets} }`)
         }
         // If after the loop, remainingBets is still greater than 0, it means the remaining bets are for the main pot
         // Will create a new pot for the remaining bets afterwards
@@ -697,7 +700,6 @@ export default function Game() {
     }
 
     // Update the pots
-    console.log("potsUpdate", potsUpdate)
     for (let { potIndex, bet, baseAmount, baseUpdatedBy, paidPlayers } of potsUpdate) {
       const pot = newPots[potIndex];
       pot.amount += bet;
@@ -713,7 +715,6 @@ export default function Game() {
     }
 
     if (remainingBets > 0) {
-      console.log("remainingBets > 0")
       // if (isLessThanPotHighestBet) {
       //   eligiblePlayers = eligiblePlayers.filter(id => !newPots.map(p => p.baseUpdatedBy).includes(id));
       // }
@@ -862,7 +863,6 @@ export default function Game() {
   };
 
   const declareWinnerRanking = () => {
-    console.log("declareWinnerRanking", selectedRanks)
     const newPots = [...pots];
     const newPlayers = [...players];
 
@@ -872,7 +872,6 @@ export default function Game() {
       return acc;
     }, {});
     printPots(newPots);
-    console.log("sortedRanks", sortedRanks)
 
     const settle = (playerIds: string[]) => {
       let potIndex: number[] = [];
@@ -900,11 +899,8 @@ export default function Game() {
     
     // for each rank, distribute the pot evenly to the players
     for (let [rank, playerIds] of Object.entries(sortedRanks)) {
-      console.log("playerIds", playerIds, "rank", rank)
       settle(playerIds);
     }
-    console.log("newPlayers", newPlayers)
-    console.log("newPots", newPots)
     setPlayers(newPlayers);
     setShowdownMode(false);
     setSelectedRanks({});
@@ -1046,7 +1042,6 @@ export default function Game() {
   };
 
   const handleSelectWinner = (playerId: number, rank?: number) => {
-    console.log("playerId", playerId)
     const activePlayers = players.filter(p => !p.hasFolded);
     if (activePlayers.length === 2) {
       toggleWinner(playerId);
@@ -1085,14 +1080,27 @@ export default function Game() {
     setStage(stage)
     setDealerIndex(dealerIndex)
     setActivePlayerIndex(activePlayerIndex)
-    setInitialed(initialed)
+    setInitialed(false)
   }
 
   const rollback = () => {
     const history = LocalStorage.get('history').toObject<History[]>() || [];
     if (history.length > 0) {
+      // Set to the previous state
+      history.pop();
+      if (history.length === 0) return;
+      setIsSwitchState(true);
       setGameState(history[history.length - 1]);
+      // Remove the state at the end of history
+      LocalStorage.set('history', history);
     }
+  }
+
+  const printHistory = () => {
+    // Print the history in a readable format
+    LocalStorage.get('history').toObject<History[]>()?.forEach((history, index) => {
+      console.log(`History ${index + 1}:`, history)
+    })
   }
   
   return !loading && (
