@@ -1,3 +1,6 @@
+import { KeyboardShortcut } from "@/constants/DefaultKeyboardShortCut";
+import { LocalStorage } from "./LocalStorage";
+
 export class Helper {
   static formatAbbreviatedNumber = (value: number): string => {
     if (value >= 1000000000) {
@@ -25,4 +28,12 @@ export class Helper {
     }
     return parseFloat(cleanValue);
   };
+
+  static getKeyboardShortcut = (key: keyof typeof KeyboardShortcut): string => {
+    let shortcutSetting = LocalStorage.get('shortcutSetting').toObject() as typeof KeyboardShortcut | null;
+    if (!shortcutSetting) {
+      shortcutSetting = KeyboardShortcut;
+    }
+    return shortcutSetting[key];
+  }
 }

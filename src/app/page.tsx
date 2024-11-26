@@ -20,7 +20,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black text-white flex justify-center items-center">
-      <div className="container mx-auto p-8 xxs:items-center xxs:pr-0 xxs:pl-0">
+      <div className="container mx-auto p-8 xxs:items-center xxs:pr-5 xxs:pl-5">
         <h1 className="text-4xl font-bold mb-2 text-center">Poker Anywhere!</h1>
         <p className="text-md mb-8 text-center text-gray-400">Focus on the game, not the chips</p>
         <div className="max-w-md mx-auto bg-black text-white p-8 rounded-lg shadow-2xl border border-gray-700">
@@ -28,8 +28,12 @@ export default function Home() {
             <StyledInput
               label="Players"
               value={playerCount}
-              onChange={(value) => setPlayerCount(Math.max(2, Math.min(10, Number(value))).toString())}
-              type="number"
+              onChange={(value) => { if (isNaN(Number(value))) return; setPlayerCount(value); }}
+              onBlur={(value) => { 
+                if (Number(value) < 2) setPlayerCount('2');
+                if (Number(value) > 10) setPlayerCount('10');
+              }}
+              type="text"
             />
             <StyledInput
               label="SB"

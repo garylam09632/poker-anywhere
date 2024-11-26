@@ -1,0 +1,15 @@
+export const KeyboardShortcut = {
+  "Action1": "Z",
+  "Action2": "X",
+  "Action3": "C",
+  "BetControlP1": "Q",
+  "BetControlP2": "W",
+  "BetControlP3": "E",
+  "BetControlP4": "R",
+  "BetControlP5": "T",
+  "BetControlX1": "A",
+  "BetControlX2": "S",
+  "BetControlX3": "D",
+  "SliderLeft": "ArrowLeft",
+  "SliderRight": "ArrowRight",
+}

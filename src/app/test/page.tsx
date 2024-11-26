@@ -22,6 +22,7 @@ import { ActionButtons } from '@/components/ActionButtons';
 import { MobileActionButtons } from '@/components/MobileActionButtons';
 import { LocalStorage } from '@/utils/LocalStorage';
 import { History } from '@/type/History';
+import { KeyboardShortcut } from '@/constants/DefaultKeyboardShortCut';
 
 const TEST = false;
 
@@ -102,6 +103,7 @@ export default function Game() {
 
   useEffect(() => {
     LocalStorage.set('history', []);
+    LocalStorage.set('shortcutSetting', KeyboardShortcut);
     setLoading(false);
     const tableContainer = document.getElementById('tableContainer');
     if (tableContainer) {
@@ -109,6 +111,19 @@ export default function Game() {
         event.preventDefault();
       };
     }
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // If the key is control, enable shortcut key mode
+      if (event.key.toLowerCase() === 'control') {
+        if (LocalStorage.get('km').value) {
+          LocalStorage.remove('km');
+        } else {
+          LocalStorage.set('km', "yes");
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
   }, [])
 
   useEffect(() => {
@@ -1113,16 +1128,18 @@ export default function Game() {
         "
       >
         {/* Add button area */}
-        <div className="absolute top-4 right-4 md:top-4 md:right-4 xxs:top-2 xxs:right-2 flex items-center space-x-2 z-10">
-          <IconButton
-            icon={<RiArrowGoBackLine />}
-            onClick={rollback}
-            tooltip="Rollback"
-          />
+        <div className="absolute top-4 left-4 md:top-4 md:left-4 xxs:top-2 xxs:left-2 flex items-center space-x-2 z-10">
           <IconButton
             icon={<RiLogoutBoxLine />}
             onClick={() => window.location.href = '/'}
             tooltip="Back"
+          />
+        </div>
+        <div className="absolute !mt-0 top-4 right-4 md:top-4 md:right-4 xxs:top-2 xxs:right-2 flex items-center space-x-2 z-10">
+          <IconButton
+            icon={<RiArrowGoBackLine />}
+            onClick={rollback}
+            tooltip="Rollback"
           />
           <IconButton
             icon={<RiMoneyDollarBoxLine />}

@@ -1,9 +1,10 @@
 import { ChipCSSLocation, PlayerCSSLocation, PlayerCSSLocationMobile, PlayerLocation } from "@/type/enum/Location";
 import { ChipCSSLocationMobile } from "@/type/enum/Location";
 import { useMediaQuery } from "./useMediaQuery";
+import { mobile } from "@/constants/MediaQuery";
 
 export const useLocation = () => {
-  const isMobile = useMediaQuery('(max-width: 480px)');
+  const isMobile = useMediaQuery(mobile);
 
   const chipLocation = isMobile ? ChipCSSLocationMobile : ChipCSSLocation;
   const playerLocation = isMobile ? PlayerCSSLocationMobile : PlayerCSSLocation;

@@ -4,6 +4,7 @@ import { BetSlider } from './BetSlider';
 import { useSearchParams } from 'next/navigation';
 import { StyledInput } from './StyledInput';
 import Player from '@/type/interface/Player';
+import { KeyboardShortcut } from '@/constants/DefaultKeyboardShortCut';
 
 interface ActionButtonsProps {
   onFold: () => void;
@@ -17,6 +18,12 @@ interface ActionButtonsProps {
   potSize: number;
   minRaise: number;
   disabled: boolean;
+}
+
+type BetControlOption = {
+  label: string;
+  value: number;
+  bind: keyof typeof KeyboardShortcut;
 }
 
 export const ActionButtons: React.FC<ActionButtonsProps> = ({
@@ -50,18 +57,18 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
     return points.filter(point => point.value <= playerChips && point.value >= minRaise);
   }, [potSize, playerChips, minRaise]);
 
-  const upperOptions = [
-    { label: '33%', value: Math.floor(potSize * 0.33) },
-    { label: '50%', value: Math.floor(potSize * 0.5) },
-    { label: '75%', value: Math.floor(potSize * 0.75) },
-    { label: '100%', value: potSize },
-    { label: 'All-In', value: playerChips }
+  const upperOptions: BetControlOption[] = [
+    { label: '33%', value: Math.floor(potSize * 0.33), bind: "BetControlP1" },
+    { label: '50%', value: Math.floor(potSize * 0.5), bind: "BetControlP2" },
+    { label: '75%', value: Math.floor(potSize * 0.75), bind: "BetControlP3" },
+    { label: '100%', value: potSize, bind: "BetControlP4" },
+    { label: 'All-In', value: playerChips, bind: "BetControlP5" }
   ];
 
-  const lowerOptions = [
-    { label: '2x', value: (currentBet || bb) * 2 },
-    { label: '3x', value: (currentBet || bb) * 3 },
-    { label: '4x', value: (currentBet || bb) * 4 },
+  const lowerOptions: BetControlOption[] = [
+    { label: '2x', value: (currentBet || bb) * 2, bind: "BetControlX1" },
+    { label: '3x', value: (currentBet || bb) * 3, bind: "BetControlX2" },
+    { label: '4x', value: (currentBet || bb) * 4, bind: "BetControlX3" },
   ];
   
   useEffect(() => {
@@ -97,13 +104,13 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       <div className="w-full flex justify-between mb-4 space-x-10">
         <div id="actionRegionContainer" className="flex items-center w-1/2 md:w-1/2 sh:w-1/2">
           <div className="flex flex-col space-x-0 space-y-4 w-full justify-between md:flex-row md:space-x-4 md:space-y-0">
-            <StyledButton onClick={onFold} disabled={disabled}>Fold</StyledButton>
+            <StyledButton onClick={onFold} disabled={disabled} bind={"Action1"}>Fold</StyledButton>
             {canCheck ? (
-              <StyledButton onClick={onCheck} disabled={disabled}>Check</StyledButton>
+              <StyledButton onClick={onCheck} disabled={disabled} bind={"Action2"}>Check</StyledButton>
             ) : (
-              <StyledButton onClick={onCall} disabled={disabled}>Call ${playerChips < callAmount ? playerChips : callAmount}</StyledButton>
+              <StyledButton onClick={onCall} disabled={disabled} bind={"Action2"}>Call ${playerChips < callAmount ? playerChips : callAmount}</StyledButton>
             )}
-            <StyledButton onClick={() => onRaise(raiseAmount, canRaise && raiseAmount !== playerChips)}>
+            <StyledButton onClick={() => onRaise(raiseAmount, canRaise && raiseAmount !== playerChips)} bind={"Action3"}>
               {canRaise && raiseAmount !== playerChips ? `Raise $${raiseAmount}` : `All-In $${playerChips}`}
             </StyledButton>
           </div>
@@ -115,6 +122,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
                 key={option.label}
                 onClick={() => handleControlledRaiseAmountChange(option.value)} 
                 disabled={disabled || option.value > playerChips || option.value < minRaise}
+                bind={option.bind}
               >
                 {option.label}
               </StyledButton>
@@ -127,6 +135,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
                   key={option.label}
                   onClick={() => handleControlledRaiseAmountChange(option.value)} 
                   disabled={disabled || option.value > playerChips || option.value < minRaise}
+                  bind={option.bind}
                 >
                   {option.label}
                 </StyledButton>
@@ -134,11 +143,12 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             </div>
             <div className="flex flex-row items-center w-3/4 space-x-4">
               <StyledInput
+                id="raiseAmountInput"
                 value={inputValue}
                 onChange={(value, e) => handleRaiseAmountChange(value, e)}
                 type="number"
                 max={playerChips}
-                disabled={disabled}
+                autoFocus={true}
               />
               <BetSlider
                 points={sliderPoints}
@@ -147,6 +157,12 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
                 disabled={disabled}
                 minValue={minRaise}
                 maxValue={playerChips}
+                onKeyDown={(e) => {
+                  if (e.key === 'Tab') {
+                    e.preventDefault();
+                    document.getElementById("raiseAmountInput")?.focus();
+                  }
+                }}
               />
             </div>
           </div>

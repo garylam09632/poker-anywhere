@@ -19,11 +19,19 @@ class JsonValue {
 export class LocalStorage {
 
   static get(key: string): JsonValue {
-    return new JsonValue(localStorage.getItem(key) ? Crypto.decrypt(localStorage.getItem(key) || "") : null);
+    try {
+      return new JsonValue(localStorage.getItem(key) ? Crypto.decrypt(localStorage.getItem(key) || "") : null);
+    } catch (err) {
+      return new JsonValue(null);
+    }
   }
 
   static set(key: string, value: any): void {
     localStorage.setItem(key, Crypto.encrypt(typeof value === 'object' ? JSON.stringify(value) : value));
+  }
+
+  static remove(key: string): void {
+    localStorage.removeItem(key);
   }
 
   static getTheme(): string {

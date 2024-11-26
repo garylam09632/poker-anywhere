@@ -9,13 +9,22 @@ interface SliderPoint {
 interface BetSliderProps {
   points: SliderPoint[];
   value: number;
-  onChange: (value: number) => void;
   disabled?: boolean;
   minValue: number;
   maxValue: number;
+  onChange: (value: number) => void;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
 }
 
-export const BetSlider: React.FC<BetSliderProps> = ({ points, value, onChange, disabled = false, minValue, maxValue }) => {
+export const BetSlider: React.FC<BetSliderProps> = ({ 
+  points, 
+  value, 
+  disabled = false, 
+  minValue, 
+  maxValue, 
+  onChange, 
+  onKeyDown,
+}) => {
   const sliderRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
   const [continuousValue, setContinuousValue] = useState(value);
@@ -65,6 +74,34 @@ export const BetSlider: React.FC<BetSliderProps> = ({ points, value, onChange, d
     document.addEventListener('touchend', handleEnd);
   }, [handleSliderChange]);
 
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    console.log("Key pressed:", e.key);  // Debug log
+    if (disabled) return;
+
+    e.preventDefault();
+    
+    const step = maxValue * 0.01; // Calculate 5% of maxValue
+    
+    if (e.key === 'ArrowLeft') {
+      const newValue = Math.max(minValue, value - step);
+      // console.log("New value (left):", newValue);
+      onChange(newValue);
+    } else if (e.key === 'ArrowRight') {
+      const newValue = Math.min(maxValue, value + step);
+      // console.log("New value (right):", newValue);
+      onChange(newValue);
+    }
+    onKeyDown?.(e);
+  }, [value, onChange, minValue, maxValue, disabled, onKeyDown]);
+
+  // Add focus test
+  const handleClick = () => {
+    if (sliderRef.current) {
+      sliderRef.current.focus();
+      console.log("Slider focused");
+    }
+  };
+
   useEffect(() => {
     // console.log("continuousValue", continuousValue)
     // console.log("minValue", minValue)
@@ -89,9 +126,18 @@ export const BetSlider: React.FC<BetSliderProps> = ({ points, value, onChange, d
     <div className="w-full relative">
       <div 
         ref={sliderRef}
-        className={`w-full h-2 bg-gray-200 rounded-lg relative ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+        className={`
+          w-full h-2 bg-gray-200 rounded-lg relative 
+          ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
+          focus:outline-none
+          focus:shadow-[0_0_15px_rgba(255,255,255,0.5)]
+          transition-shadow duration-200
+        `}        
         onMouseDown={handleStart}
         onTouchStart={handleStart}
+        onClick={handleClick}
+        tabIndex={disabled ? -1 : 0}
+        onKeyDown={handleKeyDown}
       >
         {filteredPoints.map((point, index) => (
           <div 
