@@ -66,6 +66,7 @@ const Modal: React.FC<ModalProps> = ({
 
   const handleClose = () => {
     // setIsClosing(true);
+    (document.getElementById('raiseAmountInput') as HTMLInputElement)?.focus();
     setTimeout(onClose, 150);
   };
 

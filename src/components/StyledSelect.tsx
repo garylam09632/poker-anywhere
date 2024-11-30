@@ -74,7 +74,7 @@ export const StyledSelect: React.FC<StyledSelectProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute w-full mt-1 bg-black border border-gray-600 rounded-md shadow-lg z-10">
+        <div className="absolute w-full mt-1 bg-black border border-gray-600 rounded-md shadow-lg z-20 max-h-64 overflow-y-auto">
           {options.map((option) => (
             <div
               key={option.value}

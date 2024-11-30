@@ -121,9 +121,42 @@ export default function Game() {
         }
       }
     };
-
+    
+    const handleBlur = (e: FocusEvent) => {
+      // console.log("Focus lost:", e.target);
+      setTimeout(() => {
+        if (document.activeElement?.tagName === 'BODY') {
+          (document.getElementById('raiseAmountInput') as HTMLInputElement)?.focus();
+        }
+      }, 500);
+      
+      const target = e.target as HTMLElement;
+      const relatedTarget = e.relatedTarget as HTMLElement;
+      // console.log("relatedTarget:", relatedTarget);
+      
+      // // Check if the blur is from raise amount controls
+      // if (target.id === 'raiseAmountInput' || target.id === 'raiseAmountSlider') {
+      //   // Only allow focus to move between the input and slider
+      //   if (!relatedTarget || 
+      //       (relatedTarget.id !== 'raiseAmountInput' && 
+      //        relatedTarget.id !== 'raiseAmountSlider')) {
+      //     // Refocus the input if focus is moving outside raise controls
+      //     const raiseInput = document.getElementById('raiseAmountInput') as HTMLInputElement;
+      //     if (raiseInput) {
+      //       raiseInput.focus();
+      //     }
+      //   }
+      // }
+    };
+    
     window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    // Listen for both focus and blur events
+    document.addEventListener('blur', handleBlur, true);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+      document.removeEventListener('blur', handleBlur, true);
+    }
   }, [])
 
   useEffect(() => {

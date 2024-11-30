@@ -7,6 +7,7 @@ interface SliderPoint {
 }
 
 interface BetSliderProps {
+  id?: string;
   points: SliderPoint[];
   value: number;
   disabled?: boolean;
@@ -17,6 +18,7 @@ interface BetSliderProps {
 }
 
 export const BetSlider: React.FC<BetSliderProps> = ({ 
+  id,
   points, 
   value, 
   disabled = false, 
@@ -124,7 +126,8 @@ export const BetSlider: React.FC<BetSliderProps> = ({
   
   return (
     <div className="w-full relative">
-      <div 
+      <div
+        id={id} 
         ref={sliderRef}
         className={`
           w-full h-2 bg-gray-200 rounded-lg relative 

@@ -151,6 +151,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
                 autoFocus={true}
               />
               <BetSlider
+                id="raiseAmountSlider"
                 points={sliderPoints}
                 value={raiseAmount}
                 onChange={handleControlledRaiseAmountChange}
