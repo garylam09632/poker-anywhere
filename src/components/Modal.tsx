@@ -7,6 +7,8 @@ import { useState, useEffect } from 'react';
 import { BetSlider} from './BetSlider';
 import { StyledSelect } from './StyledSelect';
 import { Helper } from '@/utils/Helper';
+import { LocalStorage } from '@/utils/LocalStorage';
+import type { Settings } from '@/type/Settings';
 
 interface ModalProps {
   type: ModalType;
@@ -25,6 +27,11 @@ interface ModalProps {
 interface PlayerSettingsProps {
   player: Player;
   setPlayer: (value: Player) => void;
+}
+
+interface SettingsProps {
+  players: Player[];
+  bustedPlayers: Player[];
 }
 
 interface BuyInProps {
@@ -96,6 +103,8 @@ const Modal: React.FC<ModalProps> = ({
       )
     } else if (type === ModalType.Statics) {
       return <Statics players={players} bustedPlayers={bustedPlayers} />
+    } else if (type === ModalType.Settings) {
+      return <Settings players={players} bustedPlayers={bustedPlayers} />
     }
   }
 
@@ -148,18 +157,84 @@ const PlayerSettings: React.FC<PlayerSettingsProps> = ({ player, setPlayer }) =>
         onChange={(value) => setName(value)}
         type="text"
       />
-      <StyledInput
+      {/* <StyledInput
         label="Chips"
         value={chips}
         onChange={(value) => setChips(Number(value))}
         type="number"
-      />
+      /> */}
       <StyledButton onClick={handleSave}>
         Save Settings
       </StyledButton>
     </div>
   )
 }
+
+const Settings: React.FC<SettingsProps> = ({ players, bustedPlayers }) => {
+  const [playerCount, setPlayerCount] = useState(String(players.length + bustedPlayers.length));
+  const [smallBlind, setSmallBlind] = useState('1');
+  const [bigBlind, setBigBlind] = useState('2');
+  const [buyIn, setBuyIn] = useState('100');
+
+  // Load initial values from LocalStorage
+  useEffect(() => {
+    const settings = LocalStorage.get('settings').toObject() as Settings;
+    if (settings) {
+      setPlayerCount(String(players.length + bustedPlayers.length));
+      setSmallBlind(settings.smallBlind.toString());
+      setBigBlind(settings.bigBlind.toString());
+      setBuyIn(settings.buyIn.toString());
+    }
+  }, []);
+
+  const handleSave = () => {
+    LocalStorage.set('settings', { playerCount, smallBlind, bigBlind, buyIn });
+    // You might want to add some callback here to notify the parent component
+  };
+
+  return (
+    <div className="w-[75vw] md:w-[40vw] space-y-6">
+      {/* <StyledInput
+        label="Players"
+        value={playerCount}
+        onChange={(value) => { if (isNaN(Number(value))) return; setPlayerCount(value); }}
+        onBlur={(value) => { 
+          if (Number(value) < 2) setPlayerCount('2');
+          if (Number(value) > 10) setPlayerCount('10');
+        }}
+        type="text"
+      /> */}
+      <StyledInput
+        label="SB"
+        value={smallBlind}
+        onChange={(value) => {
+          const newValue = Number(value);
+          setSmallBlind(newValue.toString());
+          setBigBlind(Math.max(newValue * 2, Number(bigBlind)).toString());
+        }}
+        type="number"
+      />
+      <StyledInput
+        label="BB"
+        value={bigBlind}
+        onChange={(value) => setBigBlind(Math.max(Number(smallBlind) * 2, Number(value)).toString())}
+        type="number"
+      />
+      <StyledInput
+        label="Buy-in"
+        value={buyIn}
+        onChange={(value) => setBuyIn(value)}
+        type="number"
+      />
+      <StyledButton
+        onClick={handleSave}
+        disabled={Number(playerCount) < 2}
+      >
+        {Number(playerCount) < 2 ? 'At least 2 players required' : 'Save Settings'}
+      </StyledButton>
+    </div>
+  );
+};
 
 const BuyIn: React.FC<BuyInProps> = ({ 
   players,
@@ -254,13 +329,18 @@ const BuyIn: React.FC<BuyInProps> = ({
 
 const Statics: React.FC<StaticsProps> = ({ players, bustedPlayers }) => {
   return (
-    <div className="p-4 w-[65vw] md:w-[40vw]">
-      <h2 className="text-xl font-bold mb-4">Game Statistics</h2>
+    <div className="p-1 w-[65vw] md:w-[40vw]">
       <div className="space-y-3">
-        {players.map((player) => (
-          <div key={player.id} className="flex justify-between items-center">
+        <div className="grid grid-cols-3 gap-4">
+          <span className="font-semibold">Name</span>
+          <span className="font-bold text-center">Buy In</span>
+          <span className="font-bold text-right">P/L</span>
+        </div>
+        {players.sort((a, b) => b.chipChange - a.chipChange).map((player) => (
+          <div key={player.id} className="grid grid-cols-3 gap-4">
             <span className="font-semibold">{player.name}</span>
-            <span className={`font-bold ${
+            <span className="font-bold text-center">${player.buyIn}</span>
+            <span className={`font-bold text-right ${
               player.chipChange > 0 
                 ? 'bg-white text-black px-2 rounded' 
                 : 'text-white'
@@ -270,9 +350,10 @@ const Statics: React.FC<StaticsProps> = ({ players, bustedPlayers }) => {
           </div>
         ))}
         {bustedPlayers.map((player) => (
-          <div key={player.id} className="flex justify-between items-center opacity-50">
+          <div key={player.id} className="grid grid-cols-3 gap-4 opacity-50">
             <span className="font-semibold">{player.name} (Busted)</span>
-            <span className="text-white font-bold">
+            <span className="font-bold text-center">${player.buyIn}</span>
+            <span className="text-white font-bold text-right">
               -${Math.abs(player.chipChange)}
             </span>
           </div>

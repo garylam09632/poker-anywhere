@@ -10,6 +10,8 @@ class JsonValue {
 
   toObject<T>(): T | null { return this.value ? JSON.parse(this.value) as T : null };
 
+  isNull(): boolean { return this.value === null }
+
   constructor (value: string | null) {
     this.value = value;
   }

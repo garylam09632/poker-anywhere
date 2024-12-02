@@ -4,9 +4,11 @@ import { ModalType } from '@/type/enum/ModalType';
 
 export const useModal = (
   players: Player[], 
-  bustedPlayers: Player[], 
+  bustedPlayers: Player[],
+  reset: boolean,
   setPlayers: React.Dispatch<React.SetStateAction<Player[]>>, 
-  setBustedPlayers: React.Dispatch<React.SetStateAction<Player[]>>
+  setBustedPlayers: React.Dispatch<React.SetStateAction<Player[]>>,
+  setReset: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
   const [type, setType] = useState(ModalType.PlayerSettings);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
@@ -30,8 +32,6 @@ export const useModal = (
   };
 
   const handleBuyIn = (amount: number) => {
-    console.log("selectedPlayer", selectedPlayer);
-    console.log("amount", amount);
     if (selectedPlayer) {
       const bustedPlayer = bustedPlayers.find(p => p.id === selectedPlayer.id);
 
@@ -47,18 +47,14 @@ export const useModal = (
         playerList = [...players];
         setFunction = setPlayers;
       }
-      console.log("playerList", playerList);
       setFunction(playerList.map(p => {
         if (p.id === selectedPlayer.id) p.tempBuyIn = amount;
         return p;
       }))
       closeModal();
+      if (players.length === 1) setReset(!reset);
     }
   };
-
-  useEffect(() => {
-    console.log(selectedPlayer);
-  }, [selectedPlayer]);
 
   return {
     selectedPlayer,

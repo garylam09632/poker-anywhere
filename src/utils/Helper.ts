@@ -1,5 +1,6 @@
 import { KeyboardShortcut } from "@/constants/DefaultKeyboardShortCut";
 import { LocalStorage } from "./LocalStorage";
+import { registeredKeys } from "@/constants/LocalStorageKey";
 
 export class Helper {
   static formatAbbreviatedNumber = (value: number): string => {
@@ -35,5 +36,16 @@ export class Helper {
       shortcutSetting = KeyboardShortcut;
     }
     return shortcutSetting[key];
+  }
+
+  static validateLocalStorage = (): boolean => {
+    let ok = true;
+    for (const key of registeredKeys) {
+      if (LocalStorage.get(key).isNull()) {
+        LocalStorage.remove(key);
+        ok = false;
+      }
+    }
+    return ok;
   }
 }

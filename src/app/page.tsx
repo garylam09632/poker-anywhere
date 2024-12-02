@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { StyledInput } from '../components/StyledInput';
 import { StyledButton } from '../components/StyledButton';
+import { LocalStorage } from '@/utils/LocalStorage';
 
 export default function Home() {
   const [playerCount, setPlayerCount] = useState('2');
@@ -14,7 +15,8 @@ export default function Home() {
 
   const handleStartGame = () => {
     if (Number(playerCount) >= 2) {
-      router.push(`/test?players=${playerCount}&smallBlind=${smallBlind}&bigBlind=${bigBlind}&buyIn=${buyIn}`);
+      router.push(`/test`);
+      LocalStorage.set('settings', { playerCount, smallBlind, bigBlind, buyIn });
     }
   };
 

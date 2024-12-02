@@ -202,7 +202,6 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
         `}
           onClick={() => { 
             if (showdownMode && isEligible) { 
-              console.log("Clicked")
               onSelectWinner(player.id) 
             }
           }}
