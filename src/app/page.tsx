@@ -41,16 +41,22 @@ export default function Home() {
               label="SB"
               value={smallBlind}
               onChange={(value) => {
-                const newValue = Number(value);
-                setSmallBlind(newValue.toString());
-                setBigBlind(Math.max(newValue * 2, Number(bigBlind)).toString());
+                const sb = Number(value);
+                const bb = sb * 2;
+                setSmallBlind(sb.toString());
+                setBigBlind(bb.toString());
+                setBuyIn((bb * 100).toString());
               }}
               type="number"
             />
             <StyledInput
               label="BB"
               value={bigBlind}
-              onChange={(value) => setBigBlind(Math.max(Number(smallBlind) * 2, Number(value)).toString())}
+              onChange={(value) => {
+                const bb = Number(value) > Number(smallBlind) ? Number(value) : Number(smallBlind);
+                setBigBlind(bb.toString());
+                setBuyIn((bb * 100).toString());
+              }}
               type="number"
             />
             <StyledInput

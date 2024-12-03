@@ -32,6 +32,7 @@ interface PlayerSettingsProps {
 interface SettingsProps {
   players: Player[];
   bustedPlayers: Player[];
+  handleClose: () => void;
 }
 
 interface BuyInProps {
@@ -104,7 +105,7 @@ const Modal: React.FC<ModalProps> = ({
     } else if (type === ModalType.Statics) {
       return <Statics players={players} bustedPlayers={bustedPlayers} />
     } else if (type === ModalType.Settings) {
-      return <Settings players={players} bustedPlayers={bustedPlayers} />
+      return <Settings players={players} bustedPlayers={bustedPlayers} handleClose={handleClose} />
     }
   }
 
@@ -170,7 +171,7 @@ const PlayerSettings: React.FC<PlayerSettingsProps> = ({ player, setPlayer }) =>
   )
 }
 
-const Settings: React.FC<SettingsProps> = ({ players, bustedPlayers }) => {
+const Settings: React.FC<SettingsProps> = ({ players, bustedPlayers, handleClose }) => {
   const [playerCount, setPlayerCount] = useState(String(players.length + bustedPlayers.length));
   const [smallBlind, setSmallBlind] = useState('1');
   const [bigBlind, setBigBlind] = useState('2');
@@ -178,7 +179,7 @@ const Settings: React.FC<SettingsProps> = ({ players, bustedPlayers }) => {
 
   // Load initial values from LocalStorage
   useEffect(() => {
-    const settings = LocalStorage.get('settings').toObject() as Settings;
+    const settings = LocalStorage.get('settings').toObject<Settings>();
     if (settings) {
       setPlayerCount(String(players.length + bustedPlayers.length));
       setSmallBlind(settings.smallBlind.toString());
@@ -189,6 +190,7 @@ const Settings: React.FC<SettingsProps> = ({ players, bustedPlayers }) => {
 
   const handleSave = () => {
     LocalStorage.set('settings', { playerCount, smallBlind, bigBlind, buyIn });
+    handleClose();
     // You might want to add some callback here to notify the parent component
   };
 
@@ -208,16 +210,22 @@ const Settings: React.FC<SettingsProps> = ({ players, bustedPlayers }) => {
         label="SB"
         value={smallBlind}
         onChange={(value) => {
-          const newValue = Number(value);
-          setSmallBlind(newValue.toString());
-          setBigBlind(Math.max(newValue * 2, Number(bigBlind)).toString());
+          const sb = Number(value);
+          const bb = sb * 2;
+          setSmallBlind(sb.toString());
+          setBigBlind(bb.toString());
+          setBuyIn((bb * 100).toString());
         }}
         type="number"
       />
       <StyledInput
         label="BB"
         value={bigBlind}
-        onChange={(value) => setBigBlind(Math.max(Number(smallBlind) * 2, Number(value)).toString())}
+        onChange={(value) => {
+          const bb = Number(value) > Number(smallBlind) ? Number(value) : Number(smallBlind);
+          setBigBlind(bb.toString());
+          setBuyIn((bb * 100).toString());
+        }}
         type="number"
       />
       <StyledInput
@@ -245,7 +253,7 @@ const BuyIn: React.FC<BuyInProps> = ({
   setSelectedPlayer 
 }) => {
   const [buyInAmount, setBuyInAmount] = useState(0);
-  const [customMaxBuyIn, setCustomMaxBuyIn] = useState(maxBuyIn);
+  const [customMaxBuyIn, setCustomMaxBuyIn] = useState(LocalStorage.get("settings").toObject<Settings>()?.buyIn || maxBuyIn);
 
   const handleBuyInChange = (newAmount: number) => {
     // Ensure the amount is within bounds

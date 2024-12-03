@@ -36,18 +36,19 @@ export default function Game() {
 
   // Game state
   const [players, setPlayers] = useState<Player[]>([]);
+  const [bustedPlayers, setBustedPlayers] = useState<Player[]>([]);
+  const [waitingPlayers, setWaitingPlayers] = useState<Player[]>([]);
   const [pots, setPots] = useState<Pot[]>([{ amount: 0, eligiblePlayers: [] }]);
   const [totalPot, setTotalPot] = useState<number>(0);
   const [smallBlind, setSmallBlind] = useState(1);
   const [bigBlind, setBigBlind] = useState(2);
-  const [handNumber, setHandNumber] = useState(1);
   const [stage, setStage] = useState<Stage>('Preflop');
+  const [handNumber, setHandNumber] = useState(1);
   const [currentBet, setCurrentBet] = useState(0);
   const [dealerIndex, setDealerIndex] = useState(0);
   const [activePlayerIndex, setActivePlayerIndex] = useState(0);
   const [showdownMode, setShowdownMode] = useState(false);
   const [selectedWinners, setSelectedWinners] = useState<number[]>([]);
-  const [bustedPlayers, setBustedPlayers] = useState<Player[]>([]);
   const [chipMovement, setChipMovement] = useState<'bet' | 'pot'>('bet');
   const [selectedRanks, setSelectedRanks] = useState<{[key: number]: number}>({});
 
@@ -371,6 +372,7 @@ export default function Game() {
   const nextHand = () => {
     let tempPlayers: Player[] = players.map(p => ({...p}));
     let tempBustedPlayers: Player[] = bustedPlayers.map(p => ({...p}));
+    let tempWaitingPlayers: Player[] = [];
     let newPlayers: Player[] = [];
     let newBustedPlayers: Player[] = [];
     let bustedPlayerMap = new Map<string, Player>();
@@ -447,7 +449,18 @@ export default function Game() {
       return resetPlayer(player);
     })
 
-    setCurrentBet(bigBlind);
+    // Update Small Blind & Big Blind if require
+    const settings = LocalStorage.get('settings').toObject<Settings>();
+    if (!settings) {
+      router.push('/');
+      return;
+    }
+    const sb = Number(settings.smallBlind);
+    const bb = Number(settings.bigBlind);
+    setSmallBlind(sb);
+    setBigBlind(bb);
+
+    setCurrentBet(bb);
     const bbIndex = newPlayers.findIndex(p => p.position === Position.BB);
     setActivePlayerIndex(bbIndex + 1 === newPlayers.length ? 0 : bbIndex + 1);
     // Set new players to state
