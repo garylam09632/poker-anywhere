@@ -40,6 +40,7 @@ interface PlayerSettingsProps extends CommonModalProps {
 interface SettingsProps extends CommonModalProps {
   players: Player[];
   bustedPlayers: Player[];
+  handleClose: () => void;
 }
 
 interface BuyInProps extends CommonModalProps {
@@ -122,7 +123,7 @@ const Modal: React.FC<ModalProps> = ({
     } else if (type === ModalType.Statics) {
       return <Statics players={players} bustedPlayers={bustedPlayers} dictionary={dictionary} />
     } else if (type === ModalType.Settings) {
-      return <Settings players={players} bustedPlayers={bustedPlayers} dictionary={dictionary} />
+      return <Settings players={players} bustedPlayers={bustedPlayers} handleClose={handleClose} dictionary={dictionary} />
     }
   }
 
@@ -188,7 +189,7 @@ const PlayerSettings: React.FC<PlayerSettingsProps> = ({ player, setPlayer, dict
   )
 }
 
-const Settings: React.FC<SettingsProps> = ({ players, bustedPlayers, dictionary }) => {
+const Settings: React.FC<SettingsProps> = ({ players, bustedPlayers, dictionary, handleClose, }) => {
   const [playerCount, setPlayerCount] = useState(String(players.length + bustedPlayers.length));
   const [smallBlind, setSmallBlind] = useState('1');
   const [bigBlind, setBigBlind] = useState('2');
@@ -202,7 +203,7 @@ const Settings: React.FC<SettingsProps> = ({ players, bustedPlayers, dictionary 
 
   // Load initial values from LocalStorage
   useEffect(() => {
-    const settings = LocalStorage.get('settings').toObject() as Settings;
+    const settings = LocalStorage.get('settings').toObject<Settings>();
     if (settings) {
       setPlayerCount(String(players.length + bustedPlayers.length));
       setSmallBlind(settings.smallBlind.toString());
@@ -218,6 +219,7 @@ const Settings: React.FC<SettingsProps> = ({ players, bustedPlayers, dictionary 
 
   const handleSave = () => {
     LocalStorage.set('settings', { playerCount, smallBlind, bigBlind, buyIn });
+    handleClose();
     // You might want to add some callback here to notify the parent component
   };
 
@@ -333,7 +335,7 @@ const BuyIn: React.FC<BuyInProps> = ({
   setSelectedPlayer,
 }) => {
   const [buyInAmount, setBuyInAmount] = useState(0);
-  const [customMaxBuyIn, setCustomMaxBuyIn] = useState(maxBuyIn);
+  const [customMaxBuyIn, setCustomMaxBuyIn] = useState(LocalStorage.get("settings").toObject<Settings>()?.buyIn || maxBuyIn);
 
   const handleBuyInChange = (newAmount: number) => {
     // Ensure the amount is within bounds
