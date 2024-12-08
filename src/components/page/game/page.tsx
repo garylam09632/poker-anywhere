@@ -11,6 +11,7 @@ import { useBuyIn } from '@/hooks/useBuyIn';
 
 import BuyInModal from '@/components/BuyInModal';
 import { Position } from '@/type/enum/Position';
+import { PlayerLocation } from '@/type/enum/Location';
 
 const TEST = false;
 
@@ -94,7 +95,8 @@ export default function Game() {
           chips,
           buyIn,
           position,
-          currentBet,
+          PlayerLocation.TopCenter,
+          0,
           0,
           false,
           false,

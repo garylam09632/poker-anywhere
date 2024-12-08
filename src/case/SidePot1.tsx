@@ -30,7 +30,8 @@ const players: Player[] = [
     buyIn: 10000,
     hasBusted: false,
     location: PlayerLocation.LeftBottom,
-    betHistory: []
+    betHistory: [],
+    actualBet: 0
   },
   {
     id: 2,
@@ -44,7 +45,8 @@ const players: Player[] = [
     buyIn: 10000,
     hasBusted: false,
     location: PlayerLocation.LeftCenter,
-    betHistory: []
+    betHistory: [],
+    actualBet: 0
   },
   {
     id: 3,
@@ -58,7 +60,8 @@ const players: Player[] = [
     buyIn: 10000,
     hasBusted: false,
     location: PlayerLocation.TopRight,
-    betHistory: []
+    betHistory: [],
+    actualBet: 0
   },
   {
     id: 4,
@@ -72,7 +75,8 @@ const players: Player[] = [
     buyIn: 10000,
     hasBusted: false,
     location: PlayerLocation.BottomCenter,
-    betHistory: []
+    betHistory: [],
+    actualBet: 0
   },
   {
     id: 5,
@@ -86,7 +90,8 @@ const players: Player[] = [
     buyIn: 10000,
     hasBusted: false,
     location: PlayerLocation.BottomLeft,
-    betHistory: []
+    betHistory: [],
+    actualBet: 0
   },
 ]
 

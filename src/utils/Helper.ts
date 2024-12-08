@@ -48,4 +48,12 @@ export class Helper {
     }
     return ok;
   }
+
+  // static getLang = (): string => {
+  //   const url = new URL(window.location.href);
+  //   const lang = url.pathname.split('/')[1];
+  //   if (lang) {
+  //     return lang;
+  //   }
+  // }
 }

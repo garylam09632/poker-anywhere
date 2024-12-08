@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { StyledInput } from './StyledInput';
 import Player from '@/type/interface/Player';
 import { KeyboardShortcut } from '@/constants/DefaultKeyboardShortCut';
+import { Dictionary } from '@/type/Dictionary';
 
 interface ActionButtonsProps {
   onFold: () => void;
@@ -18,6 +19,7 @@ interface ActionButtonsProps {
   potSize: number;
   minRaise: number;
   disabled: boolean;
+  dictionary: Dictionary;
 }
 
 type BetControlOption = {
@@ -38,6 +40,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   potSize,
   minRaise,
   disabled,
+  dictionary,
 }) => {
   const searchParams = useSearchParams();
   const [raiseAmount, setRaiseAmount] = useState(minRaise);
@@ -47,12 +50,12 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
 
   const sliderPoints = useMemo(() => {
     const points = [
-      { label: 'Min', value: minRaise },
+      { label: "", value: minRaise },
       { label: '1/3', value: Math.floor(potSize / 3) },
       { label: '1/2', value: Math.floor(potSize / 2) },
       { label: '3/4', value: Math.floor(potSize * 3 / 4) },
-      { label: 'Pot', value: potSize },
-      { label: 'Max', value: playerChips }
+      { label: dictionary.pot, value: potSize },
+      { label: "", value: playerChips }
     ];
     return points.filter(point => point.value <= playerChips && point.value >= minRaise);
   }, [potSize, playerChips, minRaise]);
@@ -62,7 +65,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
     { label: '50%', value: Math.floor(potSize * 0.5), bind: "BetControlP2" },
     { label: '75%', value: Math.floor(potSize * 0.75), bind: "BetControlP3" },
     { label: '100%', value: potSize, bind: "BetControlP4" },
-    { label: 'All-In', value: playerChips, bind: "BetControlP5" }
+    { label: dictionary.allIn, value: playerChips, bind: "BetControlP5" }
   ];
 
   const lowerOptions: BetControlOption[] = [
@@ -104,14 +107,14 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       <div className="w-full flex justify-between mb-4 space-x-10">
         <div id="actionRegionContainer" className="flex items-center w-1/2 md:w-1/2 sh:w-1/2">
           <div className="flex flex-col space-x-0 space-y-4 w-full justify-between md:flex-row md:space-x-4 md:space-y-0">
-            <StyledButton onClick={onFold} disabled={disabled} bind={"Action1"}>Fold</StyledButton>
+            <StyledButton onClick={onFold} disabled={disabled} bind={"Action1"}>{dictionary.fold}</StyledButton>
             {canCheck ? (
-              <StyledButton onClick={onCheck} disabled={disabled} bind={"Action2"}>Check</StyledButton>
+              <StyledButton onClick={onCheck} disabled={disabled} bind={"Action2"}>{dictionary.check}</StyledButton>
             ) : (
-              <StyledButton onClick={onCall} disabled={disabled} bind={"Action2"}>Call ${playerChips < callAmount ? playerChips : callAmount}</StyledButton>
+              <StyledButton onClick={onCall} disabled={disabled} bind={"Action2"}>{dictionary.call} ${playerChips < callAmount ? playerChips : callAmount}</StyledButton>
             )}
             <StyledButton onClick={() => onRaise(raiseAmount, canRaise && raiseAmount !== playerChips)} bind={"Action3"}>
-              {canRaise && raiseAmount !== playerChips ? `Raise $${raiseAmount}` : `All-In $${playerChips}`}
+              {canRaise && raiseAmount !== playerChips ? `${dictionary.raise} $${raiseAmount}` : `${dictionary.allIn} $${playerChips}`}
             </StyledButton>
           </div>
         </div>

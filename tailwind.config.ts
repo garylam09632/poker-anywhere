@@ -71,6 +71,11 @@ const config: Config = {
           '0%': { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
           '100%': { backgroundColor: 'rgba(0, 0, 0, 0)' },
         },
+        shake: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' },
+          '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' }
+        }
       },
       animation: {
         'float-in': 'floatIn 0.5s ease-in-out',
@@ -78,6 +83,7 @@ const config: Config = {
         'slide-down': 'slideDown 0.3s ease-out forwards',
         'fade-in': 'fadeIn 0.3s ease-out forwards',
         'fade-out': 'fadeOut 0.3s ease-out forwards',
+        'shake': 'shake 0.6s cubic-bezier(.36,.07,.19,.97) both'
       },
       fontSize: {
         'xxs': '0.5rem',

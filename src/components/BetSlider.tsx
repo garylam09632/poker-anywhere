@@ -1,5 +1,6 @@
 import { useLocation } from '@/hooks/useLocation';
 import React, { useRef, useEffect, useCallback, useState } from 'react';
+import { getDictionary } from '../../get-dictionary';
 
 interface SliderPoint {
   label: string;
@@ -100,7 +101,6 @@ export const BetSlider: React.FC<BetSliderProps> = ({
   const handleClick = () => {
     if (sliderRef.current) {
       sliderRef.current.focus();
-      console.log("Slider focused");
     }
   };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Player from '@/type/interface/Player';
 import Pot from '@/type/interface/Pot';
@@ -10,7 +10,7 @@ import { useModal } from '@/hooks/useModal';
 import { Position } from '@/type/enum/Position';
 import PlayerUnit from '@/components/PlayerUnit';
 import Chip from '@/components/Chip';
-import { PlayerCSSLocation, PlayerCSSLocationMobile, PlayerLocation } from '@/type/enum/Location';
+import { PlayerLocation } from '@/type/enum/Location';
 import { ShowdownMode } from '@/type/enum/ShowdownMode';
 import Modal from '@/components/Modal';
 import { ModalType } from '@/type/enum/ModalType';
@@ -24,11 +24,15 @@ import { LocalStorage } from '@/utils/LocalStorage';
 import { History } from '@/type/History';
 import { KeyboardShortcut } from '@/constants/DefaultKeyboardShortCut';
 import { Settings } from '@/type/Settings';
-import { Helper } from '@/utils/Helper';
+import { Dictionary } from '@/type/Dictionary';
 
 const TEST = false;
 
-export default function Game() {
+export default function Game({
+  dictionary,
+}: {
+  dictionary: Dictionary;
+}) {
   const searchParams = useSearchParams();
   const router = useRouter();
   
@@ -1046,29 +1050,29 @@ export default function Game() {
           <IconButton
             icon={<RiLogoutBoxLine />}
             onClick={() => window.location.href = '/'}
-            tooltip="Back"
+            tooltip={dictionary.back}
           />
         </div>
         <div className="absolute !mt-0 top-4 right-4 md:top-4 md:right-4 xxs:top-2 xxs:right-2 flex items-center space-x-2 z-10">
           <IconButton
             icon={<RiArrowGoBackLine />}
             onClick={rollback}
-            tooltip="Rollback"
+            tooltip={dictionary.rollback}
           />
           <IconButton
             icon={<RiMoneyDollarBoxLine />}
             onClick={onShowBuyIn}
-            tooltip="Buy In"
+            tooltip={dictionary.buyIn}
           />
           <IconButton
             icon={<RiBarChartLine />}
             onClick={onShowStatics}
-            tooltip="Statics"
+            tooltip={dictionary.statics}
           />
           <IconButton
             icon={<FiSettings />}
             onClick={onShowSettings}
-            tooltip="Game State"
+            tooltip={dictionary.settings}
           />
         </div>
         <div 
@@ -1117,7 +1121,7 @@ export default function Game() {
                   sh:-bottom-3 sh:px-2 sh:py-0 sh:text-xxs`
                 }
               >
-                { showdownMode ? `#${handNumber} Showdown` : `#${handNumber} ${stage}`}
+                { showdownMode ? `#${handNumber} ${dictionary.showdown}` : `#${handNumber} ${dictionary[stage]}`}
               </div>
               {
                 pots.length > 0 && (
@@ -1201,6 +1205,7 @@ export default function Game() {
                       potSize={pots.reduce((total, pot) => total + pot.amount, 0)}
                       minRaise={minRaise}
                       disabled={!activePlayer}
+                      dictionary={dictionary}
                     />
                   )
                 }
@@ -1216,6 +1221,7 @@ export default function Game() {
         visible={modalVisible}
         withHeader={modalWithHeader}
         selectedPlayer={selectedPlayer}
+        dictionary={dictionary}
         setPlayers={setPlayers}
         setSelectedPlayer={handlePlayerSelect}
         onClose={closeModal}
