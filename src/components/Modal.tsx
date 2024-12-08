@@ -12,6 +12,7 @@ import type { Settings } from '@/type/Settings';
 import { Tab, TabGroup } from './Tab';
 import { Dictionary } from '@/type/Dictionary';
 import { GameSettingsForm } from './GameSettingForm';
+import { GameState } from '@/type/GameState';
 
 interface ModalProps {
   type: ModalType;
@@ -23,8 +24,9 @@ interface ModalProps {
   closeOnOutsideClick?: boolean;
   dictionary: Dictionary;
   onClose: () => void;
-  setPlayers: React.Dispatch<React.SetStateAction<Player[]>>;
+  getGameState: () => GameState;
   handleBuyIn: (amount: number) => void;
+  setPlayers: React.Dispatch<React.SetStateAction<Player[]>>;
   setSelectedPlayer: (player: Player) => void;
 }
 
@@ -41,6 +43,18 @@ interface SettingsProps extends CommonModalProps {
   players: Player[];
   bustedPlayers: Player[];
   handleClose: () => void;
+  getGameState: () => GameState;
+}
+
+interface GameSettingsProps extends CommonModalProps {
+  players: Player[];
+  bustedPlayers: Player[];
+  handleClose: () => void;
+}
+
+interface DisplaySettingsProps extends CommonModalProps {
+  handleClose: () => void;
+  getGameState: () => GameState;
 }
 
 interface BuyInProps extends CommonModalProps {
@@ -67,6 +81,7 @@ const Modal: React.FC<ModalProps> = ({
   dictionary,
   closeOnOutsideClick = true,
   onClose, 
+  getGameState,
   setPlayers,
   handleBuyIn,
   setSelectedPlayer,
@@ -123,7 +138,15 @@ const Modal: React.FC<ModalProps> = ({
     } else if (type === ModalType.Statics) {
       return <Statics players={players} bustedPlayers={bustedPlayers} dictionary={dictionary} />
     } else if (type === ModalType.Settings) {
-      return <Settings players={players} bustedPlayers={bustedPlayers} handleClose={handleClose} dictionary={dictionary} />
+      return (
+        <Settings 
+          players={players} 
+          bustedPlayers={bustedPlayers} 
+          handleClose={handleClose} 
+          getGameState={getGameState} 
+          dictionary={dictionary} 
+        />
+      )
     }
   }
 
@@ -189,17 +212,50 @@ const PlayerSettings: React.FC<PlayerSettingsProps> = ({ player, setPlayer, dict
   )
 }
 
-const Settings: React.FC<SettingsProps> = ({ players, bustedPlayers, dictionary, handleClose, }) => {
-  const [playerCount, setPlayerCount] = useState(String(players.length + bustedPlayers.length));
-  const [smallBlind, setSmallBlind] = useState('1');
-  const [bigBlind, setBigBlind] = useState('2');
-  const [buyIn, setBuyIn] = useState('100');
+const Settings: React.FC<SettingsProps> = ({ 
+  players, 
+  bustedPlayers, 
+  dictionary, 
+  handleClose, 
+  getGameState,
+}) => {
   const [activeTab, setActiveTab] = useState('game');
 
   const tabs = [
     { id: 'game', label: `${dictionary.game} ${dictionary.settings}` },
     { id: 'display', label: `${dictionary.display} ${dictionary.settings}` }
   ];
+
+  return (
+    <div className="w-[75vw] md:w-[40vw] min-h-[400px] flex flex-col">
+      <TabGroup
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      >
+        <Tab label={`${dictionary.game} ${dictionary.settings}`} isActive={activeTab === 'game'}>
+          <GameSettings players={players} bustedPlayers={bustedPlayers} handleClose={handleClose} dictionary={dictionary} />
+        </Tab>        
+        <Tab label={`${dictionary.display} ${dictionary.settings}`} isActive={activeTab === 'display'}>
+          <DisplaySettings handleClose={handleClose} getGameState={getGameState} dictionary={dictionary} />
+        </Tab>
+      </TabGroup>
+
+    </div>
+  );
+};
+
+const GameSettings: React.FC<GameSettingsProps> = ({ players, bustedPlayers, handleClose, dictionary }) => {
+  const [playerCount, setPlayerCount] = useState(String(players.length + bustedPlayers.length));
+  const [smallBlind, setSmallBlind] = useState('1');
+  const [bigBlind, setBigBlind] = useState('2');
+  const [buyIn, setBuyIn] = useState('100');
+
+  const handleGameSettingsSave = () => {
+    LocalStorage.set('settings', { playerCount, smallBlind, bigBlind, buyIn });
+    handleClose();
+    // You might want to add some callback here to notify the parent component
+  };
 
   // Load initial values from LocalStorage
   useEffect(() => {
@@ -212,118 +268,53 @@ const Settings: React.FC<SettingsProps> = ({ players, bustedPlayers, dictionary,
     }
   }, []);
 
+  return (
+    <GameSettingsForm
+      dictionary={dictionary}
+      playerCount={playerCount}
+      smallBlind={smallBlind}
+      bigBlind={bigBlind}
+      buyIn={buyIn}
+      setPlayerCount={setPlayerCount}
+      setSmallBlind={setSmallBlind}
+      setBigBlind={setBigBlind}
+      setBuyIn={setBuyIn}
+      onSubmit={handleGameSettingsSave}
+    />
+  )
+}
+
+const DisplaySettings: React.FC<DisplaySettingsProps> = ({ handleClose, getGameState, dictionary }) => {
+  
+  const [language, setLanguage] = useState(window.location.pathname.split('/')[1]);
+  
   const languageOptions = [];
   for (const [key, value] of Object.entries(dictionary.languageOptions)) {
     languageOptions.push({ value: key, label: value });
   }
 
-  const handleSave = () => {
-    LocalStorage.set('settings', { playerCount, smallBlind, bigBlind, buyIn });
+  const handleDisplaySettingsSave = () => {
+    LocalStorage.set('tempGameState', getGameState());
     handleClose();
-    // You might want to add some callback here to notify the parent component
-  };
+    window.location.href = `/${language}/game`;
+  }
 
   return (
-    <div className="w-[75vw] md:w-[40vw] min-h-[400px] flex flex-col">
-      <TabGroup
-        tabs={tabs}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      >
-        <Tab label={`${dictionary.game} ${dictionary.settings}`} isActive={activeTab === 'game'}>
-          {/* <div className="space-y-10">
-            <StyledInput
-              label={dictionary.players}
-              value={playerCount}
-              onChange={(value) => { if (isNaN(Number(value))) return; setPlayerCount(value); }}
-              onBlur={(value) => { 
-                if (Number(value) < 2) setPlayerCount('2');
-                if (Number(value) > 10) setPlayerCount('10');
-              }}
-              type="text"
-            />
-            <StyledInput
-              label={dictionary.smallBlind}
-              value={smallBlind}
-              onChange={(value) => {
-                const newValue = Number(value);
-                setSmallBlind(newValue.toString());
-                setBigBlind(Math.max(newValue * 2, Number(bigBlind)).toString());
-              }}
-              onValidate={(value) => {
-                return Number(value) < 1 ? dictionary.message.smallBlindMustBeGreaterThan0 : '';
-              }}
-              type="number"
-            />
-            <StyledInput
-              label={dictionary.bigBlind}
-              value={bigBlind}
-              onChange={(value) => {
-                const newValue = Number(value);
-                setBigBlind(newValue.toString());
-                setBuyIn((newValue * 100).toString());
-              }}
-              onValidate={(value) => {
-                return Number(value) < Number(smallBlind) ? dictionary.message.bigBlindMustBeGreaterOrEqualToSmallBlind : '';
-              }}
-              type="number"
-            />
-            <StyledInput
-              label={dictionary.buyIn}
-              value={buyIn}
-              onChange={(value) => setBuyIn(value)}
-              type="number"
-              onValidate={(value) => {
-                return Number(value) < Number(bigBlind) * 2 ? dictionary.message.buyInMustBeGreaterThanBigBlindTimes2 : '';
-              }}
-            />
-            <StyledButton
-              size="md"
-              onClick={handleSave}
-              disabled={
-                Number(playerCount) < 2 ||
-                Number(smallBlind) < 1 ||
-                Number(bigBlind) < Number(smallBlind) ||
-                Number(buyIn) < Number(bigBlind) * 2
-              }
-            >
-              {Number(playerCount) < 2 ? dictionary.message.atLeast2PlayersRequired : dictionary.start}
-            </StyledButton>
-          </div> */}
-          <GameSettingsForm
-            dictionary={dictionary}
-            playerCount={playerCount}
-            smallBlind={smallBlind}
-            bigBlind={bigBlind}
-            buyIn={buyIn}
-            setPlayerCount={setPlayerCount}
-            setSmallBlind={setSmallBlind}
-            setBigBlind={setBigBlind}
-            setBuyIn={setBuyIn}
-            onSubmit={handleSave}
-          />
-        </Tab>
-        
-        <Tab label={`${dictionary.display} ${dictionary.settings}`} isActive={activeTab === 'display'}>
-          <div className="space-y-6">
-            <StyledSelect
-              label={dictionary.language}
-              value={window.location.pathname.split('/')[1]}
-              onChange={(value) => {
-                window.location.href = `/${value}`;
-              }}
-              options={languageOptions}
-            />
-            <StyledButton onClick={handleSave}>
-              {dictionary.save}
-            </StyledButton>
-          </div>
-        </Tab>
-      </TabGroup>
-
+    <div className="space-y-6">
+      <StyledSelect
+        label={dictionary.language}
+        value={language}
+        onChange={(value) => {
+          setLanguage(value);
+        }}
+        options={languageOptions}
+      />
+      <StyledButton onClick={handleDisplaySettingsSave}>
+        {dictionary.save}
+      </StyledButton>
     </div>
-  );
-};
+  )
+}
 
 const BuyIn: React.FC<BuyInProps> = ({ 
   players,

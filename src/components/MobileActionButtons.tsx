@@ -3,6 +3,7 @@ import { StyledButton } from './StyledButton';
 import { BetSlider } from './BetSlider';
 import { useSearchParams } from 'next/navigation';
 import { StyledInput } from './StyledInput';
+import { Dictionary } from '@/type/Dictionary';
 
 interface ActionButtonsProps {
   onFold: () => void;
@@ -10,6 +11,7 @@ interface ActionButtonsProps {
   onCall: () => void;
   onRaise: (amount: number, isRaise?: boolean) => void;
   setShowBetControls: (show: boolean) => void;
+  dictionary: Dictionary;
   canCheck: boolean;
   callAmount: number;
   currentBet: number;
@@ -26,6 +28,7 @@ export const MobileActionButtons: React.FC<ActionButtonsProps> = ({
   onCall,
   onRaise,
   setShowBetControls,
+  dictionary,
   showBetControls,
   canCheck,
   callAmount,
@@ -45,12 +48,12 @@ export const MobileActionButtons: React.FC<ActionButtonsProps> = ({
 
   const sliderPoints = useMemo(() => {
     const points = [
-      { label: 'Min', value: minRaise },
+      { label: '', value: minRaise },
       { label: '1/3', value: Math.floor(potSize / 3) },
       { label: '1/2', value: Math.floor(potSize / 2) },
       { label: '3/4', value: Math.floor(potSize * 3 / 4) },
-      { label: 'Pot', value: potSize },
-      { label: 'Max', value: playerChips }
+      { label: dictionary.pot, value: potSize },
+      { label: '', value: playerChips }
     ];
     return points.filter(point => point.value <= playerChips && point.value >= minRaise);
   }, [potSize, playerChips, minRaise]);
@@ -127,17 +130,17 @@ export const MobileActionButtons: React.FC<ActionButtonsProps> = ({
         `}
       >
         <div className="flex space-x-2 w-full">
-          <StyledButton onClick={onFold} disabled={disabled}>Fold</StyledButton>
+          <StyledButton onClick={onFold} disabled={disabled}>{dictionary.fold}</StyledButton>
           {canCheck ? (
-            <StyledButton onClick={onCheck} disabled={disabled}>Check</StyledButton>
+            <StyledButton onClick={onCheck} disabled={disabled}>{dictionary.check}</StyledButton>
           ) : (
-            <StyledButton onClick={onCall} disabled={disabled}>Call ${playerChips < callAmount ? playerChips : callAmount}</StyledButton>
+            <StyledButton onClick={onCall} disabled={disabled}>{dictionary.call} ${playerChips < callAmount ? playerChips : callAmount}</StyledButton>
           )}
           <StyledButton 
             onClick={() => setShowBetControls(true)} 
             disabled={disabled}
           >
-            Raise
+            {dictionary.raise}
           </StyledButton>
         </div>
       </div>
@@ -191,7 +194,6 @@ export const MobileActionButtons: React.FC<ActionButtonsProps> = ({
               />
             </div>
             <div className="w-[80%] flex justify-center items-center pr-2">
-
                 <BetSlider
                   points={sliderPoints}
                   value={raiseAmount}
@@ -209,7 +211,7 @@ export const MobileActionButtons: React.FC<ActionButtonsProps> = ({
               setShowBetControls(false);
             }}
           >
-            {canRaise && raiseAmount !== playerChips ? `Raise $${raiseAmount}` : `All-In $${playerChips}`}
+            {canRaise && raiseAmount !== playerChips ? `${dictionary.raise} $${raiseAmount}` : `${dictionary.allIn} $${playerChips}`}
           </StyledButton>
         </div>
       </div>

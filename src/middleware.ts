@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, userAgent } from "next/server";
 import type { NextRequest } from "next/server";
 
 import { i18n } from "../i18n-config";
@@ -29,6 +29,10 @@ export function middleware(request: NextRequest) {
   console.log('Full URL:', request.url);
   const pathname = request.nextUrl.pathname;
   console.log("pathname", pathname);
+
+  //
+  const { device } = userAgent(request)
+  // console.log('device', device);
 
   // // `/_next/` and `/api/` are ignored by the watcher, but we need to ignore files in `public` manually.
   // // If you have one

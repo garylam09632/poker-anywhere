@@ -10,6 +10,7 @@ import { RiCheckLine, RiSettings4Line } from 'react-icons/ri';
 import { ShowdownMode } from '@/type/enum/ShowdownMode';
 import RankSelector from './RankSelector';
 import { useLocation } from '@/hooks/useLocation';
+import { Dictionary } from '@/type/Dictionary';
 
 interface PlayerUnitProps {
   player: Player;
@@ -21,6 +22,7 @@ interface PlayerUnitProps {
   isEligible: boolean;
   selectedRank?: number;
   selectedWinners: number[];
+  dictionary: Dictionary;
   openModal: () => void;
   onSelect: (player: Player) => void;
   onAction: (action: Action, amount?: number) => void;
@@ -41,6 +43,7 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
   isEligible, 
   selectedRank,
   selectedWinners,
+  dictionary,
   openModal,
   onSelect, 
   onAction, 
@@ -227,9 +230,10 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
           <div className={`
             absolute inset-0 flex items-center justify-center
             transition-opacity duration-300 ease-in-out
+            ${dictionary.busted.length >= 8 ? 'text-sm' : 'text-md'}
             ${showContent === 'busted' ? 'opacity-100' : 'opacity-0'}
           `}>
-            Busted
+            {dictionary.busted}
           </div>
           <div className={`
             absolute inset-0 flex items-center justify-center

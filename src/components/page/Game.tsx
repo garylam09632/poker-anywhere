@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Player from '@/type/interface/Player';
 import Pot from '@/type/interface/Pot';
 import case1 from '@/case/SidePot1';
-import { Action, Stage } from '@/type/General';
+import { Action, DeviceType, Stage } from '@/type/General';
 import { useModal } from '@/hooks/useModal';
 import { Position } from '@/type/enum/Position';
 import PlayerUnit from '@/components/PlayerUnit';
@@ -21,10 +21,11 @@ import { useLocation } from '@/hooks/useLocation';
 import { ActionButtons } from '@/components/ActionButtons';
 import { MobileActionButtons } from '@/components/MobileActionButtons';
 import { LocalStorage } from '@/utils/LocalStorage';
-import { History } from '@/type/History';
+import { GameState } from '@/type/GameState';
 import { KeyboardShortcut } from '@/constants/DefaultKeyboardShortCut';
 import { Settings } from '@/type/Settings';
 import { Dictionary } from '@/type/Dictionary';
+import OrientationGuard from '../OrientationGuard';
 
 const TEST = false;
 
@@ -112,11 +113,19 @@ export default function Game({
   }
 
   useEffect(() => {
-    LocalStorage.set('history', []);
+    const tempGameState = LocalStorage.get('tempGameState').toObject<GameState>();
+    if (!tempGameState) {
+      LocalStorage.set('history', []);
+    }
+      
     if (LocalStorage.get('shortcutSetting').isNull()) {
       LocalStorage.set('shortcutSetting', KeyboardShortcut);
     }
     setLoading(false);
+  }, [])
+
+  // Set Event listeners
+  useEffect(() => {
     const tableContainer = document.getElementById('tableContainer');
     if (tableContainer) {
       tableContainer.ontouchmove = function(event: TouchEvent) {
@@ -162,6 +171,14 @@ export default function Game({
       router.push('/');
       return;
     }
+    
+    const tempGameState = LocalStorage.get('tempGameState').toObject<GameState>();
+    if (tempGameState) {
+      setGameState(tempGameState);
+      LocalStorage.remove('tempGameState');
+      return;
+    }
+
     const playerCount = Number(settings.playerCount || 2);
     const buyIn = Number(settings.buyIn || 100);
     let sb = Number(settings.smallBlind || 1);
@@ -207,7 +224,7 @@ export default function Game({
       setActivePlayerIndex(playerCount === 2 ? 0 : 3 % playerCount); // Start with the player after BB
       setInitialed(true);
     }
-  }, [searchParams]);
+  }, []);
 
   useEffect(() => {
     if (pots.length === 0) return;
@@ -241,11 +258,13 @@ export default function Game({
       setPlayers(players);
       setInitialed(false);
 
-      LocalStorage.set('history', [...LocalStorage.get('history').toObject<History[]>() || [], {
+      LocalStorage.set('history', [...LocalStorage.get('history').toObject<GameState[]>() || [], {
         players,
+        bustedPlayers,
         currentBet,
         pots,
         stage,
+        handNumber,
         dealerIndex,
         activePlayerIndex,
         initialed
@@ -264,11 +283,13 @@ export default function Game({
     if (!players[activePlayerIndex]?.hasActed) return;
     if (!isSwitchState) {
       // If isn't switching state, set the history
-      LocalStorage.set('history', [...LocalStorage.get('history').toObject<History[]>() || [], {
+      LocalStorage.set('history', [...LocalStorage.get('history').toObject<GameState[]>() || [], {
         players,
+        bustedPlayers,
         currentBet,
         pots,
         stage,
+        handNumber,
         dealerIndex,
         activePlayerIndex,
         initialed
@@ -1008,19 +1029,25 @@ export default function Game({
     openModal();
   }
 
-  const setGameState = (history: History) => {
-    const { players, currentBet, pots, stage, dealerIndex, activePlayerIndex, initialed } = history;
+  const getGameState = (): GameState => {
+    return { players, bustedPlayers, currentBet, pots, stage, handNumber, dealerIndex, activePlayerIndex, initialed }
+  }
+
+  const setGameState = (gameState: GameState) => {
+    const { players, bustedPlayers, currentBet, pots, stage, handNumber, dealerIndex, activePlayerIndex, initialed } = gameState;
     setPlayers(players)
+    setBustedPlayers(bustedPlayers)
     setCurrentBet(currentBet)
     setPots(pots)
     setStage(stage)
+    setHandNumber(handNumber)
     setDealerIndex(dealerIndex)
     setActivePlayerIndex(activePlayerIndex)
     setInitialed(false)
   }
 
   const rollback = () => {
-    const history = LocalStorage.get('history').toObject<History[]>() || [];
+    const history = LocalStorage.get('history').toObject<GameState[]>() || [];
     if (history.length > 0) {
       // Set to the previous state
       history.pop();
@@ -1032,10 +1059,10 @@ export default function Game({
     }
   }
 
-  const printHistory = () => {
+  const printGameState = () => {
     // Print the history in a readable format
-    LocalStorage.get('history').toObject<History[]>()?.forEach((history, index) => {
-      console.log(`History ${index + 1}:`, history)
+    LocalStorage.get('history').toObject<GameState[]>()?.forEach((history, index) => {
+      console.log(`GameState ${index + 1}:`, history)
     })
   }
 
@@ -1050,7 +1077,7 @@ export default function Game({
   }
 
   return !loading && (
-    <>
+    <OrientationGuard deviceType={document?.documentElement.dataset.device as DeviceType}>
       <div
         id="tableContainer"
         className="
@@ -1171,6 +1198,7 @@ export default function Game({
                   selectedRank={selectedRanks[player.id]}
                   showdownMode={showdownMode ? getPlayerNotFolded().length : ShowdownMode.None}
                   isEligible={isEligible}
+                  dictionary={dictionary}
                   openModal={openModal}
                   onAction={handleAction}
                   onNameChange={handleNameChange}
@@ -1191,6 +1219,7 @@ export default function Game({
                 {
                   isMobile ? (
                     <MobileActionButtons
+                      dictionary={dictionary}
                       onFold={handleFold}
                       onCheck={handleCheck}
                       onCall={handleCall}
@@ -1235,12 +1264,13 @@ export default function Game({
         withHeader={modalWithHeader}
         selectedPlayer={selectedPlayer}
         dictionary={dictionary}
+        getGameState={getGameState}
         setPlayers={setPlayers}
         setSelectedPlayer={handlePlayerSelect}
         onClose={closeModal}
         handleBuyIn={handleBuyIn}
       />
-    </>
+    </OrientationGuard>
   );
 }
 

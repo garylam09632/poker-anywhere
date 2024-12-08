@@ -105,7 +105,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       w-[90%] flex flex-col items-center
     ">
       <div className="w-full flex justify-between mb-4 space-x-10">
-        <div id="actionRegionContainer" className="flex items-center w-1/2 md:w-1/2 sh:w-1/2">
+        <div id="actionRegionContainer" className="flex items-center w-1/2 md:w-1/3 xl:w-1/2 sh:w-1/2">
           <div className="flex flex-col space-x-0 space-y-4 w-full justify-between md:flex-row md:space-x-4 md:space-y-0">
             <StyledButton onClick={onFold} disabled={disabled} bind={"Action1"}>{dictionary.fold}</StyledButton>
             {canCheck ? (
@@ -118,7 +118,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             </StyledButton>
           </div>
         </div>
-        <div id="betControlRegionContainer" className="flex flex-col items-center w-1/2 space-y-3 md:w-1/2 sh:w-1/2">
+        <div id="betControlRegionContainer" className="flex flex-col items-center w-1/2 space-y-3 md:w-2/3 xl:w-1/2 sh:w-1/2">
           <div className="flex flex-col space-x-0 space-y-4 w-full justify-between md:flex-row md:space-x-4 md:space-y-0">
             {upperOptions.map((option) => (
               <StyledButton 

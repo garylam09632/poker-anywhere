@@ -20,7 +20,7 @@
   "check": "過牌",
   "call": "跟注",
   "raise": "加注",
-  "allIn": "哂冷",
+  "allIn": "All-In",
   "min": "最小",
   "max": "最大",
   "language": "語言",
@@ -57,5 +57,6 @@
   "display": "顯示",
   "amount": "金額",
   "save": "保存",
-  "confirm": "確認"
+  "confirm": "確認",
+  "busted": "出局"
 }

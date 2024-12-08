@@ -34,7 +34,7 @@
     "zh-TW": "Chinese (Taiwan)",
     "zh-HK": "Chinese (Hong Kong)",
     "ko-KR": "Korean",
-    "es-ES": "Spanish",
+    "es-AR": "Spanish",
     "de-DE": "German",
     "it-IT": "Italian",
     "fr-FR": "French",
@@ -57,5 +57,6 @@
   "display": "Display",
   "amount": "Amount",
   "save": "Save",
-  "confirm": "Confirm"
+  "confirm": "Confirm",
+  "busted": "Busted"
 }
