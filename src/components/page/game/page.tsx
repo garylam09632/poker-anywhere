@@ -315,8 +315,6 @@ export default function Game() {
   const checkForLastPlayerStanding = (currentPlayers: Player[]): boolean => {
     const activePlayers = currentPlayers.filter(p => !p.hasFolded);
     if (activePlayers.length === 1) {
-      console.log("last player standing")
-      console.log("activePlayers", activePlayers)
       const winner = activePlayers[0];
       declareWinners([winner.id]);
       return true;
@@ -480,12 +478,10 @@ export default function Game() {
     let activePlayers = newPlayers.filter(p => !p.hasFolded && p.hasActed);
     let allInPlayers = activePlayers.filter(p => p.chips === 0);
     let remainingBets = newPlayers.map(p => p.currentBet);
-    console.log("before")
-    printPots(newPots)
+    // printPots(newPots)
     if (allInPlayers.length > 1) {
       // Sort all-in players by their bet amount, lowest to highest
       allInPlayers.sort((a, b) => a.currentBet - b.currentBet);
-      console.log("allInPlayers", allInPlayers)
       // Create or update pots for each all-in player
       allInPlayers.forEach((allInPlayer) => {
         if (remainingBets.every(bet => bet === 0)) return newPots;
@@ -522,7 +518,6 @@ export default function Game() {
         } else {
           newPots.push({ amount: potAmount, eligiblePlayers });
         }
-        console.log("after")
         printPots(newPots)
       });
     }

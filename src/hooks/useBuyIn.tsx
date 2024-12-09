@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import Player from '@/type/interface/Player';
+import { LocalStorage } from '@/utils/LocalStorage';
+import { GameState } from '@/type/GameState';
 
 export const useBuyIn = (
   players: Player[], 
@@ -33,6 +35,8 @@ export const useBuyIn = (
       let playerList: Player[];
       let setFunction: React.Dispatch<React.SetStateAction<Player[]>>;
       
+      const gameState = LocalStorage.get('history').toObject<GameState[]>();
+      let newState = gameState && gameState?.length > 0 ? { ...gameState[gameState.length - 1] }: null;
       if (bustedPlayer) {
         // Handle busted player buy-in
         playerList = [...bustedPlayers];

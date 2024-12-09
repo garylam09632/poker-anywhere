@@ -118,6 +118,16 @@ const Modal: React.FC<ModalProps> = ({
 
   const setPlayer = (player: Player) => {
     setPlayers(players.map(p => p.id === player.id ? player : p));
+    const gameState = LocalStorage.get('history').toObject<GameState[]>();
+    if (gameState) {
+      let newState = gameState?.length > 0 ? { ...gameState[gameState.length - 1] }: null;
+      if (newState) {
+        newState.players = players;
+        newState.bustedPlayers = bustedPlayers;
+        LocalStorage.set('history', [...gameState, newState]);
+        console.log(LocalStorage.get('history').toObject<GameState[]>())
+      }
+    }
     onClose();
   }
 
@@ -206,7 +216,7 @@ const PlayerSettings: React.FC<PlayerSettingsProps> = ({ player, setPlayer, dict
         type="number"
       /> */}
       <StyledButton onClick={handleSave}>
-        Save Settings
+        {dictionary.save}
       </StyledButton>
     </div>
   )

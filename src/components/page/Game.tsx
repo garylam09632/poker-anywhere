@@ -866,7 +866,6 @@ export default function Game({
             // Use Math.round to distribute the pot evenly
             let share = Math.round(pot.amount / playerEligibles.length);
             newPlayers[parseInt(playerId) - 1].chips += share
-            console.log(`Pot ${i + 1} - Player ${playerId} - Share: ${share}`)
             potIndex.push(i);
           }
         }

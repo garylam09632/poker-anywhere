@@ -233,7 +233,7 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
             ${dictionary.busted.length >= 8 ? 'text-sm' : 'text-md'}
             ${showContent === 'busted' ? 'opacity-100' : 'opacity-0'}
           `}>
-            {dictionary.busted}
+            {player.tempBuyIn && player.tempBuyIn > 0 ? player.tempBuyIn: dictionary.busted}
           </div>
           <div className={`
             absolute inset-0 flex items-center justify-center

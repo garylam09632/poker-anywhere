@@ -45,7 +45,7 @@ export default async function RootLayout({
 
   const headersList = headers()
   const { device } = userAgent({ headers: headersList })
-  console.log("device", device)
+  
   return (
     <html lang={lang} data-device={device.type ? device.type : 'desktop'}>
       <head>
