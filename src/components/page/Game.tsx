@@ -26,6 +26,7 @@ import { KeyboardShortcut } from '@/constants/DefaultKeyboardShortCut';
 import { Settings } from '@/type/Settings';
 import { Dictionary } from '@/type/Dictionary';
 import OrientationGuard from '../OrientationGuard';
+import { Helper } from '@/utils/Helper';
 
 const TEST = false;
 
@@ -281,6 +282,11 @@ export default function Game({
     } 
 
     if (!players[activePlayerIndex]?.hasActed) return;
+    if (!Helper.validateLocalStorage()) {
+      alert("Something went wrong, redirect to home page")
+      router.push('/');
+      return;
+    }
     if (!isSwitchState) {
       // If isn't switching state, set the history
       LocalStorage.set('history', [...LocalStorage.get('history').toObject<GameState[]>() || [], {

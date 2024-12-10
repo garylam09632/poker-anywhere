@@ -33,18 +33,32 @@ export const useBuyIn = (
       const bustedPlayer = bustedPlayers.find(p => p.id === selectedPlayer.id);
 
       let playerList: Player[];
-      let setFunction: React.Dispatch<React.SetStateAction<Player[]>>;
+      // let setFunction: React.Dispatch<React.SetStateAction<Player[]>>;
+
+      let setFunction: (players: Player[]) => void;
       
       const gameState = LocalStorage.get('history').toObject<GameState[]>();
       let newState = gameState && gameState?.length > 0 ? { ...gameState[gameState.length - 1] }: null;
       if (bustedPlayer) {
         // Handle busted player buy-in
         playerList = [...bustedPlayers];
-        setFunction = setBustedPlayers;
+        setFunction = (players: Player[]) => { 
+          setBustedPlayers(players);
+          if (newState && gameState) { 
+            newState.bustedPlayers = players;
+            LocalStorage.set('history', [...gameState, newState]);
+          }
+        };
       } else {
         // Handle active player buy-in
         playerList = [...players];
-        setFunction = setPlayers;
+        setFunction = (players: Player[]) => { 
+          setPlayers(players);
+          if (newState && gameState) { 
+            newState.players = players; 
+            LocalStorage.set('history', [...gameState, newState]);
+          }
+        };
       }
       setFunction(playerList.map(p => {
         if (p.id === selectedPlayer.id) p.tempBuyIn = amount;

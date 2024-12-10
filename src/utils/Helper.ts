@@ -1,6 +1,7 @@
 import { KeyboardShortcut } from "@/constants/DefaultKeyboardShortCut";
 import { LocalStorage } from "./LocalStorage";
 import { registeredKeys } from "@/constants/LocalStorageKey";
+import { Settings } from "@/type/Settings";
 
 export class Helper {
   static formatAbbreviatedNumber = (value: number): string => {
@@ -47,6 +48,17 @@ export class Helper {
       }
     }
     return ok;
+  }
+
+  static cdm = (value: number): number => {
+    const chipDisplayMode = LocalStorage.get('cdm').toObject() as 'value' | 'bigBlind';
+    if (chipDisplayMode === 'value') {
+      return value;
+    } else {
+      const settings = LocalStorage.get('settings').toObject() as Settings;
+      if (!settings) return value;
+      return value / settings.bigBlind;
+    }
   }
 
   // static getLang = (): string => {
