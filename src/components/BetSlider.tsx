@@ -78,7 +78,6 @@ export const BetSlider: React.FC<BetSliderProps> = ({
   }, [handleSliderChange]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    console.log("Key pressed:", e.key);  // Debug log
     if (disabled) return;
 
     e.preventDefault();

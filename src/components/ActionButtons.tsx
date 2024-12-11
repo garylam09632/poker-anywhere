@@ -6,6 +6,7 @@ import { StyledInput } from './StyledInput';
 import Player from '@/type/interface/Player';
 import { KeyboardShortcut } from '@/constants/DefaultKeyboardShortCut';
 import { Dictionary } from '@/type/Dictionary';
+import { Helper } from '@/utils/Helper';
 
 interface ActionButtonsProps {
   onFold: () => void;
@@ -20,6 +21,7 @@ interface ActionButtonsProps {
   minRaise: number;
   disabled: boolean;
   dictionary: Dictionary;
+  isCdmChange: boolean;
 }
 
 type BetControlOption = {
@@ -41,6 +43,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   minRaise,
   disabled,
   dictionary,
+  isCdmChange,
 }) => {
   const searchParams = useSearchParams();
   const [raiseAmount, setRaiseAmount] = useState(minRaise);
@@ -111,10 +114,12 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             {canCheck ? (
               <StyledButton onClick={onCheck} disabled={disabled} bind={"Action2"}>{dictionary.check}</StyledButton>
             ) : (
-              <StyledButton onClick={onCall} disabled={disabled} bind={"Action2"}>{dictionary.call} ${playerChips < callAmount ? playerChips : callAmount}</StyledButton>
+              <StyledButton onClick={onCall} disabled={disabled} bind={"Action2"}>
+                {dictionary.call} {Helper.cdm(playerChips < callAmount ? playerChips : callAmount)}
+              </StyledButton>
             )}
             <StyledButton onClick={() => onRaise(raiseAmount, canRaise && raiseAmount !== playerChips)} bind={"Action3"}>
-              {canRaise && raiseAmount !== playerChips ? `${dictionary.raise} $${raiseAmount}` : `${dictionary.allIn} $${playerChips}`}
+              {canRaise && raiseAmount !== playerChips ? `${dictionary.raise} ${Helper.cdm(raiseAmount)}` : `${dictionary.allIn} ${Helper.cdm(playerChips)}`}
             </StyledButton>
           </div>
         </div>
@@ -141,7 +146,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
                   bind={option.bind}
                 >
                   {option.label}
-                </StyledButton>
+                </StyledButton> 
               ))}
             </div>
             <div className="flex flex-row items-center w-3/4 space-x-4">

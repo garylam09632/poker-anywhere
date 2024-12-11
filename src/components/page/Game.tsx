@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Player from '@/type/interface/Player';
 import Pot from '@/type/interface/Pot';
 import case1 from '@/case/SidePot1';
-import { Action, DeviceType, Stage } from '@/type/General';
+import { Action, ChipDisplayMode, DeviceType, Stage } from '@/type/General';
 import { useModal } from '@/hooks/useModal';
 import { Position } from '@/type/enum/Position';
 import PlayerUnit from '@/components/PlayerUnit';
@@ -67,6 +67,7 @@ export default function Game({
   const [isEndRound, setIsEndRound] = useState(false);
   const [isSwitchState, setIsSwitchState] = useState(false);
   const [beforeHandStart, setBeforeHandStart] = useState(false);
+  const [isCdmChange, setIsCdmChange] = useState(true);
 
   // Buy in state
   const {
@@ -122,6 +123,8 @@ export default function Game({
     if (LocalStorage.get('shortcutSetting').isNull()) {
       LocalStorage.set('shortcutSetting', KeyboardShortcut);
     }
+
+    LocalStorage.set('cdm', 'chips');
     setLoading(false);
   }, [])
 
@@ -141,6 +144,8 @@ export default function Game({
         } else {
           LocalStorage.set('km', "yes");
         }
+      } else if (event.key.toLowerCase() === 'shift') {
+        toggleCdm();
       }
     };
     
@@ -160,7 +165,7 @@ export default function Game({
       window.removeEventListener('keydown', handleKeyPress);
       document.removeEventListener('blur', handleBlur, true);
     }
-  }, [])
+  }, [isCdmChange])
 
   useEffect(() => {
     if (isSwitchState) setIsSwitchState(false);
@@ -1081,6 +1086,20 @@ export default function Game({
     return true;
   }
 
+  const toggleCdm = () => {
+    setIsCdmChange(!isCdmChange);
+    const cdm = LocalStorage.get('cdm').toString();
+    if (cdm) {
+      if (cdm === 'chips') {
+        LocalStorage.set('cdm', 'bigBlind');
+      } else {
+        LocalStorage.set('cdm', 'chips');
+      }
+    } else {
+      LocalStorage.set('cdm', 'chips');
+    }
+  }
+
   return !loading && (
     <OrientationGuard deviceType={document?.documentElement.dataset.device as DeviceType}>
       <div
@@ -1133,7 +1152,10 @@ export default function Game({
             relative
             scale-85
           "
-          onClick={(e) => {setShowBetControls(false)}}
+          onClick={(e) => {
+            setShowBetControls(false)
+            toggleCdm();
+          }}
         >
           <div className="
             absolute
@@ -1197,6 +1219,7 @@ export default function Game({
                   player={player}
                   isActive={isActive}
                   isSelected={selectedPlayer?.id === player.id}
+                  isCdmChange={isCdmChange}
                   currentBet={currentBet}
                   bigBlind={bigBlind}
                   selectedWinners={selectedWinners}
@@ -1253,6 +1276,7 @@ export default function Game({
                       minRaise={minRaise}
                       disabled={!activePlayer}
                       dictionary={dictionary}
+                      isCdmChange={isCdmChange}
                     />
                   )
                 }

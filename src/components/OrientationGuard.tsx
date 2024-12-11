@@ -26,6 +26,7 @@ const OrientationGuard: React.FC<OrientationGuardProps> = ({ children, deviceTyp
   }, [deviceType]);
 
   const checkOrientation = () => {
+    console.log("deviceType", deviceType);
     if (deviceType === 'mobile') {
       // window.innerWidth > window.innerHeight means landscape
       setIsWrongOrientation(window.innerWidth > window.innerHeight);

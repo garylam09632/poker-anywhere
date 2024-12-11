@@ -1,6 +1,8 @@
 import { PlayerLocation } from '@/type/enum/Location';
 import Player from '@/type/interface/Player';
-import React from 'react';
+import { Helper } from '@/utils/Helper';
+import { LocalStorage } from '@/utils/LocalStorage';
+import React, { useEffect } from 'react';
 
 interface ChipProps {
   amount: number;
@@ -10,18 +12,19 @@ interface ChipProps {
 }
 
 const Chip: React.FC<ChipProps> = ({ amount, type = 'bet', player, playerLocation }) => {
+
   return (
     <div className={`
       flex items-center justify-center
       ${type === 'pot' ? 'bg-gray-700' : 'bg-white'}
-      rounded-full w-12 h-12
+      rounded-full
+      ${LocalStorage.get('cdm').toString() === 'bigBlind' ? 'w-auto h-auto p-2 xxs:w-[140%]' : 'w-12 h-12'}
       sh:w-7 sh:h-7 sh:text-xxs
       text-sm font-bold
       ${type === 'pot' ? 'text-white' : 'text-black'}
       shadow-md
-      transition-all duration-500 ease-in-out
     `}>
-      {amount}
+      {Helper.cdm(amount)}
     </div>
   );
 };

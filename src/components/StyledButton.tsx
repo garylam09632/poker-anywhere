@@ -20,7 +20,7 @@ export const StyledButton: React.FC<StyledButtonProps> = ({
 }) => {
 
   const [isModeOn, setIsModeOn] = useState<boolean>(LocalStorage.get('km').value ? true : false);
-
+  
   // Add useEffect for key handler
   useEffect(() => {
     if (!bind) return;

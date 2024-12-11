@@ -11,12 +11,14 @@ import { ShowdownMode } from '@/type/enum/ShowdownMode';
 import RankSelector from './RankSelector';
 import { useLocation } from '@/hooks/useLocation';
 import { Dictionary } from '@/type/Dictionary';
+import { Helper } from '@/utils/Helper';
 
 interface PlayerUnitProps {
   player: Player;
   isActive: boolean;
   currentBet: number;
   bigBlind: number;
+  isCdmChange: boolean;
   isSelected: boolean;
   showdownMode: number;
   isEligible: boolean;
@@ -36,6 +38,7 @@ type ContentType = 'chips' | 'showdown' | 'busted';
 const PlayerUnit: React.FC<PlayerUnitProps> = ({ 
   player, 
   isActive, 
+  isCdmChange,
   isSelected, 
   currentBet, 
   bigBlind, 
@@ -214,8 +217,12 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
             transition-opacity duration-300 ease-in-out
             ${showContent === 'chips' ? 'opacity-100' : 'opacity-0'}
           `}>
-            <div className={`absolute z-10 font-bold transition-opacity duration-300 ease-in-out ${isHovered ? 'opacity-0' : 'opacity-100'}`}>
-              {player.chips}
+            <div className={
+              `absolute z-10 font-bold transition-opacity duration-300 ease-in-out 
+              ${Helper.cdm(player.chips).length >= 8 ? 'text-sm' : 'text-md'}
+              ${isHovered ? 'opacity-0' : 'opacity-100'}`
+            }>
+              { Helper.cdm(player.chips) }
             </div>
             <div 
               className={`

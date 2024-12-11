@@ -2,6 +2,7 @@ import { KeyboardShortcut } from "@/constants/DefaultKeyboardShortCut";
 import { LocalStorage } from "./LocalStorage";
 import { registeredKeys } from "@/constants/LocalStorageKey";
 import { Settings } from "@/type/Settings";
+import { ChipDisplayMode } from "@/type/General";
 
 export class Helper {
   static formatAbbreviatedNumber = (value: number): string => {
@@ -43,6 +44,7 @@ export class Helper {
     let ok = true;
     for (const key of registeredKeys) {
       if (LocalStorage.get(key).isNull()) {
+        console.log(`${key} is null`);
         LocalStorage.remove(key);
         ok = false;
       }
@@ -50,14 +52,17 @@ export class Helper {
     return ok;
   }
 
-  static cdm = (value: number): number => {
-    const chipDisplayMode = LocalStorage.get('cdm').toObject() as 'value' | 'bigBlind';
-    if (chipDisplayMode === 'value') {
-      return value;
+  static cdm = (value: number): string => {
+    const chipDisplayMode = LocalStorage.get('cdm').toString();
+    if (!chipDisplayMode) {
+      return value.toString();
+    }
+    if (chipDisplayMode === 'chips') {
+      return value.toString();
     } else {
       const settings = LocalStorage.get('settings').toObject() as Settings;
-      if (!settings) return value;
-      return value / settings.bigBlind;
+      if (!settings) return value.toString();
+      return (Math.round((value / settings.bigBlind) * 10) / 10).toString() + " BB";
     }
   }
 
