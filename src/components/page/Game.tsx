@@ -1154,7 +1154,6 @@ export default function Game({
           "
           onClick={(e) => {
             setShowBetControls(false)
-            toggleCdm();
           }}
         >
           <div className="
@@ -1194,8 +1193,8 @@ export default function Game({
                 pots.length > 0 && (
                   <div className="flex items-center space-x-2">
                     {pots.map((pot, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                      <Chip amount={pot.amount} type="pot" />
+                      <div key={index} className="flex items-center space-x-2" onClick={toggleCdm}>
+                        <Chip amount={pot.amount} type="pot" />
                       </div>
                     ))}
                   </div>

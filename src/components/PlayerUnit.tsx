@@ -206,7 +206,7 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
           text-black font-bold text-xl sh:w-16 sh:h-16 sh:text-xs
           relative ${(showdownMode && isEligible) && 'cursor-pointer'}
         `}
-          onClick={() => { 
+          onClick={(e) => { 
             if (showdownMode && isEligible) { 
               onSelectWinner(player.id) 
             }

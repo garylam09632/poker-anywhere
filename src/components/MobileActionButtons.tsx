@@ -121,7 +121,7 @@ export const MobileActionButtons: React.FC<ActionButtonsProps> = ({
   // sh:absolute sh:bottom-0 sh:translate-y-24 sh:scale-90
   return (
     <div className="w-full h-[10%] fixed bottom-0 left-0">
-      {/* Main action buttons - always visible on desktop, slides on mobile */}
+      {/* Main action buttons */}
       <div 
         className={`
           w-full flex items-center justify-between p-2 transition-transform duration-300
