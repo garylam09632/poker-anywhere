@@ -58,5 +58,17 @@
   "amount": "Amount",
   "save": "Save",
   "confirm": "Confirm",
-  "busted": "Busted"
+  "busted": "Busted",
+  "information": "Information",
+  "tutorial": "Tutorial",
+  "patchNotes": "Patch Notes",
+  "pleaseRotateToLandscapeForBestExperience": "Please rotate your device to landscape mode for best experience",
+  "pleaseRotateToPortraitForBestExperience": "Please rotate your device to portrait mode for best experience",
+  "keyboardControls": "Keyboard Controls",
+  "chipDisplay": "Chip Display",
+  "tutorialKeyboardControls": "Press {{key}} to toggle keyboard mode",
+  "tutorialChipDisplay": "Click the pot or press {{key}} to toggle between chip amounts and big blinds",
+  "tutorialGameHistory": "Use the rollback button in the left corner to undo previous actions",
+  "tutorialShowdown": "During multiple-way showdowns, scroll or swipe to select player rankings",
+  "contactMe": "Contact me if you have any questions, suggestions, corrections or issues (bugs!!) via email: "
 }

@@ -58,5 +58,17 @@
   "amount": "金額",
   "save": "保存",
   "confirm": "確認",
-  "busted": "バスト"
+  "busted": "バスト",
+  "information": "情報",
+  "tutorial": "チュートリアル",
+  "patchNotes": "パッチノート",
+  "pleaseRotateToLandscapeForBestExperience": "最適な体験のため、デバイスを横向き���してください",
+  "pleaseRotateToPortraitForBestExperience": "最適な体験のため、デバイスを縦向きにしてください",
+  "keyboardControls": "キーボード操作",
+  "chipDisplay": "チップ表示",
+  "tutorialKeyboardControls": "{{key}}を押してキーボードモードを切り替える",
+  "tutorialChipDisplay": "ポットをクリックするか{{key}}を押してチップ額とビッグブラインドを切り替える",
+  "tutorialGameHistory": "左上の取り消しボタンで前のアクションを元に戻す",
+  "tutorialShowdown": "マルチウェイのショーダウンでは、スクロールまたはスワイプでプレイヤーの順位を選択",
+  "contactMe": "質問、提案、修正、問題（バグ！！）がありましたら、メールでご連絡ください："
 }

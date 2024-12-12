@@ -58,5 +58,17 @@
   "amount": "Halaga",
   "save": "I-save",
   "confirm": "Kumpirmahin",
-  "busted": "Lugi"
+  "busted": "Lugi",
+  "information": "Impormasyon",
+  "tutorial": "Tutorial",
+  "patchNotes": "Mga Tala ng Update",
+  "pleaseRotateToLandscapeForBestExperience": "Paki-rotate ang iyong device sa landscape mode para sa mas magandang karanasan",
+  "pleaseRotateToPortraitForBestExperience": "Paki-rotate ang iyong device sa portrait mode para sa mas magandang karanasan",
+  "keyboardControls": "Mga Kontrol sa Keyboard",
+  "chipDisplay": "Display ng Chips",
+  "tutorialKeyboardControls": "Pindutin ang {{key}} para i-toggle ang keyboard mode",
+  "tutorialChipDisplay": "I-click ang pot o pindutin ang {{key}} para magpalitan sa pagitan ng halaga ng chips at big blinds",
+  "tutorialGameHistory": "Gamitin ang rollback button sa kaliwang sulok para i-undo ang mga nakaraang aksyon",
+  "tutorialShowdown": "Sa multiple-way showdowns, mag-scroll o mag-swipe para pumili ng ranking ng mga manlalaro",
+  "contactMe": "Makipag-ugnayan sa akin sa email kung mayroon kang mga tanong, mungkahi, pagwawasto o mga isyu (bugs!!):"
 }

@@ -58,5 +58,17 @@
   "amount": "Betrag",
   "save": "Speichern",
   "confirm": "Bestätigen",
-  "busted": "Verloren"
+  "busted": "Verloren",
+  "information": "Information",
+  "tutorial": "Tutorial",
+  "patchNotes": "Patchnotizen",
+  "pleaseRotateToLandscapeForBestExperience": "Bitte drehen Sie Ihr Gerät in den Querformat-Modus für die beste Erfahrung",
+  "pleaseRotateToPortraitForBestExperience": "Bitte drehen Sie Ihr Gerät in den Hochformat-Modus für die beste Erfahrung",
+  "keyboardControls": "Tastatursteuerung",
+  "chipDisplay": "Chip-Anzeige",
+  "tutorialKeyboardControls": "Drücken Sie {{key}}, um den Tastaturmodus umzuschalten",
+  "tutorialChipDisplay": "Klicken Sie auf den Pot oder drücken Sie {{key}}, um zwischen Chip-Beträgen und Big Blinds zu wechseln",
+  "tutorialGameHistory": "Verwenden Sie die Rückgängig-Taste in der linken Ecke, um vorherige Aktionen rückgängig zu machen",
+  "tutorialShowdown": "Bei mehrfachen Showdowns scrollen oder wischen Sie, um die Spielerränge auszuwählen",
+  "contactMe": "Kontaktieren Sie mich per E-Mail, wenn Sie Fragen, Vorschläge, Korrekturen oder Probleme (Bugs!!) haben:"
 }

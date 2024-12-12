@@ -58,5 +58,17 @@
   "amount": "Montant",
   "save": "Sauvegarder",
   "confirm": "Confirmer",
-  "busted": "Éliminé"
+  "busted": "Éliminé",
+  "information": "Information",
+  "tutorial": "Tutoriel",
+  "patchNotes": "Notes de mise à jour",
+  "pleaseRotateToLandscapeForBestExperience": "Veuillez tourner votre appareil en mode paysage pour une meilleure expérience",
+  "pleaseRotateToPortraitForBestExperience": "Veuillez tourner votre appareil en mode portrait pour une meilleure expérience",
+  "keyboardControls": "Contrôles clavier",
+  "chipDisplay": "Affichage des jetons",
+  "tutorialKeyboardControls": "Appuyez sur {{key}} pour activer/désactiver le mode clavier",
+  "tutorialChipDisplay": "Cliquez sur le pot ou appuyez sur {{key}} pour basculer entre les montants de jetons et les grandes blindes",
+  "tutorialGameHistory": "Utilisez le bouton d'annulation dans le coin gauche pour annuler les actions précédentes",
+  "tutorialShowdown": "Lors des showdowns à plusieurs joueurs, faites défiler ou glissez pour sélectionner le classement des joueurs",
+  "contactMe": "Contactez-moi par email si vous avez des questions, suggestions, corrections ou problèmes (bugs!!) :"
 }

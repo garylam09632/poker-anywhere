@@ -58,5 +58,17 @@
   "amount": "Số lượng",
   "save": "Lưu",
   "confirm": "Xác nhận",
-  "busted": "Thua sạch"
+  "busted": "Thua sạch",
+  "information": "Thông tin",
+  "tutorial": "Hướng dẫn",
+  "patchNotes": "Ghi chú cập nhật",
+  "pleaseRotateToLandscapeForBestExperience": "Vui lòng xoay thiết bị sang chế độ ngang để có trải nghiệm tốt nhất",
+  "pleaseRotateToPortraitForBestExperience": "Vui lòng xoay thiết bị sang chế độ dọc để có trải nghiệm tốt nhất",
+  "keyboardControls": "Điều khiển bàn phím",
+  "chipDisplay": "Hiển thị chip",
+  "tutorialKeyboardControls": "Nhấn {{key}} để chuyển đổi chế độ bàn phím",
+  "tutorialChipDisplay": "Nhấp vào pot hoặc nhấn {{key}} để chuyển đổi giữa số lượng chip và big blind",
+  "tutorialGameHistory": "Sử dụng nút rollback ở góc trái để hoàn tác các hành động trước đó",
+  "tutorialShowdown": "Trong showdown nhiều người, cuộn hoặc vuốt để chọn thứ hạng người chơi",
+  "contactMe": "Liên hệ với tôi qua email nếu bạn có bất kỳ câu hỏi, đề xuất, chỉnh sửa hoặc vấn đề (lỗi!!):"
 }

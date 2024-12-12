@@ -12,6 +12,7 @@ import RankSelector from './RankSelector';
 import { useLocation } from '@/hooks/useLocation';
 import { Dictionary } from '@/type/Dictionary';
 import { Helper } from '@/utils/Helper';
+import { LocalStorage } from '@/utils/LocalStorage';
 
 interface PlayerUnitProps {
   player: Player;
@@ -219,7 +220,7 @@ const PlayerUnit: React.FC<PlayerUnitProps> = ({
           `}>
             <div className={
               `absolute z-10 font-bold transition-opacity duration-300 ease-in-out 
-              ${Helper.cdm(player.chips).length >= 8 ? 'text-sm' : 'text-md'}
+              ${LocalStorage.get('cdm').value === 'bigBlind' ? 'text-msm' : 'text-md'}
               ${isHovered ? 'opacity-0' : 'opacity-100'}`
             }>
               { Helper.cdm(player.chips) }

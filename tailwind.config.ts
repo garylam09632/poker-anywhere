@@ -75,6 +75,16 @@ const config: Config = {
           '0%, 100%': { transform: 'translateX(0)' },
           '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' },
           '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' }
+        },
+        'message-slide-down': {
+          '0%': { 
+            transform: 'translateY(-100%)',
+            opacity: '0' 
+          },
+          '100%': { 
+            transform: 'translateY(0)',
+            opacity: '1' 
+          },
         }
       },
       animation: {
@@ -83,11 +93,13 @@ const config: Config = {
         'slide-down': 'slideDown 0.3s ease-out forwards',
         'fade-in': 'fadeIn 0.3s ease-out forwards',
         'fade-out': 'fadeOut 0.3s ease-out forwards',
-        'shake': 'shake 0.6s cubic-bezier(.36,.07,.19,.97) both'
+        'shake': 'shake 0.6s cubic-bezier(.36,.07,.19,.97) both',
+        'message-slide-down': 'messageSlideDown 0.3s ease-out forwards',
       },
       fontSize: {
         'xxs': '0.5rem',
         'xs': '0.625rem',
+        'msm': '1rem',
       },
     },
     screens: {

@@ -58,5 +58,17 @@
   "amount": "Cantidad",
   "save": "Guardar",
   "confirm": "Confirmar",
-  "busted": "Eliminado"
+  "busted": "Eliminado",
+  "information": "Información",
+  "tutorial": "Tutorial",
+  "patchNotes": "Notas del parche",
+  "pleaseRotateToLandscapeForBestExperience": "Por favor, gire su dispositivo al modo horizontal para una mejor experiencia",
+  "pleaseRotateToPortraitForBestExperience": "Por favor, gire su dispositivo al modo vertical para una mejor experiencia",
+  "keyboardControls": "Controles de teclado",
+  "chipDisplay": "Visualización de fichas",
+  "tutorialKeyboardControls": "Presiona {{key}} para alternar el modo teclado",
+  "tutorialChipDisplay": "Haz clic en el bote o presiona {{key}} para alternar entre cantidades de fichas y ciegas grandes",
+  "tutorialGameHistory": "Usa el botón de deshacer en la esquina izquierda para deshacer acciones anteriores",
+  "tutorialShowdown": "Durante showdowns múltiples, desplázate o desliza para seleccionar el ranking de jugadores",
+  "contactMe": "Contáctame por correo electrónico si tienes preguntas, sugerencias, correcciones o problemas (¡¡bugs!!):"
 }

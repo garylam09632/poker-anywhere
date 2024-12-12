@@ -10,6 +10,7 @@ interface GameSettingsFormProps {
   smallBlind: string;
   bigBlind: string;
   buyIn: string;
+  hasPlayerCountInput?: boolean;
   setPlayerCount: (value: string) => void;
   setSmallBlind: (value: string) => void;
   setBigBlind: (value: string) => void;
@@ -23,6 +24,7 @@ export function GameSettingsForm({
   smallBlind,
   bigBlind,
   buyIn,
+  hasPlayerCountInput = true,
   setPlayerCount,
   setSmallBlind,
   setBigBlind,
@@ -32,16 +34,18 @@ export function GameSettingsForm({
   const [reset, setReset] = useState(false);
   return (
     <div className="space-y-10">
-      <StyledInput
-        label={dictionary.players}
-        value={playerCount}
-        onChange={(value) => { if (isNaN(Number(value))) return; setPlayerCount(value); }}
-        onBlur={(value) => { 
-          if (Number(value) < 2) setPlayerCount('2');
-          if (Number(value) > 10) setPlayerCount('10');
-        }}
-        type="text"
-      />
+      {hasPlayerCountInput && (
+        <StyledInput
+          label={dictionary.players}
+          value={playerCount}
+          onChange={(value) => { if (isNaN(Number(value))) return; setPlayerCount(value); }}
+          onBlur={(value) => { 
+            if (Number(value) < 2) setPlayerCount('2');
+            if (Number(value) > 10) setPlayerCount('10');
+          }}
+          type="text"
+        />
+      )}
       <StyledInput
         id="smallBlind"
         label={dictionary.smallBlind}

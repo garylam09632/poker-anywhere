@@ -13,6 +13,7 @@ import { Tab, TabGroup } from './Tab';
 import { Dictionary } from '@/type/Dictionary';
 import { GameSettingsForm } from './GameSettingForm';
 import { GameState } from '@/type/GameState';
+import { versions} from '@/data/Versions';
 
 interface ModalProps {
   type: ModalType;
@@ -101,6 +102,7 @@ const Modal: React.FC<ModalProps> = ({
     if (type === ModalType.BuyIn) return dictionary.buyIn;
     if (type === ModalType.Statics) return dictionary.statics;
     if (type === ModalType.Settings) return dictionary.settings;
+    if (type === ModalType.Information) return dictionary.information;
     return '';
   }
 
@@ -157,6 +159,8 @@ const Modal: React.FC<ModalProps> = ({
           dictionary={dictionary} 
         />
       )
+    } else if (type === ModalType.Information) {
+      return <Information dictionary={dictionary} />
     }
   }
 
@@ -285,6 +289,7 @@ const GameSettings: React.FC<GameSettingsProps> = ({ players, bustedPlayers, han
       smallBlind={smallBlind}
       bigBlind={bigBlind}
       buyIn={buyIn}
+      hasPlayerCountInput={false}
       setPlayerCount={setPlayerCount}
       setSmallBlind={setSmallBlind}
       setBigBlind={setBigBlind}
@@ -449,6 +454,97 @@ const Statics: React.FC<StaticsProps> = ({ players, bustedPlayers, dictionary })
             </span>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+const Information: React.FC<CommonModalProps> = ({ dictionary }) => {
+  const [activeTab, setActiveTab] = useState('tutorial');
+
+  const tabs = [
+    { id: 'tutorial', label: dictionary.tutorial },
+    { id: 'patchNotes', label: dictionary.patchNotes }
+  ];
+
+  // Function to replace {{key}} with the actual key component
+  const replaceKey = (text: string, key: string) => {
+    const parts = text.split('{{key}}');
+    return (
+      <>
+        {parts[0]}
+        <kbd className="bg-gray-700 px-2 py-1 mx-1 rounded">{key}</kbd>
+        {parts[1]}
+      </>
+    );
+  };
+
+  return (
+    <div className="w-[75vw] md:w-[40vw] min-h-[400px] flex flex-col">
+      <TabGroup
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      >
+        <Tab label={dictionary.tutorial} isActive={activeTab === 'tutorial'}>
+          <div className="space-y-5">
+            <div>
+              <h3 className="font-bold mb-2">{dictionary.keyboardControls}</h3>
+              <p>{replaceKey(dictionary.tutorialKeyboardControls, 'Ctrl')}</p>
+            </div>
+            
+            <div>
+              <h3 className="font-bold mb-2">{dictionary.chipDisplay}</h3>
+              <p>{replaceKey(dictionary.tutorialChipDisplay, 'Shift')}</p>
+            </div>
+            
+            <div>
+              <h3 className="font-bold mb-2">{dictionary.rollback}</h3>
+              <p>{dictionary.tutorialGameHistory}</p>
+            </div>
+            
+            <div>
+              <h3 className="font-bold mb-2">{dictionary.showdown}</h3>
+              <p>{dictionary.tutorialShowdown}</p>
+            </div>
+          </div>
+        </Tab>        
+        <Tab label={dictionary.patchNotes} isActive={activeTab === 'patchNotes'}>
+          <div className="space-y-6">
+            {versions.map((version) => (
+              <div 
+                key={version.version} 
+                className="border border-gray-700 rounded-lg p-4 hover:border-gray-500 transition-colors"
+              >
+                <div className="flex justify-between items-center mb-3">
+                  <h2 className="text-xl font-bold">v{version.version}</h2>
+                  <span className="text-sm text-gray-400">{version.date}</span>
+                </div>
+                <ul className="list-disc list-inside space-y-2">
+                  {version.changes.map((change, index) => (
+                    <li key={index} className="text-gray-300">
+                      {change}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </Tab>
+      </TabGroup>
+      <br />
+      <div className="flex flex-col items-center space-y-2">
+        <p>{dictionary.contactMe}</p>
+        <p 
+          className="bg-white text-black px-2 py-1 rounded w-fit select-text cursor-pointer"           
+          onClick={(e) => {
+            e.preventDefault();
+            navigator.clipboard.writeText('garylamoffical@gmail.com');
+            alert('Copied!');
+          }}
+        >
+          garylamoffical@gmail.com
+        </p>
       </div>
     </div>
   );

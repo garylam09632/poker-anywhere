@@ -58,5 +58,17 @@
   "amount": "จำนวน",
   "save": "บันทึก",
   "confirm": "ยืนยัน",
-  "busted": "หมดตัว"
+  "busted": "หมดตัว",
+  "information": "ข้อมูล",
+  "tutorial": "บทเรียน",
+  "patchNotes": "บันทึกการอัปเดต",
+  "pleaseRotateToLandscapeForBestExperience": "โปรดหมุนอุปกรณ์ของคุณเป็นแนวนอนเพื่อประสบการณ์ที่ดีที่สุด",
+  "pleaseRotateToPortraitForBestExperience": "โปรดหมุนอุปกรณ์ของคุณเป็นแนวตั้งเพื่อประสบการณ์ที่ดีที่สุด",
+  "keyboardControls": "การควบคุมแป้นพิมพ์",
+  "chipDisplay": "การแสดงชิป",
+  "tutorialKeyboardControls": "กด {{key}} เพื่อสลับโหมดแป้นพิมพ์",
+  "tutorialChipDisplay": "คลิกที่พอทหรือกด {{key}} เพื่อสลับระหว่างจำนวนชิปและบิ๊กบลายด์",
+  "tutorialGameHistory": "ใช้ปุ่มย้อนกลับที่มุมซ้ายเพื่อยกเลิกการกระทำก่อนหน้า",
+  "tutorialShowdown": "ในระหว่างการเปิดไพ่หลายทาง เลื่อนหรือสไลด์เพื่อเลือกอันดับผู้เล่น",
+  "contactMe": "ติดต่อฉันทางอีเมลหากคุณมีคำถาม ข้อเสนอแนะ การแก้ไข หรือปัญหา (บั๊ก!!):"
 }

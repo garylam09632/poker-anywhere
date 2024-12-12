@@ -58,5 +58,17 @@
   "amount": "Importo",
   "save": "Salva",
   "confirm": "Conferma",
-  "busted": "Eliminato"
+  "busted": "Eliminato",
+  "information": "Informazioni",
+  "tutorial": "Tutorial",
+  "patchNotes": "Note di aggiornamento",
+  "pleaseRotateToLandscapeForBestExperience": "Ruota il dispositivo in modalità orizzontale per una migliore esperienza",
+  "pleaseRotateToPortraitForBestExperience": "Ruota il dispositivo in modalità verticale per una migliore esperienza",
+  "keyboardControls": "Controlli tastiera",
+  "chipDisplay": "Visualizzazione fiches",
+  "tutorialKeyboardControls": "Premi {{key}} per attivare/disattivare la modalità tastiera",
+  "tutorialChipDisplay": "Clicca sul piatto o premi {{key}} per alternare tra importi delle fiches e big blind",
+  "tutorialGameHistory": "Usa il pulsante di annullamento nell'angolo sinistro per annullare le azioni precedenti",
+  "tutorialShowdown": "Durante gli showdown multipli, scorri o fai swipe per selezionare le classifiche dei giocatori",
+  "contactMe": "Contattami via email se hai domande, suggerimenti, correzioni o problemi (bug!!):"
 }

@@ -58,5 +58,17 @@
   "amount": "금액",
   "save": "저장",
   "confirm": "확인",
-  "busted": "파산"
+  "busted": "파산",
+  "information": "정보",
+  "tutorial": "튜토리얼",
+  "patchNotes": "패치 노트",
+  "pleaseRotateToLandscapeForBestExperience": "최상의 경험을 위해 기기를 가로 모드로 전환해 주세요",
+  "pleaseRotateToPortraitForBestExperience": "최상의 경험을 위해 기기를 세로 모드로 전환해 주세요",
+  "keyboardControls": "키보드 컨트롤",
+  "chipDisplay": "칩 표시",
+  "tutorialKeyboardControls": "{{key}}를 눌러 키보드 모드 전환",
+  "tutorialChipDisplay": "팟을 클릭하거나 {{key}}를 눌러 칩 금액과 빅 블라인드 전환",
+  "tutorialGameHistory": "왼쪽 모서리의 되돌리기 버튼을 사용하여 이전 작업 취소",
+  "tutorialShowdown": "멀티웨이 쇼다운에서는 스크롤하거나 스와이프하여 플레이어 순위 선택",
+  "contactMe": "질문, 제안, 수정 또는 문제(버그!!)가 있으시면 이메일로 연락해 주세요:"
 }

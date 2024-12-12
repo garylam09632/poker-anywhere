@@ -15,8 +15,8 @@ import { ShowdownMode } from '@/type/enum/ShowdownMode';
 import Modal from '@/components/Modal';
 import { ModalType } from '@/type/enum/ModalType';
 import { IconButton } from '@/components/IconButton';
-import { FiLogOut, FiSettings } from 'react-icons/fi';
-import { RiArrowGoBackLine, RiBarChartLine, RiLogoutBoxLine, RiMoneyDollarBoxLine } from 'react-icons/ri';
+import { FiSettings } from 'react-icons/fi';
+import { RiArrowGoBackLine, RiBarChartLine, RiInformationLine, RiLogoutBoxLine, RiMoneyDollarBoxLine } from 'react-icons/ri';
 import { useLocation } from '@/hooks/useLocation';
 import { ActionButtons } from '@/components/ActionButtons';
 import { MobileActionButtons } from '@/components/MobileActionButtons';
@@ -25,8 +25,8 @@ import { GameState } from '@/type/GameState';
 import { KeyboardShortcut } from '@/constants/DefaultKeyboardShortCut';
 import { Settings } from '@/type/Settings';
 import { Dictionary } from '@/type/Dictionary';
-import OrientationGuard from '../OrientationGuard';
 import { Helper } from '@/utils/Helper';
+import Page from './Page';
 
 const TEST = false;
 
@@ -1039,6 +1039,12 @@ export default function Game({
     openModal();
   }
 
+  const onShowInformation = () => {
+    setModalType(ModalType.Information);
+    setModalWithHeader(true);
+    openModal();
+  }
+
   const getGameState = (): GameState => {
     return { players, bustedPlayers, currentBet, pots, stage, handNumber, dealerIndex, activePlayerIndex, initialed }
   }
@@ -1101,7 +1107,7 @@ export default function Game({
   }
 
   return !loading && (
-    <OrientationGuard deviceType={document?.documentElement.dataset.device as DeviceType}>
+    <Page>
       <div
         id="tableContainer"
         className="
@@ -1132,6 +1138,11 @@ export default function Game({
             icon={<RiBarChartLine />}
             onClick={onShowStatics}
             tooltip={dictionary.statics}
+          />
+          <IconButton
+            icon={<RiInformationLine />}
+            onClick={onShowInformation}
+            tooltip={dictionary.information}
           />
           <IconButton
             icon={<FiSettings />}
@@ -1298,7 +1309,7 @@ export default function Game({
         onClose={closeModal}
         handleBuyIn={handleBuyIn}
       />
-    </OrientationGuard>
+    </Page>
   );
 }
 

@@ -1,6 +1,6 @@
 {
   "start": "开始",
-  "slogan": "专注于扑克，而非筹码",
+  "slogan": "专注扑克，而非筹码",
   "players": "玩家",
   "smallBlind": "小盲",
   "bigBlind": "大盲",
@@ -58,5 +58,17 @@
   "amount": "金额",
   "save": "保存",
   "confirm": "确认",
-  "busted": "出局"
+  "busted": "出局",
+  "information": "信息",
+  "tutorial": "教程",
+  "patchNotes": "更新日志",
+  "pleaseRotateToLandscapeForBestExperience": "请将设备横向放置以获得最佳体验",
+  "pleaseRotateToPortraitForBestExperience": "请将设备纵向放置以获得最佳体验",
+  "keyboardControls": "键盘控制",
+  "chipDisplay": "筹码显示",
+  "tutorialKeyboardControls": "按 {{key}} 切换键盘模式",
+  "tutorialChipDisplay": "点击底池或按 {{key}} 切换筹码和盲注",
+  "tutorialGameHistory": "使用左上角的回滚按钮撤销之前的操作",
+  "tutorialShowdown": "在多人摊牌时，滚动或滑动选择玩家排名",
+  "contactMe": "如果您有任何问题、建议、更正或问题（错误！！），请通过电子邮件联系我："
 }

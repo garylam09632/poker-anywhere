@@ -42,7 +42,7 @@ export default async function RootLayout({
   params: Promise<{ lang: Locale }>;
 }>) {
   const { lang } = await params;
-
+  
   const headersList = headers()
   const { device } = userAgent({ headers: headersList })
   

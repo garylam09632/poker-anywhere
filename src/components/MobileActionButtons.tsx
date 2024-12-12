@@ -4,6 +4,7 @@ import { BetSlider } from './BetSlider';
 import { useSearchParams } from 'next/navigation';
 import { StyledInput } from './StyledInput';
 import { Dictionary } from '@/type/Dictionary';
+import { Helper } from '@/utils/Helper';
 
 interface ActionButtonsProps {
   onFold: () => void;
@@ -134,7 +135,7 @@ export const MobileActionButtons: React.FC<ActionButtonsProps> = ({
           {canCheck ? (
             <StyledButton onClick={onCheck} disabled={disabled}>{dictionary.check}</StyledButton>
           ) : (
-            <StyledButton onClick={onCall} disabled={disabled}>{dictionary.call} ${playerChips < callAmount ? playerChips : callAmount}</StyledButton>
+            <StyledButton onClick={onCall} disabled={disabled}>{dictionary.call} ${Helper.cdm(playerChips < callAmount ? playerChips : callAmount)}</StyledButton>
           )}
           <StyledButton 
             onClick={() => setShowBetControls(true)} 
@@ -211,7 +212,7 @@ export const MobileActionButtons: React.FC<ActionButtonsProps> = ({
               setShowBetControls(false);
             }}
           >
-            {canRaise && raiseAmount !== playerChips ? `${dictionary.raise} $${raiseAmount}` : `${dictionary.allIn} $${playerChips}`}
+            {canRaise && raiseAmount !== playerChips ? `${dictionary.raise} $${Helper.cdm(raiseAmount)}` : `${dictionary.allIn} $${Helper.cdm(playerChips)}`}
           </StyledButton>
         </div>
       </div>

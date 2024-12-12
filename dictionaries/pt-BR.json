@@ -58,5 +58,17 @@
   "amount": "Quantidade",
   "save": "Salvar",
   "confirm": "Confirmar",
-  "busted": "Eliminado"
+  "busted": "Eliminado",
+  "information": "Informação",
+  "tutorial": "Tutorial",
+  "patchNotes": "Notas da atualização",
+  "pleaseRotateToLandscapeForBestExperience": "Por favor, gire seu dispositivo para o modo paisagem para uma melhor experiência",
+  "pleaseRotateToPortraitForBestExperience": "Por favor, gire seu dispositivo para o modo retrato para uma melhor experiência",
+  "keyboardControls": "Controles do teclado",
+  "chipDisplay": "Exibição de fichas",
+  "tutorialKeyboardControls": "Pressione {{key}} para alternar o modo teclado",
+  "tutorialChipDisplay": "Clique no pote ou pressione {{key}} para alternar entre valores de fichas e big blinds",
+  "tutorialGameHistory": "Use o botão de desfazer no canto esquerdo para desfazer ações anteriores",
+  "tutorialShowdown": "Durante showdowns múltiplos, role ou deslize para selecionar as classificações dos jogadores",
+  "contactMe": "Entre em contato comigo por e-mail se tiver dúvidas, sugestões, correções ou problemas (bugs!!):"
 }

@@ -1,6 +1,6 @@
 {
   "start": "開始",
-  "slogan": "專注於撲克，而非籌碼",
+  "slogan": "專注撲克，而非籌碼",
   "players": "玩家",
   "smallBlind": "小盲",
   "bigBlind": "大盲",
@@ -58,5 +58,17 @@
   "amount": "金額",
   "save": "保存",
   "confirm": "確認",
-  "busted": "出局"
+  "busted": "出局",
+  "information": "資訊",
+  "tutorial": "教學",
+  "patchNotes": "更新日誌",
+  "pleaseRotateToLandscapeForBestExperience": "請將裝置橫向放置以獲得最佳體驗",
+  "pleaseRotateToPortraitForBestExperience": "請將裝置縱向放置以獲得最佳體驗",
+  "keyboardControls": "鍵盤控制",
+  "chipDisplay": "籌碼顯示",
+  "tutorialKeyboardControls": "按 {{key}} 切換鍵盤模式",
+  "tutorialChipDisplay": "點擊底池或按 {{key}} 切換籌碼和大盲注",
+  "tutorialGameHistory": "使用左上角的回滾按鈕撤銷之前的操作",
+  "tutorialShowdown": "在多人攤牌時，滾動或滑動選擇玩家排名",
+  "contactMe": "如果您有任何問題、建議、更正或問題（錯誤！！），請通過電子郵件聯繫我："
 }
