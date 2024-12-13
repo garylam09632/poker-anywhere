@@ -288,7 +288,7 @@ export default function Game({
 
     if (!players[activePlayerIndex]?.hasActed) return;
     if (!Helper.validateLocalStorage()) {
-      alert("Something went wrong, redirect to home page")
+      alert("Something went wrong, redirect to home page (001)")
       router.push('/');
       return;
     }
@@ -1271,6 +1271,7 @@ export default function Game({
                       potSize={pots.reduce((total, pot) => total + pot.amount, 0)}
                       minRaise={minRaise}
                       disabled={!activePlayer}
+                      isCdmChange={isCdmChange}
                     />
                   ) : (
                     <ActionButtons

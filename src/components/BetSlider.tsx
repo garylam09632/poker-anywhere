@@ -1,6 +1,9 @@
 import { useLocation } from '@/hooks/useLocation';
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { getDictionary } from '../../get-dictionary';
+import { LocalStorage } from '@/utils/LocalStorage';
+import { ChipDisplayMode } from '@/type/General';
+import { Settings } from '@/type/Settings';
 
 interface SliderPoint {
   label: string;
@@ -32,6 +35,19 @@ export const BetSlider: React.FC<BetSliderProps> = ({
   const thumbRef = useRef<HTMLDivElement>(null);
   const [continuousValue, setContinuousValue] = useState(value);
   const { isMobile } = useLocation();
+  const bb = (LocalStorage.get('settings').toObject() as Settings)?.bigBlind || 2;
+  const cdm = LocalStorage.get('cdm').toString() as ChipDisplayMode;
+  if (!cdm) {
+    alert("Something went wrong, redirect to home page (002)")
+    return;
+  }
+
+  let min = minValue;
+  let max = maxValue;
+  if (cdm === "bigBlind") {
+    min = min / bb;
+    max = max / bb;
+  }  
 
   // Add this new effect to sync with external value
   useEffect(() => {
@@ -45,6 +61,8 @@ export const BetSlider: React.FC<BetSliderProps> = ({
   const filteredPoints = points.filter(point => point.value === minValue || point.value > maxValue / 3);
 
   const handleSliderChange = useCallback((clientX: number) => {
+    // let min = minValue, max = maxValue;
+
     if (sliderRef.current && !disabled) {
       const rect = sliderRef.current.getBoundingClientRect();
       const percentage = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));

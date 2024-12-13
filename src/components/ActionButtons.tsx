@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { StyledButton } from './StyledButton';
 import { BetSlider } from './BetSlider';
-import { useSearchParams } from 'next/navigation';
 import { StyledInput } from './StyledInput';
-import Player from '@/type/interface/Player';
 import { KeyboardShortcut } from '@/constants/DefaultKeyboardShortCut';
 import { Dictionary } from '@/type/Dictionary';
 import { Helper } from '@/utils/Helper';
+import { LocalStorage } from '@/utils/LocalStorage';
+import { Settings } from '@/type/Settings';
+import { ChipDisplayMode } from '@/type/General';
 
 interface ActionButtonsProps {
   onFold: () => void;
@@ -45,11 +46,15 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   dictionary,
   isCdmChange,
 }) => {
-  const searchParams = useSearchParams();
   const [raiseAmount, setRaiseAmount] = useState(minRaise);
   const [inputValue, setInputValue] = useState(String(minRaise));
   const [canRaise, setCanRaise] = useState(playerChips > minRaise);
-  const bb = Number(searchParams.get('bigBlind') || 2);
+  const bb = (LocalStorage.get('settings').toObject() as Settings)?.bigBlind || 2;
+  const cdm = LocalStorage.get('cdm').toString() as ChipDisplayMode;
+  if (!cdm) {
+    alert("Something went wrong, redirect to home page (002)")
+    return;
+  }
 
   const sliderPoints = useMemo(() => {
     const points = [
@@ -92,8 +97,9 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
 
   // Represents raise amount input that are uncontrolled such as number input
   const handleRaiseAmountChange = (value: string, event?: React.ChangeEvent<HTMLInputElement>) => {
-    const numValue = Number(value);
+    let numValue = Number(value);
     setInputValue(value);
+    if (cdm === "bigBlind") numValue = numValue * bb
     
     if (numValue >= minRaise && numValue <= playerChips) {
       setRaiseAmount(numValue);
@@ -102,7 +108,15 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
     }
   };
 
-  // sh:absolute sh:bottom-0 sh:translate-y-24 sh:scale-90
+  useEffect(() => {
+    const cdm = LocalStorage.get('cdm').toString() as ChipDisplayMode;
+    if (cdm === "bigBlind") {
+      setInputValue(String(raiseAmount / bb));
+    } else {
+      setInputValue(String(raiseAmount));
+    }
+  }, [isCdmChange, raiseAmount]);
+
   return (
     <div className="
       w-[90%] flex flex-col items-center

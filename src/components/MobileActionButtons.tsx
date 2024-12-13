@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { StyledButton } from './StyledButton';
 import { BetSlider } from './BetSlider';
-import { useSearchParams } from 'next/navigation';
 import { StyledInput } from './StyledInput';
 import { Dictionary } from '@/type/Dictionary';
 import { Helper } from '@/utils/Helper';
+import { LocalStorage } from '@/utils/LocalStorage';
+import { ChipDisplayMode } from '@/type/General';
+import { Settings } from '@/type/Settings';
 
 interface ActionButtonsProps {
   onFold: () => void;
@@ -21,6 +23,7 @@ interface ActionButtonsProps {
   minRaise: number;
   disabled: boolean;
   showBetControls: boolean;
+  isCdmChange: boolean;
 }
 
 export const MobileActionButtons: React.FC<ActionButtonsProps> = ({
@@ -37,15 +40,21 @@ export const MobileActionButtons: React.FC<ActionButtonsProps> = ({
   playerChips,
   potSize,
   minRaise,
-  disabled
+  disabled,
+  isCdmChange,
 }) => {
-  const searchParams = useSearchParams();
   const [raiseAmount, setRaiseAmount] = useState(minRaise);
   const [inputValue, setInputValue] = useState(String(minRaise));
   const [canRaise, setCanRaise] = useState(playerChips > minRaise);
-  const bb = Number(searchParams.get('bigBlind') || 2);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const betControlsRef = useRef<HTMLDivElement>(null);
+  const bb = (LocalStorage.get('settings').toObject() as Settings)?.bigBlind || 2;
+
+  const cdm = LocalStorage.get('cdm').toString() as ChipDisplayMode;
+  if (!cdm) {
+    alert("Something went wrong, redirect to home page (002)")
+    return;
+  }
 
   const sliderPoints = useMemo(() => {
     const points = [
@@ -109,8 +118,9 @@ export const MobileActionButtons: React.FC<ActionButtonsProps> = ({
 
   // Represents raise amount input that are uncontrolled such as number input
   const handleRaiseAmountChange = (value: string, event?: React.ChangeEvent<HTMLInputElement>) => {
-    const numValue = Number(value);
+    let numValue = Number(value);
     setInputValue(value);
+    if (cdm === "bigBlind") numValue = numValue * bb
     
     if (numValue >= minRaise && numValue <= playerChips) {
       setRaiseAmount(numValue);
@@ -118,6 +128,14 @@ export const MobileActionButtons: React.FC<ActionButtonsProps> = ({
       setRaiseAmount(playerChips);
     }
   };
+
+  useEffect(() => {
+    if (cdm === "bigBlind") {
+      setInputValue(String(raiseAmount / bb));
+    } else {
+      setInputValue(String(raiseAmount));
+    }
+  }, [isCdmChange, raiseAmount]);
 
   // sh:absolute sh:bottom-0 sh:translate-y-24 sh:scale-90
   return (
@@ -135,7 +153,7 @@ export const MobileActionButtons: React.FC<ActionButtonsProps> = ({
           {canCheck ? (
             <StyledButton onClick={onCheck} disabled={disabled}>{dictionary.check}</StyledButton>
           ) : (
-            <StyledButton onClick={onCall} disabled={disabled}>{dictionary.call} ${Helper.cdm(playerChips < callAmount ? playerChips : callAmount)}</StyledButton>
+            <StyledButton onClick={onCall} disabled={disabled}>{dictionary.call} {Helper.cdm(playerChips < callAmount ? playerChips : callAmount)}</StyledButton>
           )}
           <StyledButton 
             onClick={() => setShowBetControls(true)} 
@@ -212,7 +230,7 @@ export const MobileActionButtons: React.FC<ActionButtonsProps> = ({
               setShowBetControls(false);
             }}
           >
-            {canRaise && raiseAmount !== playerChips ? `${dictionary.raise} $${Helper.cdm(raiseAmount)}` : `${dictionary.allIn} $${Helper.cdm(playerChips)}`}
+            {canRaise && raiseAmount !== playerChips ? `${dictionary.raise} ${Helper.cdm(raiseAmount)}` : `${dictionary.allIn} $${Helper.cdm(playerChips)}`}
           </StyledButton>
         </div>
       </div>
