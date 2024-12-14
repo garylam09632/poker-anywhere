@@ -52,7 +52,7 @@ export class Helper {
     return ok;
   }
 
-  static cdm = (value: number): string => {
+  static cdm = (value: number, withBB: boolean = true): string => {
     const chipDisplayMode = LocalStorage.get('cdm').toString();
     if (!chipDisplayMode) {
       return value.toString();
@@ -62,7 +62,7 @@ export class Helper {
     } else {
       const settings = LocalStorage.get('settings').toObject() as Settings;
       if (!settings) return value.toString();
-      return (Math.round((value / settings.bigBlind) * 10) / 10).toString() + " BB";
+      return `${(Math.round((value / settings.bigBlind) * 10) / 10).toString()}${withBB ? " BB" : ""}`;
     }
   }
 

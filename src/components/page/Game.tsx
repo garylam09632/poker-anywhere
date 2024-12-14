@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Player from '@/type/interface/Player';
 import Pot from '@/type/interface/Pot';
 import case1 from '@/case/SidePot1';
-import { Action, ChipDisplayMode, DeviceType, Stage } from '@/type/General';
+import { Action, Stage } from '@/type/General';
 import { useModal } from '@/hooks/useModal';
 import { Position } from '@/type/enum/Position';
 import PlayerUnit from '@/components/PlayerUnit';
@@ -1107,7 +1107,7 @@ export default function Game({
   }
 
   return !loading && (
-    <Page>
+    <Page dictionary={dictionary}>
       <div
         id="tableContainer"
         className="

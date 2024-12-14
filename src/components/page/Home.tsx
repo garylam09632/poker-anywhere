@@ -34,7 +34,7 @@ export default function Home({
   }, []);
 
   return loaded && (
-    <Page>
+    <Page dictionary={dictionary}>
       <div className="min-h-screen bg-black text-white flex justify-center items-center">
         <div className="container mx-auto p-8 xxs:items-center xxs:pr-5 xxs:pl-5">
         <h1 className="text-4xl font-bold mb-2 text-center">Poker Anywhere!</h1>

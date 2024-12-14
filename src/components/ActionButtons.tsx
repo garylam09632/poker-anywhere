@@ -91,7 +91,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   const handleControlledRaiseAmountChange = (amount: number) => {
     if (amount <= playerChips) {
       setRaiseAmount(amount);
-      setInputValue(String(amount));
+      setInputValue(cdm === "bigBlind" ? Helper.cdm(amount, false) : String(amount));
     }
   }
 
@@ -110,11 +110,13 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
 
   useEffect(() => {
     const cdm = LocalStorage.get('cdm').toString() as ChipDisplayMode;
-    if (cdm === "bigBlind") {
-      setInputValue(String(raiseAmount / bb));
-    } else {
-      setInputValue(String(raiseAmount));
-    }
+    // if (cdm === "bigBlind") {
+    //   setInputValue(Helper.cdm(raiseAmount));
+    // } else {
+    //   setInputValue(String(raiseAmount));
+    // }
+    console.log("Helper.cdm(raiseAmount): ", Helper.cdm(raiseAmount));
+    setInputValue(Helper.cdm(raiseAmount, false));
   }, [isCdmChange, raiseAmount]);
 
   return (

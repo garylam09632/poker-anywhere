@@ -14,6 +14,7 @@ import { Dictionary } from '@/type/Dictionary';
 import { GameSettingsForm } from './GameSettingForm';
 import { GameState } from '@/type/GameState';
 import { versions} from '@/data/Versions';
+import { ChipDisplayMode } from '@/type/General';
 
 interface ModalProps {
   type: ModalType;
@@ -424,6 +425,11 @@ const BuyIn: React.FC<BuyInProps> = ({
 };
 
 const Statics: React.FC<StaticsProps> = ({ players, bustedPlayers, dictionary }) => {
+  const cdm = LocalStorage.get('cdm').toString() as ChipDisplayMode;
+  if (!cdm) {
+    alert("Something went wrong, redirect to home page (003)")
+    return;
+  }
   return (
     <div className="p-1 w-[65vw] md:w-[40vw]">
       <div className="space-y-3">
@@ -435,22 +441,22 @@ const Statics: React.FC<StaticsProps> = ({ players, bustedPlayers, dictionary })
         {players.sort((a, b) => b.chipChange - a.chipChange).map((player) => (
           <div key={player.id} className="grid grid-cols-3 gap-4">
             <span className="font-semibold">{player.name}</span>
-            <span className="font-bold text-center">${player.buyIn}</span>
+            <span className="font-bold text-center">{cdm === 'bigBlind' ? Helper.cdm(player.buyIn) : `$${player.buyIn}`}</span>
             <span className={`font-bold text-right ${
               player.chipChange > 0 
                 ? 'bg-white text-black px-2 rounded' 
                 : 'text-white'
             }`}>
-              {player.chipChange > 0 ? '+' : player.chipChange < 0 ? '-' : ''}${Math.abs(player.chipChange)}
+              {player.chipChange > 0 ? '+' : player.chipChange < 0 ? '-' : ''}{cdm === 'bigBlind' ? Helper.cdm(Math.abs(player.chipChange)) : `$${Math.abs(player.chipChange)}`}
             </span>
           </div>
         ))}
         {bustedPlayers.map((player) => (
           <div key={player.id} className="grid grid-cols-3 gap-4 opacity-50">
             <span className="font-semibold">{player.name} (Busted)</span>
-            <span className="font-bold text-center">${player.buyIn}</span>
+            <span className="font-bold text-center">{cdm === 'bigBlind' ? Helper.cdm(player.buyIn) : `$${player.buyIn}`}</span>
             <span className="text-white font-bold text-right">
-              -${Math.abs(player.chipChange)}
+              {player.chipChange > 0 ? '+' : player.chipChange < 0 ? '-' : ''}{cdm === 'bigBlind' ? Helper.cdm(Math.abs(player.chipChange)) : `-$${Math.abs(player.chipChange)}`}
             </span>
           </div>
         ))}

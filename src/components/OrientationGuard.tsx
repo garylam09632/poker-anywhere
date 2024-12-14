@@ -1,12 +1,14 @@
+import { Dictionary } from "@/type/Dictionary";
 import { DeviceType } from "@/type/General";
 import { useEffect, useState } from "react";
 
 interface OrientationGuardProps {
   deviceType: DeviceType;
   children: React.ReactNode;
+  dictionary: Dictionary;
 }
 
-const OrientationGuard: React.FC<OrientationGuardProps> = ({ children, deviceType }) => {
+const OrientationGuard: React.FC<OrientationGuardProps> = ({ children, deviceType, dictionary }) => {
   const [isWrongOrientation, setIsWrongOrientation] = useState(false);
 
   useEffect(() => {
@@ -38,8 +40,7 @@ const OrientationGuard: React.FC<OrientationGuardProps> = ({ children, deviceTyp
     return (
       <div className="fixed inset-0 bg-black z-50 flex items-center justify-center p-4">
         <div className="text-white text-center">
-          
-          <p>Please rotate your device to { deviceType === 'mobile' ? 'portrait' : 'landscape' } mode</p>
+          <p>{deviceType === 'mobile' ? dictionary.pleaseRotateToPortraitForBestExperience : dictionary.pleaseRotateToLandscapeForBestExperience}</p>
           {/* You can add an icon or animation here */}
         </div>
       </div>

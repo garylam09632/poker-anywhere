@@ -38,12 +38,13 @@ export const BetSlider: React.FC<BetSliderProps> = ({
   const bb = (LocalStorage.get('settings').toObject() as Settings)?.bigBlind || 2;
   const cdm = LocalStorage.get('cdm').toString() as ChipDisplayMode;
   if (!cdm) {
-    alert("Something went wrong, redirect to home page (002)")
+    alert("Something went wrong, redirect to home page (004)")
     return;
   }
 
   let min = minValue;
   let max = maxValue;
+  let v = value;
   if (cdm === "bigBlind") {
     min = min / bb;
     max = max / bb;

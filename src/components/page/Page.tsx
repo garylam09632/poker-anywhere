@@ -4,13 +4,18 @@ import OrientationGuard from "../OrientationGuard";
 import { DeviceType } from "@/type/General";
 import { useEffect, useState } from "react";
 import { LoadingSpinner } from "../LoadingSpinner";
+import { Dictionary } from "@/type/Dictionary";
 
-const Page: React.FC<{ 
+interface PageProps {
   children: React.ReactNode,
-  className?: string 
-}> = ({ 
+  className?: string,
+  dictionary: Dictionary
+}
+
+const Page: React.FC<PageProps> = ({ 
   children,
-  className = "" 
+  className = "",
+  dictionary
 }) => {
   const [isProviderMounted, setIsProviderMounted] = useState(false);
 
@@ -37,7 +42,7 @@ const Page: React.FC<{
           : 'opacity-0 translate-y-4'
         }
       `}>
-        <OrientationGuard deviceType={document?.documentElement.dataset.device as DeviceType}>
+        <OrientationGuard deviceType={document?.documentElement.dataset.device as DeviceType} dictionary={dictionary}>
           {children}
         </OrientationGuard>
       </div>

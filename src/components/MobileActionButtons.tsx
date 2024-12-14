@@ -112,7 +112,7 @@ export const MobileActionButtons: React.FC<ActionButtonsProps> = ({
   const handleControlledRaiseAmountChange = (amount: number) => {
     if (amount <= playerChips) {
       setRaiseAmount(amount);
-      setInputValue(String(amount));
+      setInputValue(cdm === "bigBlind" ? Helper.cdm(amount, false) : String(amount));
     }
   }
 
@@ -131,7 +131,7 @@ export const MobileActionButtons: React.FC<ActionButtonsProps> = ({
 
   useEffect(() => {
     if (cdm === "bigBlind") {
-      setInputValue(String(raiseAmount / bb));
+      setInputValue(Helper.cdm(raiseAmount, false));
     } else {
       setInputValue(String(raiseAmount));
     }

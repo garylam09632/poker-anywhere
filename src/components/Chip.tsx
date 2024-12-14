@@ -18,7 +18,7 @@ const Chip: React.FC<ChipProps> = ({ amount, type = 'bet', player, playerLocatio
       flex items-center justify-center
       ${type === 'pot' ? 'bg-gray-700' : 'bg-white'}
       rounded-full
-      ${LocalStorage.get('cdm').toString() === 'bigBlind' ? 'w-auto h-auto p-2 xxs:w-[140%]' : 'w-12 h-12'}
+      ${LocalStorage.get('cdm').toString() === 'bigBlind' ? 'w-auto h-auto px-1 py-2 xxs:w-[140%]' : 'w-12 h-12'}
       sh:w-7 sh:h-7 sh:text-xxs
       text-sm font-bold
       ${type === 'pot' ? 'text-white' : 'text-black'}
